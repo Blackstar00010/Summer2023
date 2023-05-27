@@ -1,6 +1,10 @@
 import yfinance as yf
+import logging
 
-# TODO
+
+logging.basicConfig(level=logging.INFO)
+
+# TODO : extract all tickers from the .xlsx file
 tickers = ["AZN", "HSBA", "SHEL", "OKYO"]
 period = "max"
 
@@ -9,5 +13,5 @@ for ticker in tickers:
 
     # df of columns Open/High/Low/Close/Volume/Dividends/Stock Splits
     history = equity.history(period=period)
-    print(history.head())
-    history.to_csv('./files/history/'+ticker+".csv")
+    logging.info(f"{ticker} data completed")
+    history.to_csv(f"./files/history/{ticker}.csv")
