@@ -15,3 +15,5 @@ for ticker in tickers:
     history = equity.history(period=period)
     logging.info(f"{ticker} data completed")
     history.to_csv(f"./files/history/{ticker}.csv")
+
+
