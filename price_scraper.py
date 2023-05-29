@@ -20,7 +20,8 @@ for ticker in tickers:
 
     # df of columns Open/High/Low/Close/Volume/Dividends/Stock Splits
     history = equity.history(period=period, end="2022-12-31")
+    history = history.round(3)
     logging.info(f"{ticker} data completed")
     history.to_csv(f"./files/history/{ticker}.csv")
 
-
+_.revert_path()
