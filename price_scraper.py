@@ -1,6 +1,5 @@
 import logging
 from prep import Prep
-sys_setup = Prep(should_prep=True)
 import yfinance as yf
 
 
@@ -17,4 +16,3 @@ for ticker in tickers:
     logging.info(f"{ticker} data completed")
     history.to_csv(f"./files/history/{ticker}.csv")
 
-sys_setup.revert_path()
