@@ -5,12 +5,19 @@ import os
 
 
 class Prep:
-    def __init__(self):
+    def __init__(self, should_prep=False):
+        logging.basicConfig(level=logging.INFO)
         self._os = platform.system()
         self._is_Darwin = True if self._os == 'Darwin' else False
         self._openssl_version = self.check_openssl()
         self._prev_path = self.check_path()
         self._new_path = self._prev_path
+
+        if should_prep:
+            self.update_path()
+            self.check_path()
+            self.check_openssl()
+
 
     def check_openssl(self):
         """

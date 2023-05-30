@@ -1,15 +1,8 @@
-import yfinance as yf
 import logging
 from prep import Prep
+sys_setup = Prep(should_prep=True)
+import yfinance as yf
 
-
-logging.basicConfig(level=logging.INFO)
-
-_ = Prep()
-_.check_openssl()
-_.update_path()
-_.check_path()
-_.check_openssl()
 
 # TODO : extract all tickers from the .xlsx file
 tickers = ["AZN", "HSBA", "SHEL", "OKYO"]
@@ -24,4 +17,4 @@ for ticker in tickers:
     logging.info(f"{ticker} data completed")
     history.to_csv(f"./files/history/{ticker}.csv")
 
-_.revert_path()
+sys_setup.revert_path()
