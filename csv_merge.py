@@ -11,6 +11,8 @@ for file in csv_history:
     df = pd.read_csv(file_path)
     if 'Date' in df.columns and 'Close' in df.columns:
         df = df[['Date', 'Close']]
+        close_column_name = os.path.splitext(file)[0]
+        df.rename(columns={'Close': close_column_name}, inplace=True)
         if merged_data.empty:
             merged_data = df
         else:
