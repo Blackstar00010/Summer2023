@@ -31,7 +31,6 @@ files = './files/history/*'
 '''
 
 
-
 '''
 from price_scraper import tickers
 
