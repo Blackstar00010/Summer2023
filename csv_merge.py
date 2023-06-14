@@ -18,23 +18,9 @@ for file in csv_history:
         else:
             merged_data = pd.merge(merged_data, df, on='Date', how='outer')
 
+# Date Column Sorting (이 코드 없으면 순서가 뒤죽박죽)
+merged_data['Date'] = pd.to_datetime(merged_data['Date'])
+merged_data.sort_values('Date', inplace=True)
+merged_data.reset_index(drop=True, inplace=True)
+
 merged_data.to_csv('./files/merged_data.csv', index=False)
-
-
-'''
-import pandas as pd
-
-df = pd.read_csv('./files/history/888.csv')
-var = df[["Date", "Close"]]
-
-files = './files/history/*'
-'''
-
-
-'''
-from price_scraper import tickers
-
-for ticker in tickers:
-    files = f'./files/history/{ticker}.csv'
-'''
-
