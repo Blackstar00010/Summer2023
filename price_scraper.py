@@ -5,6 +5,7 @@ import yfinance as yf
 import openpyxl
 import pandas as pd
 import os
+# pip freeze > requirements. txt
 
 def get_data (file, sheet, start_row, end_row, column_index):
     df = pd.read_excel(file, sheet_name=sheet)
