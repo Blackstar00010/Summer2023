@@ -1,20 +1,17 @@
 import logging
-from prep import Prep
 import yfinance as yf
-
-import openpyxl
 import pandas as pd
-import os
+
 # pip freeze > requirements. txt
 
-def get_data (file, sheet, start_row, end_row, column_index):
+def get_data(file, sheet, start_row, end_row, column_index):
     df = pd.read_excel(file, sheet_name=sheet)
 
     data = []
 
-    for row in range(start_row, end_row+1):
-        value = df.iloc[row-1,column_index]
-        value = value.replace(" (LSE)", "").rstrip(".").replace(".","-")
+    for row in range(start_row, end_row + 1):
+        value = df.iloc[row - 1, column_index]
+        value = value.replace(" (LSE)", "").rstrip(".").replace(".", "-")
         data.append(value)
 
     return data
@@ -32,14 +29,14 @@ file_path = "tickers.csv"
 
 df = pd.DataFrame(tickers, columns=["Ticker"])
 
-df.to_csv(f"./files/history/*tickers.csv")
+df.to_csv(f"./files/history/_tickers.csv")
 
 print("Tickers written to CSV file.")
 
 period = "max"
 
 for ticker in tickers:
-    equity = yf.Ticker(ticker+".L")
+    equity = yf.Ticker(ticker + ".L")
 
     history = equity.history(period=period, end="2023-06-20")
     history = history.round(3)
