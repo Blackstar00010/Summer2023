@@ -1,5 +1,11 @@
 import pandas as pd
 
+"""
+Let's write what this code does. 
+If it is a scratch file, delete and make a scratch.py.
+If it is a useless file, delete. 
+    If it is too good to be deleted, move to ./deprecated/ folder."""
+
 
 def csv_to_sql(csv_file, sql_file, table_name):
     df = pd.read_csv(csv_file)

@@ -3,6 +3,12 @@ import subprocess
 import logging
 import os
 
+"""
+In case openssl library is downloaded but not working as intended for PATH issue,
+this file updates PATH variable to make it work. 
+!! Only works for Darwin !!
+"""
+
 
 class Prep:
     def __init__(self, should_prep=False):
@@ -17,7 +23,6 @@ class Prep:
             self.update_path()
             self.check_path()
             self.check_openssl()
-
 
     def check_openssl(self):
         """

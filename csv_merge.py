@@ -1,6 +1,12 @@
 import os
 import pandas as pd
 
+"""
+Let's write what this code does. 
+If it is a scratch file, delete and make a scratch.py.
+If it is a useless file, delete. 
+    If it is too good to be deleted, move to ./deprecated/ folder."""
+
 directory = './files/history'
 csv_history = sorted(filename for filename in os.listdir(directory))
 
