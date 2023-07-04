@@ -1,0 +1,18 @@
+'''
+Read merged_data file and delete data before 1990
+'''
+
+import csv
+
+# Open the input CSV file
+with open('./files/merged_data.csv', 'r') as input_file:
+    reader = csv.reader(input_file)
+
+    # Create a new CSV file for writing
+    with open('./files/merged_data1990.csv', 'w', newline='') as output_file:
+        writer = csv.writer(output_file)
+
+        # Iterate over the rows in the input file
+        for i, row in enumerate(reader):
+            if i < 1 or i > 4501:
+                writer.writerow(row)
