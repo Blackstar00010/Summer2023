@@ -41,7 +41,7 @@ for k, clusters in clusters_k.items():
         plt.title(f'Cluster {cluster + 1}, k={k}')
 
         # List the firm names on the side of the graph
-        if len(firms) <= 8:
+        if len(firms) <= 10:
             plt.legend(loc='center right')
         else:
             plt.legend(loc='center right', title=f'Total Firms: {len(firms)}', labels=firms[:10] + ['...'])
