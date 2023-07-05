@@ -31,7 +31,7 @@ for k, clusters in clusters_k.items():
 
         # PLot the line graph for firms in each cluster
         for firm in firms:
-            firm_index = int(firm.split()[1]) - 1
+            firm_index = int(firm.split()[1]) - 1  # Extract firm number from firm name
             firm_data = data_array[firm_index]
 
             plt.plot(range(1, len(firm_data) + 1), firm_data, label=firm)
