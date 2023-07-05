@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
 
 # Read data from CSV file
 data = pd.read_csv('./files/feature_set/1990-1.csv')
@@ -27,4 +28,17 @@ for k, clusters in clusters_k.items():
     print(f'Clusters for k = {k}:')
     for cluster, firms in clusters.items():
         print(f'Cluster {cluster + 1}: {firms}')
+
+        # PLot the line graph for firms in each cluster
+        for firm in firms:
+            firm_index = int(firm.split()[1]) - 1
+            firm_data = data_array[firm_index]
+
+            plt.plot(range(1, len(firm_data) + 1), firm_data, label=firm)
+
+        plt.xlabel('Characteristics')
+        plt.ylabel('Data Value')
+        plt.title(f'Cluster {cluster}, k={k}, {firm}')
+        plt.show()
+
     print()
