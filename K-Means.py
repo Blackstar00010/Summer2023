@@ -2,6 +2,9 @@ import pandas as pd
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
+# WHAT DOES THIS FILE DO? PLEASE WRITE SPECIFICALLY
+
+
 # Read data from CSV file
 data = pd.read_csv('./files/feature_set/1990-1.csv')
 data_array = data.values[:, 1:]  # Exclude the first column (firm names)

@@ -1,5 +1,11 @@
-import pandas as pd
+
+# not used as of 4 July 2023
+
+# Code used to generate placeholder .csv files filled with random real numbers.
+# The .csv files generated will soon be replaced by actual data fetched using Eikon Data API, etc.
+
 import numpy as np
+import pandas as pd
 
 outputdir = ""
 

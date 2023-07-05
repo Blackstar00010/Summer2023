@@ -1,13 +1,9 @@
-import platform
-import subprocess
-import logging
-import os
 
-"""
-In case openssl library is downloaded but not working as intended for PATH issue,
-this file updates PATH variable to make it work. 
-!! Only works for Darwin !!
-"""
+# In case openssl library is downloaded but not working as intended for PATH issue,
+# this file updates PATH variable to make it work.
+# !! Only works for Darwin !!
+
+import platform, subprocess, logging, os
 
 
 class Prep:
