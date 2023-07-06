@@ -28,7 +28,7 @@ def fetch_ticker(file: str, sheet: str, start_row: int, end_row: int, column_ind
     return data
 
 
-file = '../files/SPGlobal_ListManager-All_27-May-2023.xlsx'
+file = '../files/tickers_from_ciq.xlsx'
 sheet = 'List Manager - Companies'
 start_row = 8
 end_row = 662
