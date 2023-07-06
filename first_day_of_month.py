@@ -1,0 +1,20 @@
+import pandas as pd
+
+dir = "./files/"
+
+df = pd.read_csv(dir + "filtered_price_data.csv")
+
+dates = df['Date']
+
+months = pd.DataFrame([item[5:7] for item in dates])
+
+flags = (months == months.shift(1)).dropna()
+
+df["Month Start Flag"] = flags
+
+df_filtered = df[df['Month Start Flag'] == False]
+
+df_filtered = df_filtered.drop(columns='Month Start Flag')
+
+df_filtered.to_csv(dir + "first_day_of_month.csv", index=False)
+
