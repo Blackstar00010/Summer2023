@@ -1,6 +1,5 @@
-'''
-Read merged_data file and delete data before 1990
-'''
+
+# Read ./files/merged_data.csv file and extract data after 1990-Jan-01 and save as ./files/merged_data1990.csv
 
 import csv
 

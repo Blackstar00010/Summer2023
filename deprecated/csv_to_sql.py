@@ -1,8 +1,7 @@
-import pandas as pd
 
-"""
-Reads the data from a CSV file and converts into a SQL file.
-"""
+# Reads data from CSV file of delisted companies and converts into an SQL file.
+
+import pandas as pd
 
 
 def csv_to_sql(csv_file, sql_file):
@@ -14,6 +13,7 @@ def csv_to_sql(csv_file, sql_file):
 
     with open(sql_file, 'w') as file:
         file.write("\n".join(sql_))
+
 
 '''
 csv_file = './files/merged_data.csv'

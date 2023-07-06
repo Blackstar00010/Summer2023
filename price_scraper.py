@@ -2,10 +2,8 @@ import logging
 import yfinance as yf
 import pandas as pd
 
-"""
-Fetches tickers from the .xlsx file downloaded from CapitalIQ, finds ISINs and save as a .csv file.
-Then, for each ticker, it fetches price data from yahoo finance and save as a .csv file. 
-"""
+# Fetches tickers from the .xlsx file downloaded from CapitalIQ, finds ISINs and save as a .csv file.
+# Then, for each ticker, it fetches price data from yahoo finance and save as a .csv file.
 
 
 def fetch_ticker(file: str, sheet: str, start_row: int, end_row: int, column_index: int):
