@@ -1,6 +1,6 @@
 import pandas as pd
 
-dir = "../files/"
+dir = "../files/history/"
 
 df = pd.read_csv(dir + "filtered_price_data.csv")
 
@@ -18,3 +18,4 @@ df_filtered = df_filtered.drop(columns='Month Start Flag')
 
 df_filtered.to_csv(dir + "first_day_of_month.csv", index=False)
 
+# ../files/return_factor.csv
