@@ -1,6 +1,6 @@
 import pandas as pd
 
-dir = "./files/"
+dir = "../files/"
 
 df = pd.read_csv(dir + "filtered_price_data.csv")
 
