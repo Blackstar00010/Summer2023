@@ -1,16 +1,18 @@
 import pandas as pd
 
+# For each month from 1990-01 to 2022-12, it creates a new table of 48 rows of momentum factor
+# Momentum Factor: ratio of the current month's value to the value from i months ago minus 1
+
 df = pd.read_csv('../files/history/first_day_of_month.csv')
 df['Date'] = pd.to_datetime(df['Date'])
 df.set_index('Date', inplace=True)
 
-# Loop over the dates
 start_date = pd.to_datetime('1990-01-01')
 end_date = pd.to_datetime('2022-12-01')
 months = pd.date_range(start_date, end_date, freq='MS', tz='UTC')
 
 for current_date in months:
-    window = df.loc[:current_date].tail(48)
+    window = df.loc[:current_date].tail(49)
 
     mom = pd.DataFrame(index=range(1, 49), columns=window.columns)
     for i in range(1, 49):

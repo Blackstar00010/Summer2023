@@ -1,5 +1,8 @@
 import pandas as pd
 
+# For each month from 1990-01 to 2022-12, it creates a new table of 48 return factor
+# Return Factor: ratio of the current month's value to the value from 1 months ago minus 1
+
 df = pd.read_csv('../files/history/first_day_of_month.csv')
 df['Date'] = pd.to_datetime(df['Date'])
 df.set_index('Date', inplace=True)

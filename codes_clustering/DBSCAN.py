@@ -1,34 +1,27 @@
 import pandas as pd
-from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-
-
-# Performs K-Means clustering using SciKit-Learn in different number of cluster
-# Prints out the clusters for each value of k and creates a line graph for each cluster
+from sklearn.cluster import DBSCAN
 
 # Read data from CSV file
 data = pd.read_csv('../files/feature_set/1990-1.csv')
 data_array = data.values[:, 1:]  # Exclude the first column (firm names)
 
-# Define the number of clusters k
-k_values = [5, 10, 50, 100, 500, 1000]
+# Perform DBSCAN clustering
+clusters_DBSCAN = {}
 
-# Perform k-means clustering for each value of k
-clusters_k = {}
+dbscan = DBSCAN(eps=0.5, min_samples=5)  # Set your own parameters
+dbscan.fit(data_array)  # Compute DBSCAN clustering
+cluster_labels = dbscan.labels_  # Label of each point
 
-for k in k_values:
-    kmeans = KMeans(n_clusters=k, n_init=10, random_state=0)  # n_init setting to suppress warning
-    kmeans.fit(data_array)  # Compute k-means clustering
-    cluster_labels = kmeans.labels_  # Label of each point (ndarray of shape)
+n_clusters = len(set(cluster_labels)) - (1 if -1 in cluster_labels else 0)  # Number of clusters, excluding noise if present
 
-    clusters = {i: [] for i in range(k)}  # Dictionary key-value pair
-    for i, cluster in enumerate(cluster_labels):
-        clusters[cluster].append(f'firm {i + 1}')
-
-    clusters_k[k] = clusters
+clusters_DBSCAN = {i: [] for i in range(n_clusters)}  # Dictionary key-value pair
+for i, cluster in enumerate(cluster_labels):
+    if cluster != -1:  # Exclude noise points
+        clusters_DBSCAN[cluster].append(f'firm {i + 1}')
 
 # Print the clusters for each k value
-for k, clusters in clusters_k.items():
+for k, clusters in clusters_DBSCAN.items():
     print(f'Clusters for k = {k}:')
     for cluster, firms in clusters.items():
         print(f'Cluster {cluster + 1}: {firms}')

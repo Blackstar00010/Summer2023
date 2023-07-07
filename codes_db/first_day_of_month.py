@@ -1,5 +1,7 @@
 import pandas as pd
 
+# Creates a new table only containing the rows of dates that are first business day of the month
+
 dir = "../files/history/"
 
 df = pd.read_csv(dir + "filtered_price_data.csv")
@@ -17,5 +19,3 @@ df_filtered = df[df['Month Start Flag'] == False]
 df_filtered = df_filtered.drop(columns='Month Start Flag')
 
 df_filtered.to_csv(dir + "first_day_of_month.csv", index=False)
-
-# ../files/return_factor.csv

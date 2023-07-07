@@ -1,9 +1,8 @@
+import os
+import pandas as pd
 
 # Reads CSV files from './files/history' directory and merges them based on the 'Date' column.
 # Code for sorting the date was added because the order of the date was random.
-
-import os
-import pandas as pd
 
 directory = './files/history'
 csv_history = sorted(filename for filename in os.listdir(directory))
