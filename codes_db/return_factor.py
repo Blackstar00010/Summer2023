@@ -12,13 +12,15 @@ end_date = pd.to_datetime('2022-12-01')
 months = pd.date_range(start_date, end_date, freq='MS', tz='UTC')
 
 for current_date in months:
-    window = df.loc[:current_date].tail(48)
+    window = df.loc[:current_date].tail(49)
 
-    return_factor = window / window.shift()
+    return_factor = window / window.shift() - 1
 
     return_factor = return_factor.iloc[::-1]
 
-    return_factor.index = range(1, 49)
+    return_factor.index = range(1, 50)
+
+    return_factor = return_factor.T
 
     filename = current_date.strftime('%Y-%m') + '.csv'
     return_factor.to_csv('../files/return_factor/' + filename, index_label='Return Factor')
