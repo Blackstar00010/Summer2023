@@ -1,5 +1,32 @@
 import pandas as pd
 from sklearn.cluster import DBSCAN
+import numpy as np
+
+# Read data from CSV file
+data = pd.read_csv('../files/momentum/2017-01.csv')
+data_array = data.values[:, 1:]  # Exclude the first column (firm names)
+
+# Define DBSCAN parameters
+eps_values = np.linspace(0.01, 1.01, 101)  # eps values from 0.01 to 1.01
+min_samples_values = range(2, 51)  # min_samples values from 2 to 50
+
+# Iterate over all combinations of eps and min_samples
+for eps in eps_values:
+    for min_samples in min_samples_values:
+        # Perform DBSCAN clustering
+        dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+        cluster_labels = dbscan.fit_predict(data_array)
+
+        # Get the unique cluster labels (excluding noise)
+        unique_labels = set(label for label in cluster_labels if label != -1)
+
+        # If there are more than two clusters, print eps and min_samples
+        if len(unique_labels) >= 2:
+            print(f'eps: {eps}, min_samples: {min_samples}')
+
+'''
+import pandas as pd
+from sklearn.cluster import DBSCAN
 import matplotlib.pyplot as plt
 
 # Read data from CSV file
@@ -8,8 +35,8 @@ data_array = data.values[:, 1:]  # Exclude the first column (firm names)
 firm_names = data.values[:, 0]  # Get the first column (firm names)
 
 # Define DBSCAN parameters
-eps =2  # Maximum distance between two samples to be considered as neighbors
-min_samples = 50  # Minimum number of samples in a neighborhood for a point to be considered as a core point
+eps = 0.16  # Maximum distance between two samples to be considered as neighbors
+min_samples = 2  # Minimum number of samples in a neighborhood for a point to be considered as a core point
 
 # Perform DBSCAN clustering
 dbscan = DBSCAN(eps=eps, min_samples=min_samples)
@@ -49,3 +76,4 @@ for cluster_label, firms in clusters.items():
     plt.show()
 
     print()
+'''

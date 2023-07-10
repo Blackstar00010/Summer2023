@@ -3,7 +3,7 @@ import hdbscan
 import matplotlib.pyplot as plt
 
 # Read data from CSV file
-data = pd.read_csv('../files/feature_set/1990-1.csv')
+data = pd.read_csv('../files/history/1990-1.csv')
 data_array = data.values[:, 1:]  # Exclude the first column (firm names)
 
 # Define HDBSCAN parameters
