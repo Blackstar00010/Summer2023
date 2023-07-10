@@ -2,13 +2,10 @@ import pandas as pd
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
-
-# Performs K-Means clustering using SciKit-Learn in different number of cluster
-# Prints out the clusters for each value of k and creates a line graph for each cluster
-
 # Read data from CSV file
 data = pd.read_csv('../files/momentum/2010-01.csv')
 data_array = data.values[:, 1:]  # Exclude the first column (firm names)
+firm_names = data.values[:, 0]  # Get the first column (firm names)
 
 # Define the number of clusters k
 k_values = [50]
@@ -23,7 +20,7 @@ for k in k_values:
 
     clusters = {i: [] for i in range(k)}  # Dictionary key-value pair
     for i, cluster in enumerate(cluster_labels):
-        clusters[cluster].append(f'firm {i + 1}')
+        clusters[cluster].append(firm_names[i])  # Use actual firm name instead of 'firm {i + 1}'
 
     clusters_k[k] = clusters
 
@@ -33,9 +30,9 @@ for k, clusters in clusters_k.items():
     for cluster, firms in clusters.items():
         print(f'Cluster {cluster + 1}: {firms}')
 
-        # PLot the line graph for firms in each cluster
+        # Plot the line graph for firms in each cluster
         for firm in firms:
-            firm_index = int(firm.split()[1]) - 1  # Extract firm number from firm name
+            firm_index = list(firm_names).index(firm)  # Get index of firm name in firm_names
             firm_data = data_array[firm_index]
 
             plt.plot(range(1, len(firm_data) + 1), firm_data, label=firm)
@@ -54,6 +51,7 @@ for k, clusters in clusters_k.items():
 
     print()
 
+
 '''
 import pandas as pd
 from sklearn.cluster import KMeans
@@ -61,7 +59,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Read data from CSV file
-data = pd.read_csv('../files/momentum/199-01.csv')
+data = pd.read_csv('../files/momentum/1990-01.csv')
 firm_names = data.values[:, 0]  # The first column contains firm names
 data_array = data.values[:, 1:].astype(float)  # Exclude the first column (firm names)
 
