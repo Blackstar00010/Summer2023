@@ -48,7 +48,7 @@ file_name = "0_tickers.csv"
 df = pd.DataFrame(tickers, columns=["Ticker"])
 df["ISIN"] = isins
 
-df.to_csv(f"./files/history/" + file_name)
+df.to_csv(f"../files/history/" + file_name)
 
 print("Tickers written to CSV file.")
 
@@ -57,7 +57,7 @@ period = "max"
 for ticker in tickers:
     equity = yf.Ticker(ticker + ".L")
 
-    history = equity.history(period=period, end="2023-06-20")
+    history = equity.history(period=period, end="2023-06-30")
     history = history.round(3)
     logging.info(f"{ticker} data completed")
-    history.to_csv(f"./files/history/{ticker}.csv")
+    history.to_csv(f"../files/history/{ticker}.csv")

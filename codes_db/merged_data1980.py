@@ -1,5 +1,5 @@
 
-# Read ./files/merged_data.csv file and extract data after 1990-Jan-01 and save as ./files/merged_data1990.csv
+# Read ./files/merged_data.csv file and extract data after 1980-Jan-01 and save as ./files/merged_data1980.csv
 
 import csv
 

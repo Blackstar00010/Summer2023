@@ -4,14 +4,14 @@ import pandas as pd
 # Reads CSV files from './files/history' directory and merges them based on the 'Date' column.
 # Code for sorting the date was added because the order of the date was random.
 
-directory = './files/history'
+directory = '../files/history_by_ticker'
 csv_history = sorted(filename for filename in os.listdir(directory))
 
 merged_data = pd.DataFrame()
 
 for file in csv_history:
     file_path = os.path.join(directory, file)
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(file_path, encoding = 'latin1')
     if 'Date' in df.columns and 'Close' in df.columns:
         df = df[['Date', 'Close']]
         close_column_name = os.path.splitext(file)[0]
@@ -26,4 +26,4 @@ merged_data['Date'] = pd.to_datetime(merged_data['Date'])
 merged_data.sort_values('Date', inplace=True)
 merged_data.reset_index(drop=True, inplace=True)
 
-merged_data.to_csv('./files/merged_data.csv', index=False)
+merged_data.to_csv('../files/history/merged_data.csv', index=False)

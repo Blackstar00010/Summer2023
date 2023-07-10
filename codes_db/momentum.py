@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 # For each month from 1990-01 to 2022-12, it creates a new table of 48 rows of momentum factor
 # Momentum Factor: ratio of the current month's value to the value from i months ago minus 1
@@ -26,6 +27,12 @@ for current_date in months:
     mom.index = range(1, 50)
 
     mom = mom.T
+
+    # Delete rows with all NaN values
+    mom = mom.dropna(how='all')
+
+    # Replace remaining NaN values with 0
+    mom = mom.fillna(0)
 
     filename = current_date.strftime('%Y-%m') + '.csv'
     mom.to_csv('../files/momentum/' + filename, index_label='Momentum Index')
