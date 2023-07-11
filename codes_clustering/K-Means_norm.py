@@ -41,8 +41,8 @@ for k, clusters in clusters_k.items():
         normalized_values = [(value - mean) / (std + 1e-10) for value in momentum_1_values]
 
         # Assign 1 to values greater than 0 and -1 to values less than 0
-        # long_short = [1 if value > 0 else -1 if value < 0 else 0 for value in normalized_values]
-        long_short = normalized_values
+        long_short = [1 if value > 0 else -1 if value < 0 else 0 for value in normalized_values]
+        # long_short = normalized_values
 
         # Add the data to the new table
         for i, firm in enumerate(firms_sorted):

@@ -33,8 +33,8 @@ for k, clusters in clusters_k.items():
         firms_sorted = sorted(firms, key=lambda x: data.loc[x, '1'])
         long_short = [0] * len(firms_sorted)
         for i in range(len(firms_sorted) // 2):
-            long_short[i] = -1  # 1 to the high ones
-            long_short[-i-1] = 1  # -1 to the low ones
+            long_short[i] = -1  # -1 to the low ones
+            long_short[-i-1] = 1  # 1 to the high ones
             # 0 to middle point when there are odd numbers in a cluster
 
         # Add the data to the new table
