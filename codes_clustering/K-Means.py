@@ -8,7 +8,7 @@ data_array = data.values[:, 1:]  # Exclude the first column (firm names)
 firm_names = data.values[:, 0]  # Get the first column (firm names)
 
 # Define the number of clusters k
-k_values = [50]
+k_values = [5]
 
 # Perform k-means clustering for each value of k
 clusters_k = {}

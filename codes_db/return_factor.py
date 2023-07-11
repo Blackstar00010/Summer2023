@@ -22,9 +22,7 @@ for current_date in months:
 
     return_factor = return_factor.T
 
-    return_factor = return_factor.dropna(how='all')
-
-    return_factor = return_factor.fillna(0)
+    return_factor = return_factor.dropna(how='any')
 
     filename = current_date.strftime('%Y-%m') + '.csv'
     return_factor.to_csv('../files/return_factor/' + filename, index_label='Return Factor')
