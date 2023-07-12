@@ -1,27 +1,13 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[6]:
-
-
 import os
-import csv
 import urllib.parse
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.cm import get_cmap
-from matplotlib import pyplot as plt
 from scipy.spatial.distance import pdist
 from scipy.cluster.hierarchy import dendrogram, linkage,fcluster
-get_ipython().run_line_magic('matplotlib', 'inline')
-
 
 #raw_data_dir = 'C:/Users/김주환/Desktop/My files/PCA'
 #pca_output_dir = 'C:/Users/김주환/Desktop/My files/Hierarchical_Agglomerative'
 raw_data_dir = 'C:/Users/IE/Desktop/My files/PCA'
 pca_output_dir = 'C:/Users/IE/Desktop/My files/Hierarchical_Agglomerative'
-
 
 # Get a list of all CSV files in the raw data directory
 csv_files = [file for file in os.listdir(raw_data_dir) if file.endswith('.csv')]
@@ -38,9 +24,8 @@ for file in csv_files:
     data = data[1:]
     
     mat = data.values.astype(float)
-    LS=data.values
-    mat=LS[0:,1:]
-
+    LS = data.values
+    mat = LS[0:,1:]
 
     # 거리 행렬 계산
     dist_matrix = pdist(mat, metric='euclidean')
@@ -56,16 +41,12 @@ for file in csv_files:
 #     plt.ylabel('Distance')
 #     plt.show()
 
-
     # 적절한 클러스터 개수 선택
     # 덴드로그램을 분석하여 적절한 클러스터 개수를 결정합니다.
 
     # 클러스터 할당
     k = 100  # 예시로 클러스터 개수를 3으로 설정
     clusters = fcluster(Z, k, criterion='maxclust')
-
-
-
 
     #Cluster별 분류
     list_dict = {}
@@ -81,9 +62,6 @@ for file in csv_files:
         print(value)
         print(key)
 
-
-
-
     #LS와 Rank
     for key, value in list_dict.items():
         print(f"Cluster: {key}")
@@ -95,7 +73,6 @@ for file in csv_files:
               if rank == 0:
                 h=int((length)/2)+1
                 t=1
-
 
               if rank > 0:
                 h=rank+int((length)/2)+1

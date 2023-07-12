@@ -1,16 +1,7 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[9]:
-
-
 import os
-import csv
 import urllib.parse
 import pandas as pd
-import matplotlib as mpl
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 
 
@@ -30,13 +21,10 @@ for file in csv_files:
     data = pd.read_csv(csv_path, header=None, index_col=[0])
     data=data[1:]
 
-
     LS=data.values
     mata=LS[0:,1:]
     mata = mata.astype(float)
     LS = LS.astype(float)
-
-
 
     DEBUG = True
 
@@ -59,7 +47,6 @@ for file in csv_files:
         assert N > 1, "There must be more than one sample!"
         assert K > 1, "There must be more than one gaussian model!"
 
-
         gamma = np.mat(np.zeros((N, K)))
         prob = np.zeros((N, K))
 
@@ -76,7 +63,6 @@ for file in csv_files:
             gamma[i, :] /= np.sum(gamma[i, :])
 
         return gamma
-
 
 
     def maximize(Y, gamma):
@@ -115,7 +101,6 @@ for file in csv_files:
         return Y
 
 
-
     def init_params(shape, K):
         N, D = shape
         mu = np.random.rand(K, D)
@@ -124,7 +109,6 @@ for file in csv_files:
         debug("Parameters initialized.")
         debug("mu:", mu, "cov:", cov, "alpha:", alpha, sep="\n")
         return mu, cov, alpha
-
 
 
     def GMM_EM(Y, K, times):
@@ -138,20 +122,14 @@ for file in csv_files:
         return mu, cov, alpha
 
 
-
-
     DEBUG = True
-
 
     Y=mata
     matY = np.matrix(Y, copy=True)
 
-
     K = 4
 
-
     mu, cov, alpha = GMM_EM(matY, K, 100)
-
 
     N = Y.shape[0]
 
@@ -174,8 +152,6 @@ for file in csv_files:
 #     plt.title("GMM Clustering By EM Algorithm")
 #     plt.show()
 
-
-
     class_indices = []
     for i in range(K):
         indices = [data.index[index] for index, c in enumerate(category) if c == i][0:]
@@ -192,8 +168,6 @@ for file in csv_files:
 
     #print(class_indices_dict)
 
-
-
     #print(LS[0,0])
     cluster_elements = {i: [] for i in range(1, K+1)}
     #print(cluster_elements)
@@ -204,8 +178,6 @@ for file in csv_files:
         value = LS[i, 0]  # 첫 번째 열의 값
         cluster_elements[cluster+1].append((index, value))
 
-
-
     # 각 클러스터 내부의 첫 번째 열 값에 따라 내림차순 정렬
     for cluster, elements in cluster_elements.items():
         elements.sort(key=lambda x: x[1], reverse=True)
@@ -233,8 +205,6 @@ for file in csv_files:
                 else:
                     rank_value = 0  # 중간값에는 0 할당
                 #print(f"Firm: {index}, Value: {value}, Rank Value: {rank_value}, Cluster: {cluster}")
-
-
 
     # 출력값을 저장할 데이터 프레임
     df = pd.DataFrame(columns=['Firm', 'Value', 'Rank Value', 'Cluster'])
@@ -244,31 +214,19 @@ for file in csv_files:
         elements.sort(key=lambda x: x[1], reverse=True)
 
         num_elements = len(elements)
-        if num_elements % 2 == 1:
-            median_index = num_elements // 2  # 중간값의 인덱스
-            median_value = elements[median_index][1]  # 중간값의 값
-            for rank, (index, value) in enumerate(elements):
-                if value > median_value:
-                    rank_value = 1  # 상위 rank에는 1 할당
-                elif value < median_value:
-                    rank_value = -1  # 하위 rank에는 -1 할당
-                else:
-                    rank_value = 0  # 중간값에는 0 할당
-                # 데이터 프레임에 출력값 추가
-                df = pd.concat([df, pd.DataFrame({'Firm': [index], 'Value': [value], 'Rank Value': [rank_value], 'Cluster': [cluster]})])
-        else:
-            upper_half = num_elements // 2
-            lower_half = num_elements // 2
-            for rank, (index, value) in enumerate(elements):
-                if rank < upper_half:
-                    rank_value = 1  # 상위 rank에는 1 할당
-                elif rank >= num_elements - lower_half:
-                    rank_value = -1  # 하위 rank에는 -1 할당
-                else:
-                    rank_value = 0  # 중간값에는 0 할당
-                # 데이터 프레임에 출력값 추가
-                df = pd.concat([df, pd.DataFrame({'Firm': [index], 'Value': [value], 'Rank Value': [rank_value], 'Cluster': [cluster]})])
 
+        median_index = num_elements // 2  # 중간값의 인덱스
+        median_value = elements[median_index][1]  # 중간값의 값
+        for rank, (index, value) in enumerate(elements):
+            rank_value = 0
+            if value > median_value:
+                rank_value = 1  # 상위 rank에는 1 할당
+            elif value < median_value:
+                rank_value = -1  # 하위 rank에는 -1 할당
+
+            # 데이터 프레임에 출력값 추가
+            df = pd.concat([df, pd.DataFrame(
+                {'Firm': [index], 'Value': [value], 'Rank Value': [rank_value], 'Cluster': [cluster]})])
 
     # 첫 번째 열과 인덱스를 일치하게 정렬
     df_sorted = df.set_index('Firm').loc[data.index].reset_index()

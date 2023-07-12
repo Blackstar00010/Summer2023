@@ -1,21 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[2]:
-
-
 import os
-import csv
 import urllib.parse
-import matplotlib.gridspec as gridspec
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-from matplotlib.cm import get_cmap
 from matplotlib import pyplot as plt
-from scipy.spatial.distance import pdist
 from sklearn.cluster import OPTICS, cluster_optics_dbscan
-
 
 # Specify the directories for raw data and PCA results
 #raw_data_dir = 'C:/Users/김주환/Desktop/My files/PCA'
@@ -23,29 +10,22 @@ from sklearn.cluster import OPTICS, cluster_optics_dbscan
 raw_data_dir = 'C:/Users/IE/Desktop/My files/PCA'
 pca_output_dir = 'C:/Users/IE/Desktop/My files/OPTICS'
 
-
 # Get a list of all CSV files in the raw data directory
 csv_files = [file for file in os.listdir(raw_data_dir) if file.endswith('.csv')]
 
-
 # Loop through each CSV file
 for file in csv_files:
-
     csv_path = os.path.join(raw_data_dir, file)
     data = pd.read_csv(csv_path, header=None)
 
-
     firm_lists = data[data.columns[0]].tolist()[1:]
     data = data.set_index(data.columns[0])
-    data=data[1:]
+    data = data[1:]
 
+    LS = data.values
+    mat = LS[0:,1:]
 
-    LS=data.values
-    mat=LS[0:,1:]
-
-
-
-    X=mat
+    X = mat
 
     clust = OPTICS(min_samples=3, xi=0.1, min_cluster_size=3)
     cluster_labels = clust.fit_predict(X)
@@ -85,8 +65,6 @@ for file in csv_files:
 
         print()
 
-
-
     dat = pd.read_csv(csv_path, index_col=0) 
     # Get the unique cluster labels (excluding noise)
     unique_labels = set(label for label in cluster_labels if label != -1)
@@ -115,7 +93,6 @@ for file in csv_files:
         for i, firm in enumerate(firms_sorted):
             LS_table.loc[len(LS_table)] = [firm, dat.loc[firm, '1'], long_short[i], cluster+1]
 
-
     LS_table.to_csv(output_file, index=False)
     
     # Print the download link and file path for the saved CSV file
@@ -123,4 +100,3 @@ for file in csv_files:
     file_path = os.path.abspath(output_file)
     print(f"Download link: {download_link}")
     print(f"File path: {file_path}")
-
