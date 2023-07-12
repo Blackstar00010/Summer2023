@@ -1,24 +1,28 @@
 import os
 import pandas as pd
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
+import numpy as np
 
 # Define the number of clusters k
 k_values = [50]
 
 # Directory containing the input files
 input_dir = '../files/momentum'
+momentum = sorted(filename for filename in os.listdir(input_dir))
 
 # Directory to save the output files
 output_dir = '../files/Clustering/K-Means'
 
-# Get a list of all the files in the input directory
-files = os.listdir(input_dir)
-
 # Process each file
-for file in files:
+for file in momentum:
     # Read data from CSV file
     data = pd.read_csv(os.path.join(input_dir, file), index_col=0)  # Set the first column as index
+
+    # Replace infinities with NaN
+    data.replace([np.inf, -np.inf], np.nan, inplace=True)
+    # Drop rows with NaN values
+    data.dropna(inplace=True)
+
     data_array = data.values  # Get the data values
     firm_names = data.index  # Get the firm names
 
