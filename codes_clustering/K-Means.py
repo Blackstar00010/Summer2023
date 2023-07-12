@@ -3,9 +3,9 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
 # Read data from CSV file
-data = pd.read_csv('../files/momentum/2010-01.csv')
-data_array = data.values[:, 1:]  # Exclude the first column (firm names)
-firm_names = data.values[:, 0]  # Get the first column (firm names)
+data = pd.read_csv('../files/momentum/2010-01.csv', index_col = 0)
+data_array = data.values  # Exclude the first column (firm names)
+firm_names = data.index  # Get the first column (firm names)
 
 # Define the number of clusters k
 k_values = [5]
