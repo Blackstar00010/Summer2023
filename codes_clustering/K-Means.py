@@ -11,24 +11,27 @@ firm_names = data.index  # Get the first column (firm names)
 k_values = [5]
 
 # Perform k-means clustering for each value of k
-clusters_k = {}
+clusters_k = []
 
 for k in k_values:
     kmeans = KMeans(n_clusters=k, n_init=10, random_state=0)  # n_init setting to suppress warning
-    kmeans.fit(data_array)  # Compute k-means clustering
+    kmeans.fit(data_array)  # Compute K-Means clustering
     cluster_labels = kmeans.labels_  # Label of each point (ndarray of shape)
 
-    clusters = {i: [] for i in range(k)}  # Dictionary key-value pair
+    clusters = [[] for _ in range(k)]
+
     for i, cluster in enumerate(cluster_labels):
+        # i: index
+        # cluster: momentum value
         clusters[cluster].append(firm_names[i])
 
-    clusters_k[k] = clusters
+    clusters_k.append(clusters)
 
 # Print the clusters for each k value
-for k, clusters in clusters_k.items():
-    print(f'Clusters for k = {k}:')
-    for cluster, firms in clusters.items():
-        print(f'Cluster {cluster + 1}: {firms}')
+for i, clusters in enumerate(clusters_k):
+    print(f'Clusters for k = {k_values[i]}:')
+    for j, firms in enumerate(clusters):
+        print(f'Cluster {j + 1}: {firms}')
 
         # Plot the line graph for firms in each cluster
         for firm in firms:
@@ -39,7 +42,7 @@ for k, clusters in clusters_k.items():
 
         plt.xlabel('Characteristics')
         plt.ylabel('Data Value')
-        plt.title(f'Cluster {cluster + 1}, k={k}')
+        plt.title(f'Cluster {j + 1}, k={k_values[i]}')
 
         # List the firm names on the side of the graph
         if len(firms) <= 10:
