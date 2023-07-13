@@ -1,22 +1,9 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # Import Necessary Libraries
-
-# In[10]:
-
-
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.cluster import OPTICS, cluster_optics_dbscan
 
-
-# # Dataset Construction
-
-# In[11]:
-
-
+#데이터 불러오기
 #data = pd.read_csv('C:/Users/김주환/Desktop/My files/PCA/2018-01.csv', header=None)
 data = pd.read_csv('C:/Users/IE/Desktop/My files/PCA/2018-01.csv', header=None)
 
@@ -31,11 +18,6 @@ print('Mom1+PCA')
 print(LS)
 print('Only PCA')
 print(mat)
-
-
-# # OPTICS
-
-# In[12]:
 
 
 #OPTICS 알고리즘 구현
@@ -68,9 +50,6 @@ for cluster_label, firms in clusters.items():
     print()
 
 
-# In[13]:
-
-
 #Result CSV 구현 및 생성.
 dat = pd.read_csv('C:/Users/IE/Desktop/My files/PCA/2018-01.csv', index_col=0) 
 unique_labels = set(label for label in cluster_labels if label != -1)
@@ -91,9 +70,7 @@ for cluster, firms in clusters.items():
 LS_table
 
 
-# In[14]:
-
-
+#CSV 받기
 # import os
 # import csv
 # import urllib.parse
