@@ -1,22 +1,10 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # **Import Necessary Libraries**
-
-# In[30]:
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.decomposition import PCA
 
 
-# # **Dataset Construction**
-
-# In[31]:
-
-
+# 데이터 불러오기
 #data = pd.read_csv('C:/Users/김주환/Desktop/My files/raw_data/2018-01.csv', header=None)
 data = pd.read_csv('C:/Users/IE/Desktop/My files/raw_data/2018-01.csv', header=None)
 firms_list = data[data.columns[0]].tolist()[1:]
@@ -28,11 +16,7 @@ print('Data')
 print(mat)
 
 
-# # **Principal Component Analysis, PCA**
-
-# In[32]:
-
-
+# PCA 구현
 def get_pca_data(data, n_components=2):
     pca = PCA(n_components=n_components)
     pca.fit(data)
@@ -53,10 +37,6 @@ def print_variance_ratio(pca):
 pca_mat, pca= get_pca_data(mat, n_components=20)
 print_variance_ratio(pca)
 
-
-# In[33]:
-
-
 cols = []
 for i in range(1, 21):
     cols.append('pca_' + str(i))
@@ -69,21 +49,13 @@ X_pca=pca.transform(mat)
 print("original shape: ", mat.shape)
 print("transformed shape: ", pca_mat.shape)
 
-
-# In[34]:
-
-
 mat_new=pca.inverse_transform(pca_mat)
 plt.scatter(mat[:,0],mat[:,1], alpha=0.2)
 plt.scatter(mat_new[:,0], mat_new[:,1], alpha=0.8)
 plt.axis('equal');
 
 
-# # **StandardScaler**
-
-# In[35]:
-
-
+# StandardScaler
 # 각 열의 평균과 표준편차 계산
 mean = np.mean(mat, axis=0)
 std = np.std(mat, axis=0)
@@ -101,23 +73,14 @@ first_column_matrix=first_column_matrix[0:]
 combined_matrix = np.hstack((first_column_matrix, mat_pd_pca_matrix))
 
 
-# In[36]:
-
-
+# PCA 전후 비교
 mat_pd_pca
-
-
-# In[37]:
-
-
 df_combined = pd.DataFrame(combined_matrix)
 df_combined.insert(0, 'Firm', firms_list)
 df_combined
 
 
-# In[38]:
-
-
+# CSV받기
 # import os
 # import csv
 # import urllib.parse
