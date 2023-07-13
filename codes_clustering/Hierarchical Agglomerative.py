@@ -51,30 +51,38 @@ for i in range(0,len(firms_list)):
           list(list_dict.values())[j].append('firm'+str(i+1)+': '+str(LS[0:,0][i]))
 # 클러스터 내부에서 Frim Number 기준정렬 후 Rank와 Long Short Value계산하여result_matrix저장.
 result_matrix = []
+
 for key, value in list_dict.items():
     row = [key]
     sorted_data = sorted(value, key=lambda x: float(x.split(': ')[1]), reverse=True)
     length = len(sorted_data)
     # h = Rank, t = Long Short Value
-    for i, item in enumerate(sorted_data):
+    
+     for i, item in enumerate(sorted_data):
         rank = i - length // 2
         h = rank + (length + 1) // 2
         t = 0 if length % 2 == 0 else (1 if rank > 0 else -1)
         result = f"{item}: {t}: {h}"
         row.append(result)
     result_matrix.append(row)
+
 df = pd.DataFrame(result_matrix)
+
 #df의 각 원소에 대하여 맨 뒤에 소속 Cluster를 붙임.
 for i in range(0,100):
     for j in range(0,len(df.head(i+1).iloc[i].dropna())-1):
         df.iloc[i, j+1] = str(df.iloc[i, j+1]) + ':' + str(df.iloc[i, 0])
+
 df = df.iloc[:, 1:]
+
 # 결측값을 제거하고 pure data만 result_list에 저장
 result_list = []
+
 for row in df.values:
     for item in row:
         if pd.notnull(item):  
             result_list.append(item)
+
 #list 값 정렬 후 ":"기준 분리
 sorted_result_list = sorted(result_list, key=lambda x: int(x.split(":")[0][4:]))
 split_result_list = [item.split(":") for item in sorted_result_list]
@@ -104,4 +112,3 @@ df_sorted
 # file_path = os.path.abspath(output_file)
 # print(f"Download link: {download_link}")
 # print(f"File path: {file_path}")
-
