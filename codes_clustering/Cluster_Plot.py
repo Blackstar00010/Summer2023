@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
 
+# Prints clusters and the firms
+# Plots line graphs for firms in the cluster
+
 
 def plot_clusters(cluster_label, firms, firm_names, data_array):
     if cluster_label == -1:

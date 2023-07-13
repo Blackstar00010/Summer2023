@@ -2,6 +2,9 @@ import pandas as pd
 from sklearn.cluster import KMeans
 from Cluster_Plot import plot_clusters
 
+# Clusters the firms using K-Means algorithm
+# Performs just one CSV file
+
 # Read data from CSV file
 data = pd.read_csv('../files/momentum/2010-01.csv', index_col = 0)
 data_array = data.values  # Exclude the first column (firm names)

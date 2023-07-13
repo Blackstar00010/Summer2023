@@ -2,6 +2,9 @@ import pandas as pd
 from sklearn.cluster import DBSCAN
 from Cluster_Plot import plot_clusters
 
+# Clusters the firms using DBSCAN algorithm
+# Performs just one CSV file
+
 # Read data from CSV file
 data = pd.read_csv('../files/momentum/2017-01.csv', index_col = 0)
 

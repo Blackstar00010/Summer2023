@@ -3,6 +3,9 @@ import pandas as pd
 from sklearn.cluster import DBSCAN
 import numpy as np
 
+# Prints cases that makes more than 2 clusters
+# Prints the eps and min_samples value
+
 # Define DBSCAN parameters
 eps_values = np.linspace(0.01, 4., 101)  # eps values from 0.01 to 1.01
 min_samples_values = range(2, 51)  # min_samples values from 2 to 50
