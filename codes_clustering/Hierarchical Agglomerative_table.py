@@ -1,11 +1,8 @@
 import os
-import csv
 import urllib.parse
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from scipy.spatial.distance import pdist
-from scipy.cluster.hierarchy import dendrogram, linkage,fcluster
+from scipy.cluster.hierarchy import linkage,fcluster
 
 
 # 파일 불러오기

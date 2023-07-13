@@ -1,9 +1,8 @@
 import numpy as np
 import pandas as pd
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
-from Cluster_Plot import plot_clusters
+from _Cluster_Plot import plot_clusters
 
 #데이터 불러오기
 #data = pd.read_csv('C:/Users/김주환/Desktop/My files/PCA/2018-01.csv', header=None, index_col=[0])
