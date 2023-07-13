@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[3]:
-
-
 import os
 import csv
 import urllib.parse
