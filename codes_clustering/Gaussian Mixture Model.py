@@ -4,8 +4,14 @@ import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 from _Cluster_Plot import plot_clusters
 
+# TODO: 불필요한 코드나 주석 지운다
+# TODO: 함수에 대한 설명을 쓴다. 함수 뿐만 아니라 전반적인 코드에 대한 설명을 쓴다
+
+# TODO: 주석 쓰기 시작할 때 # 이후에 띄어 쓴다
 #데이터 불러오기
 #data = pd.read_csv('C:/Users/김주환/Desktop/My files/PCA/2018-01.csv', header=None, index_col=[0])
+
+# TODO: 우리 컴퓨터에서 돌아가도록 파일명 변경한다. 파이참 깔아서 깃헙 연동해서 사용한다
 data = pd.read_csv('C:/Users/IE/Desktop/My files/PCA/2018-01.csv', header=None, index_col=[0])
 data=data[1:]
 LS=data.values
@@ -19,17 +25,22 @@ print(mata)
 
 #GMM Function
 DEBUG = True
+
+
+# TODO: Explain
 def debug(*args, **kwargs):
     global DEBUG
     if DEBUG:
         print(*args, **kwargs)
 
 
+# TODO: Explain
 def phi(Y, mu_k, cov_k):
     norm = multivariate_normal(mean=mu_k, cov=cov_k, allow_singular=True)
     return norm.pdf(Y)
 
 
+# TODO: Explain
 def getExpectation(Y, mu, cov, alpha):
     N = Y.shape[0]
     K = alpha.shape[0]
@@ -47,6 +58,7 @@ def getExpectation(Y, mu, cov, alpha):
     return gamma
 
 
+# TODO: Explain
 def maximize(Y, gamma):
     N, D = Y.shape
     K = gamma.shape[1]
@@ -63,6 +75,7 @@ def maximize(Y, gamma):
     return mu, cov, alpha
 
 
+# TODO: Explain
 def scale_data(Y):
     for i in range(Y.shape[1]):
         max_ = Y[:, i].max()
@@ -72,6 +85,7 @@ def scale_data(Y):
     return Y
 
 
+# TODO: Explain
 def init_params(shape, K):
     N, D = shape
     mu = np.random.rand(K, D)
@@ -82,6 +96,7 @@ def init_params(shape, K):
     return mu, cov, alpha
 
 
+# TODO: Explain
 def GMM_EM(Y, K, times):
     Y = scale_data(Y)
     mu, cov, alpha = init_params(Y.shape, K)
@@ -95,23 +110,27 @@ def GMM_EM(Y, K, times):
 
 # GMM 알고리즘 구현
 DEBUG = True
-Y=mata
+Y=mata  # ToDo: Y = mata
 matY = np.matrix(Y, copy=True)
 K = 4
 mu, cov, alpha = GMM_EM(matY, K, 100)
 N = Y.shape[0]
 gamma = getExpectation(matY, mu, cov, alpha)
 category = gamma.argmax(axis=1).flatten().tolist()[0]
+
+# ToDo: 뭐하는 코드인지 잘은 모르겠지만 4개 클러스터라 class1-4 정의한 거 같은데 클러스터 10개여도, 100개여도 이렇게 할 것인가?
 class1 = np.array([Y[i] for i in range(N) if category[i] == 0])
 class2 = np.array([Y[i] for i in range(N) if category[i] == 1])
 class3 = np.array([Y[i] for i in range(N) if category[i] == 2])
 class4 = np.array([Y[i] for i in range(N) if category[i] == 3])
 
+# TODO: Explain
 class_indices = []
 for i in range(K):
     indices = [data.index[index] for index, c in enumerate(category) if c == i][0:]
     class_indices.append(indices)
 
+# TODO: Explain
 for i, indices in enumerate(class_indices):
     f"Class {i+1} indices: {indices}"
     
@@ -119,14 +138,16 @@ class_indices_dict = {}
 for i, indices in enumerate(class_indices):
     class_name = f"Class {i+1}"
     class_indices_dict[class_name] = indices
-    
+
+# TODO: Explain
 cluster_elements = {i: [] for i in range(1, K+1)}
 for i in range(N):
     cluster = category[i]
     index = data.index[i]
     value = LS[i, 0]  # 첫 번째 열의 값
     cluster_elements[cluster+1].append((index, value))
-     
+
+# TODO: for 문으로 돌리던가 한다
 plt.plot(class1[:, 0], class1[:, 1], 'rs', label="class1")
 plt.plot(class2[:, 0], class2[:, 1], 'bo', label="class2")
 plt.plot(class3[:, 0], class3[:, 1], 'go', label="class3")
@@ -135,12 +156,13 @@ plt.legend(loc="best")
 plt.title("GMM Clustering By EM Algorithm")
 plt.show()
 
-print(len(class1)) 
+print(len(class1))
 print(len(class2))
 print(len(class3))
 print(len(class4))
 
 
+# TODO: _table_generate.py 에서 new_table_generate 함수 써서 다시 쓴다
 # Result CSV 구현
 df = pd.DataFrame(columns=['Firm', 'Value', 'Rank Value', 'Cluster'])
 for cluster, elements in cluster_elements.items():
@@ -159,6 +181,7 @@ for cluster, elements in cluster_elements.items():
 print(df)
 
 
+# ToDo: 필요없으면 지운다
 # 파일받기
 # import os
 # import csv
@@ -172,15 +195,17 @@ print(df)
 # print(f"File path: {file_path}")
 
 
+# TODO: Why would u define pandas again? Unnecessary
 # 그래프
 import pandas as pd
 
+# TODO: 위에 이미 정의되어 있지 않나?
 # Read data from CSV file
 data = pd.read_csv('C:/Users/IE/Desktop/My files/PCA/2018-01.csv', index_col = 0)
 firm_names = data.index  # Get the first column (firm names)
 data_array = data.values[:,1:]  # Exclude the first column (firm names)
 
-# ToDo
+# ToDo: Is k_values necessary? K is already defined above...
 # Define the number of clusters k
 k_values = [4]
 
@@ -189,4 +214,3 @@ for i, clusters in enumerate(class_indices):
     print(f'Clusters for k = {k_values[i]}')    
     for j, firms in enumerate(class_indices):
         plot_clusters(j, firms, firm_names, mata)  # Use the imported function
-
