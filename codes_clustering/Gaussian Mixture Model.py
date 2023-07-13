@@ -157,7 +157,7 @@ for cluster, elements in cluster_elements.items():
         else:
             rank_value = 0
         df = pd.concat([df, pd.DataFrame({'Firm': [index], 'Value': [value], 'Rank Value': [rank_value], 'Cluster': [cluster]})])
-df
+print(df)
 
 
 # 파일받기
