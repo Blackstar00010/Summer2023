@@ -1,5 +1,39 @@
 import pandas as pd
 from sklearn.cluster import DBSCAN
+from Cluster_Plot import plot_clusters
+
+# Read data from CSV file
+data = pd.read_csv('../files/momentum/2017-01.csv', index_col = 0)
+
+data_array = data.values  # Exclude the first column (firm names)
+firm_names = data.index  # Get the first column (firm names)
+
+# Define DBSCAN parameters
+eps = 0.92  # Maximum distance between two samples to be considered as neighbors
+min_samples = 9  # Minimum number of samples in a neighborhood for a point to be considered as a core point
+
+# Perform DBSCAN clustering
+dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+cluster_labels = dbscan.fit_predict(data_array)
+
+# Get the unique cluster labels
+unique_labels = sorted(list(set(cluster_labels)))
+
+# Create a list to store firms in each cluster
+clusters = [[] for _ in unique_labels]
+
+# Group firms by cluster label
+for i, cluster_label in enumerate(cluster_labels):
+    clusters[unique_labels.index(cluster_label)].append(firm_names[i])
+
+# Print and plot the clusters
+for i, firms in enumerate(clusters):
+    plot_clusters(unique_labels[i], firms, firm_names, data_array)  # Use the imported function
+    print()
+
+'''
+import pandas as pd
+from sklearn.cluster import DBSCAN
 import matplotlib.pyplot as plt
 
 # Read data from CSV file
@@ -48,4 +82,5 @@ for cluster_label, firms in clusters.items():
 
     plt.show()
 
-    print()
+    print() 
+'''
