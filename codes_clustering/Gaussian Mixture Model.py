@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # Import Necessary Libraries
-
-# In[112]:
-
-
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
@@ -13,22 +5,12 @@ import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 from Cluster_Plot import plot_clusters
 
-
-# # Dataset Construction
-
-# In[113]:
-
-
+#데이터 불러오기
 #data = pd.read_csv('C:/Users/김주환/Desktop/My files/PCA/2018-01.csv', header=None, index_col=[0])
 data = pd.read_csv('C:/Users/IE/Desktop/My files/PCA/2018-01.csv', header=None, index_col=[0])
 data=data[1:]
 LS=data.values
 mata=LS[0:,1:]
-
-
-# In[114]:
-
-
 mata = mata.astype(float)
 LS = LS.astype(float)
 print('Mom1+PCA')
@@ -36,10 +18,7 @@ print(LS)
 print('Only PCA')
 print(mata)
 
-
-# In[115]:
-
-
+#GMM Function
 DEBUG = True
 def debug(*args, **kwargs):
     global DEBUG
@@ -115,11 +94,7 @@ def GMM_EM(Y, K, times):
     return mu, cov, alpha
 
 
-# # GMM
-
-# In[116]:
-
-
+# GMM 알고리즘 구현
 DEBUG = True
 Y=mata
 matY = np.matrix(Y, copy=True)
@@ -152,8 +127,7 @@ for i in range(N):
     index = data.index[i]
     value = LS[i, 0]  # 첫 번째 열의 값
     cluster_elements[cluster+1].append((index, value))
-    
-    
+     
 plt.plot(class1[:, 0], class1[:, 1], 'rs', label="class1")
 plt.plot(class2[:, 0], class2[:, 1], 'bo', label="class2")
 plt.plot(class3[:, 0], class3[:, 1], 'go', label="class3")
@@ -168,9 +142,7 @@ print(len(class3))
 print(len(class4))
 
 
-# In[117]:
-
-
+# Result CSV 구현
 df = pd.DataFrame(columns=['Firm', 'Value', 'Rank Value', 'Cluster'])
 for cluster, elements in cluster_elements.items():
     elements.sort(key=lambda x: x[1], reverse=True)
@@ -188,9 +160,7 @@ for cluster, elements in cluster_elements.items():
 df
 
 
-# In[118]:
-
-
+# 파일받기
 # import os
 # import csv
 # import urllib.parse
@@ -203,9 +173,7 @@ df
 # print(f"File path: {file_path}")
 
 
-# In[119]:
-
-
+# 그래프
 import pandas as pd
 from sklearn.cluster import KMeans
 # Read data from CSV file
