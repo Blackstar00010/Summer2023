@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[4]:
-
-
 import os
 import csv
 import urllib.parse
@@ -78,4 +72,3 @@ for file in csv_files:
     file_path = os.path.abspath(output_file)
     print(f"Download link: {download_link}")
     print(f"File path: {file_path}")
-
