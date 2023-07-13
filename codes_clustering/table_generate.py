@@ -15,6 +15,7 @@ def read_and_preprocess_data(input_dir, file):
     return data
 
 
+# Generates new table with firm list / momentum_1 / Long, Short Index / Cluster Index
 def new_table_generate(data, clusters, output_dir, file):
     # New table with firm name, mom_1, long and short index, cluster index
     LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])

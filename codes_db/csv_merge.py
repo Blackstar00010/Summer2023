@@ -11,7 +11,7 @@ merged_data = pd.DataFrame()
 
 for file in csv_history:
     file_path = os.path.join(directory, file)
-    df = pd.read_csv(file_path, encoding = 'latin1')
+    df = pd.read_csv(file_path, encoding='latin1')
     if 'Date' in df.columns and 'Close' in df.columns:
         df = df[['Date', 'Close']]
         close_column_name = os.path.splitext(file)[0]
