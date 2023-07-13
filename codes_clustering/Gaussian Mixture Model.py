@@ -175,12 +175,13 @@ df
 
 # 그래프
 import pandas as pd
-from sklearn.cluster import KMeans
+
 # Read data from CSV file
 data = pd.read_csv('C:/Users/IE/Desktop/My files/PCA/2018-01.csv', index_col = 0)
 firm_names = data.index  # Get the first column (firm names)
 data_array = data.values[:,1:]  # Exclude the first column (firm names)
 
+# ToDo
 # Define the number of clusters k
 k_values = [4]
 
