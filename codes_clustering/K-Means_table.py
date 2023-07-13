@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from sklearn.cluster import KMeans
-from table_generate import read_and_preprocess_data, new_table_generate
+from _table_generate import read_and_preprocess_data, new_table_generate
 
 # Define the number of clusters k
 k_values = [50]

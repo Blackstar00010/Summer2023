@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from sklearn.cluster import DBSCAN
-from table_generate import read_and_preprocess_data, new_table_generate
+from _table_generate import read_and_preprocess_data, new_table_generate
 
 # Directory containing the input files
 input_dir = '../files/momentum'

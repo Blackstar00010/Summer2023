@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.cluster import KMeans
-from Cluster_Plot import plot_clusters
+from _Cluster_Plot import plot_clusters
 
 # Clusters the firms using K-Means algorithm
 # Performs just one CSV file
