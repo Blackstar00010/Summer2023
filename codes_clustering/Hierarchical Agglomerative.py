@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # **Import Necessary Libraries**
-
-# In[20]:
-
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -13,11 +5,7 @@ from scipy.spatial.distance import pdist
 from scipy.cluster.hierarchy import dendrogram, linkage,fcluster
 
 
-# # **Dataset Construction**
-
-# In[21]:
-
-
+#데이터 불러오기
 #data = pd.read_csv('C:/Users/김주환/Desktop/My files/PCA/2018-01.csv', header=None)
 data = pd.read_csv('C:/Users/IE/Desktop/My files/PCA/2018-01.csv', header=None)
 firms_list = data[data.columns[0]].tolist()[1:]
@@ -31,11 +19,7 @@ print('Only PCA')
 print(mat)
 
 
-# # **Hierarchical Agglomerative Clustering**
-
-# In[22]:
-
-
+#Hierarchical Agglomertive 구현
 # 거리 행렬 계산
 dist_matrix = pdist(mat, metric='euclidean')
 # 연결 매트릭스 계산
@@ -53,9 +37,6 @@ clusters = fcluster(Z, k, criterion='maxclust')
 print(dist_matrix)
 print("클러스터 할당 결과:")
 print(clusters)
-
-
-# In[23]:
 
 
 # Result CSV 구현
@@ -99,9 +80,6 @@ sorted_result_list = sorted(result_list, key=lambda x: int(x.split(":")[0][4:]))
 split_result_list = [item.split(":") for item in sorted_result_list]
 
 
-# In[24]:
-
-
 # Result CSV 생성    
 #Firm Number 대신에 실제 Firm이름으로 대체.
 df_sorted = pd.DataFrame(split_result_list)
@@ -115,9 +93,7 @@ df_sorted = df_sorted.sort_values(by=['Cluster', df_sorted.columns[3]])
 df_sorted
 
 
-# In[25]:
-
-
+#CSV 받기
 # import os
 # import csv
 # import urllib.parse
