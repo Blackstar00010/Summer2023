@@ -4,21 +4,15 @@ import matplotlib.pyplot as plt
 from _Cluster_Plot import plot_clusters
 
 # 1. 파일 불러오기
-# data = pd.read_csv('C:/Users/김주환/Desktop/My files/PCA/2018-01.csv', header=None, index_col=[0])
-data = pd.read_csv('C:/Users/IE/Desktop/My files/PCA/2018-01.csv', header=None, index_col=[0])
+data = pd.read_csv('../files/PCA/2018-01.csv', header=None, index_col=[0])
 firm_list = data.index[1:]
 data = data[1:]
 LS = data.values
 mata = LS[0:, 1:]
 mata = mata.astype(float)
 LS = LS.astype(float)
-print('Mom1+PCA')
-print(LS)
-print('Only PCA')
-print(mata)
 
 # 2. GMM 구현
-DEBUG = True
 Y = mata
 matY = np.matrix(Y, copy=True)
 K = 4

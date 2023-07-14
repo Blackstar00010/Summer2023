@@ -4,15 +4,12 @@ import pandas as pd
 from sklearn.decomposition import PCA
 
 # 1. 파일 불러오기
-# data = pd.read_csv('C:/Users/김주환/Desktop/My files/raw_data/2018-01.csv', header=None)
-data = pd.read_csv('C:/Users/IE/Desktop/My files/raw_data/2018-01.csv', header=None)  # TODO
+data = pd.read_csv('../files/momentum/2018-01.csv', header=None)
 firms_list = data[data.columns[0]].tolist()[1:]
 data = data.set_index(data.columns[0])
 data = data[1:]
 mat = data.values
 mat = mat.astype(float)
-# print('Data')
-# print(mat)
 
 
 # 2. PCA 알고리즘 구현

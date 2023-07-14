@@ -1,29 +1,32 @@
 import numpy as np
 from scipy.stats import multivariate_normal
 
-# DEBUG = True
-
+DEBUG = False
 def debug(*args, **kwargs):
     global DEBUG
     if DEBUG:
         print(*args, **kwargs)
 
 
-#
 def phi(Y, mu_k, cov_k):
     """
-    TODO
-    :param Y:
-    :param mu_k:
-    :param cov_k:
-    :return: dataframe of musigi
+    데이터의 정규분포 생성
+    :param Y: data
+    :param mu_k: mean
+    :param cov_k: covariance
+    :return: Probability Density Function of Normal Distribution of Data
     """
+
     norm = multivariate_normal(mean=mu_k, cov=cov_k, allow_singular=True)
     return norm.pdf(Y)
 
 
-# 가우시안 분포가 data를 설명하는 정도의 책임값 계산.
 def getExpectation(Y, mu, cov, alpha):
+    """
+    가우시안 분포가 data를 설명하는 정도의 책임값 계산.
+    :param alpha: 혼합계수; 임의의 정규분포가 전체 데이터에서 설명하는 비중을 나타냄.
+    :return: gamma=책임값 행렬
+    """
     N = Y.shape[0]
     K = alpha.shape[0]
     assert N > 1, "There must be more than one sample!"
@@ -40,8 +43,10 @@ def getExpectation(Y, mu, cov, alpha):
     return gamma
 
 
-# 책임값에 따라 평균, 공분산, 혼합계수 최적화.
 def maximize(Y, gamma):
+    """
+    책임값 행렬 gamma 에 따라 평균, 공분산, 혼합계수 최적화.
+    """
     N, D = Y.shape
     K = gamma.shape[1]
     mu = np.zeros((K, D))
@@ -57,8 +62,10 @@ def maximize(Y, gamma):
     return mu, cov, alpha
 
 
-# data 0, 1 사이로 scale.
 def scale_data(Y):
+    """
+    data 0, 1 사이로 scale.
+    """
     for i in range(Y.shape[1]):
         max_ = Y[:, i].max()
         min_ = Y[:, i].min()
@@ -67,8 +74,12 @@ def scale_data(Y):
     return Y
 
 
-# initial parameter(평균, 공분산, 혼합계수) 무작위 지정.
 def init_params(shape, K):
+    """
+    initial parameter(평균, 공분산, 혼합계수) 무작위 지정.
+    :param shape: 데이터
+    :param K: 생성할 정규분포 갯수
+    """
     N, D = shape
     mu = np.random.rand(K, D)
     cov = np.array([np.eye(D)] * K)
@@ -78,8 +89,10 @@ def init_params(shape, K):
     return mu, cov, alpha
 
 
-# 같은 시행을 변화가 없을 때까지 times 만큼 반복.
 def GMM_EM(Y, K, times):
+    """
+    같은 시행을 변화가 없을 때까지 times 만큼 반복.
+    """
     Y = scale_data(Y)
     mu, cov, alpha = init_params(Y.shape, K)
     for i in range(times):
