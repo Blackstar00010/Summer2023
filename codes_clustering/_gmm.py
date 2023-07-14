@@ -10,11 +10,13 @@ def debug(*args, **kwargs):
         print(*args, **kwargs)
 
 
+# 정규분포 그리기.
 def phi(Y, mu_k, cov_k):
     norm = multivariate_normal(mean=mu_k, cov=cov_k, allow_singular=True)
     return norm.pdf(Y)
 
 
+# 가우시안 분포가 data를 설명하는 정도의 책임값 계산.
 def getExpectation(Y, mu, cov, alpha):
     N = Y.shape[0]
     K = alpha.shape[0]
@@ -32,6 +34,7 @@ def getExpectation(Y, mu, cov, alpha):
     return gamma
 
 
+# 책임값에 따라 평균, 공분산, 혼합계수 최적화.
 def maximize(Y, gamma):
     N, D = Y.shape
     K = gamma.shape[1]
@@ -48,6 +51,7 @@ def maximize(Y, gamma):
     return mu, cov, alpha
 
 
+# data 0, 1 사이로 scale.
 def scale_data(Y):
     for i in range(Y.shape[1]):
         max_ = Y[:, i].max()
@@ -57,6 +61,7 @@ def scale_data(Y):
     return Y
 
 
+# initial parameter(평균, 공분산, 혼합계수) 무작위 지정.
 def init_params(shape, K):
     N, D = shape
     mu = np.random.rand(K, D)
@@ -67,6 +72,7 @@ def init_params(shape, K):
     return mu, cov, alpha
 
 
+# 같은 시행을 변화가 없을 때까지 times 만큼 반복.
 def GMM_EM(Y, K, times):
     Y = scale_data(Y)
     mu, cov, alpha = init_params(Y.shape, K)
