@@ -34,4 +34,3 @@ for file in momentum:
             clusters[label].append(firm_names[i])
 
     new_table_generate(data, clusters, output_dir, file)
-
