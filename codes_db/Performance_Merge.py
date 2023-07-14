@@ -11,6 +11,9 @@ firm_names = df1['Firm Name']
 df1 = df1.drop(columns=['Firm Name'])
 df2 = df2.drop(columns=['Firm Name'])
 
+# Shift the columns of df2 to the left
+df2 = df2.shift(periods=1, axis="columns")
+
 performance = df1.mul(df2)
 
 # Create a new DataFrame with 'Firm Name' as the first column
