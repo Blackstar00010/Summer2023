@@ -14,7 +14,7 @@ end_date = pd.to_datetime('2022-12-01')
 months = pd.date_range(start_date, end_date, freq='MS', tz='UTC')
 
 for current_date in months:
-    window = df.loc[:current_date].tail(50)fd
+    window = df.loc[:current_date].tail(50)
 
     mom = pd.DataFrame(index=range(1, 50), columns=window.columns)
     for i in range(1, 50):
