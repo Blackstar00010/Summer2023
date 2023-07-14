@@ -28,9 +28,6 @@ for file in momentum:
     # Get the unique cluster labels (excluding noise)
     unique_labels = set(label for label in cluster_labels if label != -1)
 
-    # New table with firm name, mom_1, long and short index, cluster index
-    LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
-
     clusters = [[] for _ in unique_labels]
     for i, label in enumerate(cluster_labels):
         if label != -1:  # Exclude noise

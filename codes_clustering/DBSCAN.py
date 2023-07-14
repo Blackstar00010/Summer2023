@@ -6,7 +6,7 @@ from _Cluster_Plot import plot_clusters
 # Performs just one CSV file
 
 # Read data from CSV file
-data = pd.read_csv('../files/momentum/2017-01.csv', index_col = 0)
+data = pd.read_csv('../files/momentum/2017-01.csv', index_col=0)
 
 data_array = data.values  # Exclude the first column (firm names)
 firm_names = data.index  # Get the first column (firm names)
