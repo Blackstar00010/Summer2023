@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import multivariate_normal
 
-DEBUG = True
+# DEBUG = True
 
 def debug(*args, **kwargs):
     global DEBUG
@@ -9,8 +9,15 @@ def debug(*args, **kwargs):
         print(*args, **kwargs)
 
 
-# 정규분포 그리기.
+#
 def phi(Y, mu_k, cov_k):
+    """
+    TODO
+    :param Y:
+    :param mu_k:
+    :param cov_k:
+    :return: dataframe of musigi
+    """
     norm = multivariate_normal(mean=mu_k, cov=cov_k, allow_singular=True)
     return norm.pdf(Y)
 
