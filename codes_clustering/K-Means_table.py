@@ -21,7 +21,7 @@ for file in momentum:
     data_array = data.values  # Get the data values
     firm_names = data.index  # Get the firm names
 
-    n_sample = data_array.shape[0]
+    n_sample = data_array.shape[0] # number of values in the file
 
     # Skip if the number of values are less than k
     if n_sample <= k_values[0]:
@@ -36,13 +36,14 @@ for file in momentum:
         cluster_labels = kmeans.labels_  # Label of each point (ndarray of shape)
 
         clusters = [[] for _ in range(k)]  # List of lists
+
         for i, cluster in enumerate(cluster_labels):
+            # i: firm index
+            # cluster: cluster index
             clusters[cluster].append(firm_names[i])
 
         clusters_k.append(clusters)
 
-    # New table with firm name, mom_1, long and short index, cluster index
-    LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
 
     for clusters in clusters_k:
         new_table_generate(data, clusters, output_dir, file)

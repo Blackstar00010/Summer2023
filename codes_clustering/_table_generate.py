@@ -31,7 +31,7 @@ def new_table_generate(data, clusters, output_dir, file):
 
         # Add the data to the new table
         for i, firm in enumerate(firms_sorted):
-            LS_table.loc[len(LS_table)] = [firm, data.loc[firm, '1'], long_short[i], cluster_num+1]
+            LS_table.loc[len(LS_table)] = [firm, data.loc[firm, '1'], long_short[i], cluster_num + 1]
 
     # Save the output to a CSV file in the output directory
     LS_table.to_csv(os.path.join(output_dir, file), index=False)

@@ -1,12 +1,7 @@
 import os
-import csv
 import urllib.parse
-import numpy as np
 import pandas as pd
 from _gmm import *
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from scipy.stats import multivariate_normal
 
 
 # 1. 파일 불러오기

@@ -11,7 +11,7 @@ data_array = data.values  # Exclude the first column (firm names)
 firm_names = data.index  # Get the first column (firm names)
 
 # Define the number of clusters k
-k_values = [5]
+k_values = [3]
 
 # Perform k-means clustering for each value of k
 clusters_k = []
@@ -24,8 +24,8 @@ for k in k_values:
     clusters = [[] for _ in range(k)]
 
     for i, cluster in enumerate(cluster_labels):
-        # i: index
-        # cluster: momentum value
+        # i: firm index
+        # cluster: cluster index
         clusters[cluster].append(firm_names[i])
 
     clusters_k.append(clusters)
