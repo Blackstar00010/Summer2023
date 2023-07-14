@@ -1,5 +1,4 @@
 import os
-import pandas as pd
 from sklearn.cluster import KMeans
 from _table_generate import read_and_preprocess_data, new_table_generate
 
