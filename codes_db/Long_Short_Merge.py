@@ -11,6 +11,7 @@ for file in long_short:
 
     # Keep only the 'Firm Name' and 'Long Short' columns
     data = data[['Firm Name', 'Long Short']]
+    # TODO: Normalise (sum of abs() == 1)
 
     # Change the column name into file name (ex: 1990-01)
     file_column_name = os.path.splitext(file)[0]
