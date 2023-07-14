@@ -6,7 +6,7 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
 
 # 1. 데이터 불러오기
-data = pd.read_csv('../files/PCA/2018-01.csv', header=None)
+data = pd.read_csv('../files/Clustering/PCA/2018-01.csv', header=None)
 firms_list = data[data.columns[0]].tolist()[1:]
 data = data.set_index(data.columns[0])
 data = data[1:]

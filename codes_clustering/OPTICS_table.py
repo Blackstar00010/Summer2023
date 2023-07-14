@@ -8,7 +8,7 @@ from sklearn.cluster import OPTICS, cluster_optics_dbscan
 
 
 # 1. 파일 불러오기
-raw_data_dir = '../files/PCA'
+raw_data_dir = '../files/Clustering/PCA'
 pca_output_dir = '../files/Clustering/OPTICS'
 csv_files = [file for file in os.listdir(raw_data_dir) if file.endswith('.csv')]
 

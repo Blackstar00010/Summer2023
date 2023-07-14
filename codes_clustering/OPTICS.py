@@ -3,7 +3,7 @@ from _Cluster_Plot import plot_clusters
 from sklearn.cluster import OPTICS, cluster_optics_dbscan
 
 # 1. 파일 불러오기
-data = pd.read_csv('../files/PCA/2018-01.csv', header=None)
+data = pd.read_csv('../files/Clustering/PCA/2018-01.csv', header=None)
 
 firm_lists = data[data.columns[0]].tolist()[1:]
 data = data.set_index(data.columns[0])

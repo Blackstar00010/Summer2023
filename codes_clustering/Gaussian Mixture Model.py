@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from _Cluster_Plot import plot_clusters
 
 # 1. 파일 불러오기
-data = pd.read_csv('../files/PCA/2018-01.csv', header=None, index_col=[0])
+data = pd.read_csv('../files/Clustering/PCA/2018-01.csv', header=None, index_col=[0])
 firm_list = data.index[1:]
 data = data[1:]
 LS = data.values

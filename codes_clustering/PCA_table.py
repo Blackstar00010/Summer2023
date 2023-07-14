@@ -5,7 +5,7 @@ from sklearn.decomposition import PCA
 
 # 1. 파일 불러오기
 input_dir = '../files/momentum'
-output_dir = '../files/PCA'
+output_dir = '../files/Clustering/PCA'
 momentum = sorted(filename for filename in os.listdir(input_dir))
 
 # 2. CSV 파일 하나에 대해서 각각 실행

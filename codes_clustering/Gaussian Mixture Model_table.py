@@ -5,7 +5,7 @@ from _gmm import *
 
 
 # 1. 파일 불러오기
-raw_data_dir = '../files/PCA'
+raw_data_dir = '../files/Clustering/PCA'
 pca_output_dir = '../files/Clustering/Gaussian_Mixture_Model'
 csv_files = [file for file in os.listdir(raw_data_dir) if file.endswith('.csv')]
 
