@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.decomposition import PCA
 
+
+
 # 1. 파일 불러오기
 data = pd.read_csv('../files/momentum/2018-01.csv', header=None)
 firms_list = data[data.columns[0]].tolist()[1:]
@@ -26,8 +28,10 @@ def get_pd_from_pca(pca_data, cols=None):
 
 
 def print_variance_ratio(pca):
-    print('variance_ratio: ', pca.explained_variance_ratio_)
-    print('sum of variance_ratio: ', np.sum(pca.explained_variance_ratio_))
+    sum=np.sum(pca.explained_variance_ratio_)
+    # 'variance_ratio: ', pca.explained_variance_ratio_
+    # 'sum of variance_ratio: ', np.sum(pca.explained_variance_ratio_)
+    return sum
 
 
 # get_pd_from_pca에 넣을 columns 생성
