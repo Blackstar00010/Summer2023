@@ -41,9 +41,12 @@ for file in csv_files:
     # Cluster k개 생성
     k = 100
     clusters = fcluster(Z, k, criterion='maxclust')
+
+
+    # 5. Outlier선별(예정)
     
     
-    # 5. Result CSV 구현
+    # 6. Result CSV 구현
     list_dict = {}
     # 클러스터 갯수만큼 key생성
     for i in range(k):
@@ -84,7 +87,7 @@ for file in csv_files:
     split_result_list = [item.split(":") for item in sorted_result_list]
     
     
-    # 6. Result CSV 생성    
+    # 7. Result CSV 생성    
     #Firm Number 대신에 실제 Firm이름으로 대체.
     output_file = os.path.join(pca_output_dir, file)
     df_sorted = pd.DataFrame(split_result_list)
@@ -97,7 +100,7 @@ for file in csv_files:
     df_sorted = df_sorted.sort_values(by=['Cluster', df_sorted.columns[3]])
     
     
-    # 7. Print the download link and file path for the saved CSV file
+    # 8. Print the download link and file path for the saved CSV file
     # df_sorted의 열은 "Firm", "Mom1", "LS", "Rank", "Cluster"
     df_sorted.to_csv(output_file, index=False)
     download_link = urllib.parse.quote(output_file)
