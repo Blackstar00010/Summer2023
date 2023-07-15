@@ -20,49 +20,41 @@ def find_outliers_hac(threshold):
 
 # 2. CSV 파일 하나에 대해서 각각 실행
 for file in Hierarchical_Agglomerative:
-    first = True
-    if first == True:
-        data = read_and_preprocess_data(input_dir, file)
-        # PCA 주성분 데이터만 가지고 있는 mat과 원본 Mom1을 추가로 가지고 있는 LS생성.
-        mat = data.values[:, 1:]
 
-        # 4. Hierarchical Agglomerative 알고리즘 구현
-        # 거리 행렬 계산
-        dist_matrix = pdist(mat, metric='euclidean')
-        distance_matrix = squareform(dist_matrix)
+    data = read_and_preprocess_data(input_dir, file)
+    # PCA 주성분 데이터만 가지고 있는 mat과 원본 Mom1을 추가로 가지고 있는 LS생성.
+    mat = data.values[:, 1:]
 
-        # 연결 매트릭스 계산
-        Z = linkage(dist_matrix, method='ward')
+    # 4. Hierarchical Agglomerative 알고리즘 구현
+    # 거리 행렬 계산
+    dist_matrix = pdist(mat, metric='euclidean')
+    distance_matrix = squareform(dist_matrix)
 
-        # Cluster k개 생성
-        k = 80
-        clusters = fcluster(Z, k, criterion='maxclust')
+    # 연결 매트릭스 계산
+    Z = linkage(dist_matrix, method='ward')
 
-    second = True
-    if second == True:
-        # 5. Outlier선별(예정)
+    # Cluster k개 생성
+    k = 80
+    clusters = fcluster(Z, k, criterion='maxclust')
 
-        outliers = find_outliers_hac(10)
+    # 5. Outlier선별
 
-        for i in range(1, len(outliers)):
-            for j in range(0, len(clusters)):
-                if outliers[i] == j + 1:
-                    clusters[j + 1] = 0
+    outliers = find_outliers_hac(10)
 
-        print(outliers)
+    for i in range(1, len(outliers)):
+        for j in range(0, len(clusters)):
+            if outliers[i] == j + 1:
+                clusters[j + 1] = 0
 
-    third = True
-    if third == True:
+    unique_labels = sorted(list(set(clusters)))
 
-        unique_labels = sorted(list(set(clusters)))
+    clust = [[] for _ in unique_labels]
+    for i, cluster_label in enumerate(clusters):
+        clust[unique_labels.index(cluster_label)].append(data.index[i])
 
-        clust = [[] for _ in unique_labels]
-        for i, cluster_label in enumerate(clusters):
-            clust[unique_labels.index(cluster_label)].append(data.index[i])
+    for cluster_num, firms in enumerate(clust):
+        # Sort firms based on momentum_1
+        firms_sorted = sorted(firms, key=lambda x: data.loc[x, '1'])
+        print(firms_sorted)
 
-        for cluster_num, firms in enumerate(clust):
-            # Sort firms based on momentum_1
-            firms_sorted = sorted(firms, key=lambda x: data.loc[x, '1'])
-            print(firms_sorted)
-
-        new_table_generate(data, clust, output_dir, file)
+    new_table_generate(data, clust, output_dir, file)
