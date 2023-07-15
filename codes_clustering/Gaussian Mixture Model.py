@@ -1,18 +1,15 @@
 from _gmm import *
-import pandas as pd
+from _table_generate import *
 import matplotlib.pyplot as plt
 from _Cluster_Plot import plot_clusters
 
-# 1. 파일 불러오기
-data = pd.read_csv('../files/Clustering/PCA/2018-01.csv', header=None, index_col=[0])
-firm_list = data.index[1:]
-data = data[1:]
-LS = data.values
-mata = LS[0:, 1:]
-mata = mata.astype(float)
-LS = LS.astype(float)
+# 파일 불러오기
+input_dir = '../files/Clustering/PCA(1-48)'
+file = '2018-01.csv'
+data = read_and_preprocess_data(input_dir, file)
+mata = data.values[:,1:].astype(float)
 
-# 2. GMM 구현
+# 1. Gaussian Mixture Model
 Y = mata
 matY = np.matrix(Y, copy=True)
 K = 4
@@ -53,16 +50,11 @@ print(len(class4))
 # 3. Outlier선별(예정)
 
 
-# 4. GMM 결과출력
-data_array = mata
-firm_names = firm_list
+cluster_labels = []
+for i in range(0, K ):
+    cluster_labels.append(i)
 
-# TODO: unique_label -> cluster_label
-unique_labels = []
-for i in range(1, K + 1):
-    unique_labels.append(i)
-
-# Print and plot the clusters
+# 4. Print and plot the clusters
 for i, firms in enumerate(class_indices):
     # outlier = -1 조건 맞추기 위해 TODO
-    plot_clusters(unique_labels[i] - 1, firms, firm_names, data_array)  # Use the imported function
+    plot_clusters(cluster_labels[i] , firms, data.index, mata)  # Use the imported function
