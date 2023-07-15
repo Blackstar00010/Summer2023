@@ -1,5 +1,6 @@
-from _table_generate import *
 from _PCA import *
+from _table_generate import *
+
 # 1. 파일 불러오기
 input_dir = '../files/momentum'
 output_dir = '../files/Clustering/PCA'
@@ -14,29 +15,28 @@ for file in momentum:
     if mc == True:
         # 4. PCA 알고리즘 구현
 
+        n_components = 20
+
         while True:
-            if len(data)<20:
-                n_components=len(data)
-                pca_mat, pca = get_pca_data(mat, n_components=n_components)
-                t = print_variance_ratio(pca)
+            x, pca = pca(mat, n_components)
+            t = variance(pca)
 
-                if t < 0.99:
-                    break
-
-            
-
-
-
-
+            if t > 0.99 and n_components >2:
+                n_components -= 1
             else:
-                n_components=20
+                break
+
+        return n_components
+
+        print(t)
+        print(n_components)
 
         # get_pd_from_pca에 넣을 columns 생성
         cols = []
         for i in range(1, n_components+1):
             cols.append('pca_' + str(i))
 
-    md = True
+    md = False
     if md == True:
         pca_mat, pca = get_pca_data(mat, n_components=n_components)
         pca_mat_pd = get_pd_from_pca(pca_mat, cols=cols)
@@ -45,8 +45,6 @@ for file in momentum:
         t= print_variance_ratio(pca)
         print(t)
         print(n_components)
-
-
 
     mk=False
     if mk == True:
