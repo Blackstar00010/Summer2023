@@ -6,9 +6,17 @@ from sklearn.decomposition import PCA
 first=True
 if first == True:
     input_dir = '../files/momentum'
-    file='2018-01.csv'
+    file='2022-12.csv'
     data = read_and_preprocess_data(input_dir, file)
     mat = data.values.astype(float)
+
+    mom1=mat[:,0]
+
+    # mom1을 제외한 mat/PCA(2-49)
+    mat = np.delete(mat, 0, axis=1)
+
+    # # mom49를 제외한 mat/PCA(1-48)
+    # mat = np.delete(mat, 48, axis=1)
 
     def get_pca_data(data, n_components=2):
         pca = PCA(n_components=n_components)
@@ -82,6 +90,7 @@ first_column = data.iloc[:, 0]
 first_column_matrix = np.array(first_column).reshape(-1, 1)
 combined_matrix = np.hstack((first_column_matrix, mat_pd_pca_matrix))
 df_combined = pd.DataFrame(combined_matrix)
+df_combined.index=data.index
 
 # Result
 print(file)
@@ -93,6 +102,8 @@ print(df_combined)
 
 # Graph after PCA
 mat_new = pca.inverse_transform(pca_mat)
+
+
 # Mom1-Mom2 PCA before after
 plt.scatter(mat[:, 0], mat[:, 1], alpha=0.2)
 plt.scatter(mat_new[:, 0], mat_new[:, 1], alpha=0.8)

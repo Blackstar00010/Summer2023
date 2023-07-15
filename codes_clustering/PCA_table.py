@@ -3,7 +3,7 @@ from sklearn.decomposition import PCA
 
 # 파일 불러오기.
 input_dir = '../files/momentum'
-output_dir = '../files/Clustering/PCA(1-48)'
+output_dir = '../files/Clustering/PCA(2-49)'
 momentum = sorted(filename for filename in os.listdir(input_dir))
 
 # 1. PCA 알고리즘 함수.
@@ -29,15 +29,15 @@ if first == True:
 for file in momentum:
 
     data = read_and_preprocess_data(input_dir, file)
-    mat = data.values
+    mat = data.values.astype(float)
 
     mom1=mat[:,0]
 
-    # # mom1을 제외한 mat/PCA(2-49)
-    # mat = np.delete(mat, 0, axis=1)
+    # mom1을 제외한 mat/PCA(2-49)
+    mat = np.delete(mat, 0, axis=1)
 
-    # mom49를 제외한 mat/PCA(1-48)
-    mat = np.delete(mat, 48, axis=1)
+    # # mom49를 제외한 mat/PCA(1-48)
+    # mat = np.delete(mat, 48, axis=1)
 
 
     # 2. 최적 n_components 찾기
@@ -92,14 +92,14 @@ for file in momentum:
         # Original Mom1 Combining
         first_column = mom1
         first_column_matrix = np.array(first_column).reshape(-1, 1)
-        first_column_matrix = first_column_matrix[0:]
         combined_matrix = np.hstack((first_column_matrix, mat_pd_pca_matrix))
         df_combined = pd.DataFrame(combined_matrix)
+        df_combined.index=data.index
+        print(df_combined)
 
     # 4. PCA 결과 CSV로 저장
     forth = False
     if forth == True:
         # Columns=['Original Mom1', 'data after PCA', ...]
         output_file = os.path.join(output_dir, file)
-        df_combined = pd.DataFrame(combined_matrix)
         df_combined.to_csv(output_file, index=True)
