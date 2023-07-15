@@ -25,7 +25,7 @@ plt.xlabel('Samples')
 plt.ylabel('Distance')
 plt.show()
 
-# 클러스터 할당
+# Cluster k개 생성
 k = 80
 clusters = fcluster(Z, k, criterion='maxclust')
 
@@ -57,4 +57,4 @@ for i, cluster_label in enumerate(clusters):
 
 # Print and plot the clusters
 for i, firms in enumerate(clust):
-    plot_clusters(unique_labels[i]-1, firms, data.index, mat)  # Use the imported function
+    plot_clusters(unique_labels[i] - 1, firms, data.index, mat)  # Use the imported function
