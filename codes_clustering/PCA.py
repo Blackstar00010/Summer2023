@@ -3,17 +3,18 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
 # 1. 파일 불러오기 및 PCA함수
-first=True
+first = True
 if first == True:
     input_dir = '../files/momentum'
-    file='2022-12.csv'
+    file = '2022-12.csv'
     data = read_and_preprocess_data(input_dir, file)
     mat = data.values.astype(float)
 
-    mom1=mat[:,0]
+    mom1 = mat[:, 0]
 
     # mom1을 제외한 mat/PCA(2-49)
     mat = np.delete(mat, 0, axis=1)
+
 
     # # mom49를 제외한 mat/PCA(1-48)
     # mat = np.delete(mat, 48, axis=1)
@@ -39,7 +40,6 @@ if first == True:
         print('variance_ratio: ', pca.explained_variance_ratio_)
         print('sum of variance_ratio: ', np.sum(pca.explained_variance_ratio_))
 
-
 # 2. 최적 n_components 찾기
 if len(data) < 20:
     n_components = len(data)
@@ -61,7 +61,6 @@ pca = PCA(n_components + 1)
 pca.fit(mat)
 t = variance_ratio(pca)
 n_components = n_components + 1
-
 
 # 3. PCA 진행 및 결과
 # get_pd_from_pca에 넣을 columns 생성
@@ -90,7 +89,7 @@ first_column = data.iloc[:, 0]
 first_column_matrix = np.array(first_column).reshape(-1, 1)
 combined_matrix = np.hstack((first_column_matrix, mat_pd_pca_matrix))
 df_combined = pd.DataFrame(combined_matrix)
-df_combined.index=data.index
+df_combined.index = data.index
 
 # Result
 print(file)
@@ -102,7 +101,6 @@ print(df_combined)
 
 # Graph after PCA
 mat_new = pca.inverse_transform(pca_mat)
-
 
 # Mom1-Mom2 PCA before after
 plt.scatter(mat[:, 0], mat[:, 1], alpha=0.2)
