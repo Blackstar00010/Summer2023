@@ -35,4 +35,4 @@ for file in optics:
     for i, cluster in enumerate(cluster_labels):
         clusters[unique_labels.index(cluster)].append(data.index[i])
 
-    # new_table_generate(data, clusters, output_dir, file)
+    new_table_generate(data, clusters, output_dir, file)

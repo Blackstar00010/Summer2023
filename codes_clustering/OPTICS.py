@@ -1,3 +1,5 @@
+from matplotlib import pyplot as plt, gridspec
+
 from _table_generate import *
 from _Cluster_Plot import plot_clusters
 from sklearn.cluster import OPTICS, cluster_optics_dbscan
@@ -12,23 +14,6 @@ mat = data.values[:, 1:].astype(float)
 clust = OPTICS(min_samples=3, xi=0.1, min_cluster_size=3)
 # min_samples = 포함할 최소 데이터 수, xi = 거리, min_cluster_size = 생성될 최소 군집 수
 
-# Run the fit
-clust.fit(mat)
-
-labels_050 = cluster_optics_dbscan(
-    reachability=clust.reachability_,
-    core_distances=clust.core_distances_,
-    ordering=clust.ordering_,
-    eps=0.5,
-)
-
-labels_200 = cluster_optics_dbscan(
-    reachability=clust.reachability_,
-    core_distances=clust.core_distances_,
-    ordering=clust.ordering_,
-    eps=2,
-)
-
 cluster_labels = clust.fit_predict(mat)
 
 unique_labels = list(set(cluster_labels))
@@ -41,10 +26,3 @@ for i, cluster in enumerate(cluster_labels):
 # 3. Plot Clusters
 for i, firms in enumerate(clusters):
     plot_clusters(unique_labels[i], firms, data.index, mat)
-
-# 绘制聚类结果
-plt.plot(class1[:, 0], class1[:, 1], 'rs', label="class1")
-plt.plot(class2[:, 0], class2[:, 1], 'bo', label="class2")
-plt.legend(loc="best")
-plt.title("GMM Clustering By EM Algorithm")
-plt.show()
