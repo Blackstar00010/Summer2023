@@ -1,17 +1,15 @@
-import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
+from _table_generate import *
 from _Cluster_Plot import plot_clusters
 from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
 
 # 1. 데이터 불러오기
-data = pd.read_csv('../files/Clustering/PCA/2018-01.csv', header=None)
-firms_list = data[data.columns[0]].tolist()[1:]
-data = data.set_index(data.columns[0])
-data = data[1:]
-LS = data.values
-mat = LS[0:, 1:]
+input_dir='../files/Clustering/PCA(1-48)'
+file='2018-01.csv'
+data=read_and_preprocess_data(input_dir, file)
+mat=data.iloc[:,1:]
+mat=mat.values
 
 # 2. Hierachical Agglomerative 구현
 # 거리 행렬 계산
@@ -29,18 +27,12 @@ plt.ylabel('Distance')
 plt.show()
 
 # 클러스터 할당
-k = 100  # 예시로 클러스터 개수를 TODO: 3으로 설정
+k = 100
 clusters = fcluster(Z, k, criterion='maxclust')
 
 
 # 3. Outlier 선별
-def find_outliers_hac(data, threshold):  # TODO: data 지우기
-    '''
-
-    :param data:
-    :param threshold:
-    :return:
-    '''
+def find_outliers_hac(threshold):
     cluster_distances = []
     for i in range(0, len(clusters)):
         average_distance = sum(distance_matrix[i]) / len(distance_matrix[i])
@@ -51,7 +43,7 @@ def find_outliers_hac(data, threshold):  # TODO: data 지우기
     return outliers
 
 
-outliers = find_outliers_hac(dist_matrix, 5.3341)
+outliers = find_outliers_hac(5.3341)
 for i in range(1, len(outliers)):
     for j in range(0, len(clusters)):
         if outliers[i] == j + 1:
@@ -59,7 +51,7 @@ for i in range(1, len(outliers)):
 
 # 4. Hierachical Agglomerative 결과 출력
 data_array = mat
-firm_names = firms_list
+firm_names = data.index
 unique_labels = sorted(list(set(clusters)))
 
 clust = [[] for _ in unique_labels]
