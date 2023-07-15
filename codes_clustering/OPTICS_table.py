@@ -11,8 +11,7 @@ for file in optics:
     data = read_and_preprocess_data(input_dir, file)
     mat = data.values[:, 1:]
 
-    # 1. OPTICS 알고리즘
-
+    # 1. OPTICS
     if len(data) < 3:
         min_samples = int(len(data))
         min_cluster_size = int(len(data))
@@ -35,4 +34,6 @@ for file in optics:
     for i, cluster in enumerate(cluster_labels):
         clusters[unique_labels.index(cluster)].append(data.index[i])
 
+    # 2. Save CSV
+    # columns = ['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index']
     new_table_generate(data, clusters, output_dir, file)

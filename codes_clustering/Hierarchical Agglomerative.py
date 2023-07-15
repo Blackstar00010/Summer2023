@@ -4,13 +4,13 @@ from _Cluster_Plot import plot_clusters
 from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
 
-# 1. 데이터 불러오기
+# 데이터 불러오기
 input_dir = '../files/Clustering/PCA(1-48)'
 file = '2018-01.csv'
 data = read_and_preprocess_data(input_dir, file)
-mat = data.values
+mat = data.values[:, 1:].astype(float)
 
-# 2. Hierachical Agglomerative 구현
+# 1. Hierachical Agglomerative
 # 거리 행렬 계산
 dist_matrix = pdist(mat, metric='euclidean')
 distance_matrix = squareform(dist_matrix)
@@ -30,7 +30,7 @@ k = 80
 clusters = fcluster(Z, k, criterion='maxclust')
 
 
-# 3. Outlier 선별
+# 2. Outlier
 def find_outliers_hac(threshold):
     cluster_distances = []
     for i in range(0, len(clusters)):
@@ -48,13 +48,12 @@ for i in range(1, len(outliers)):
         if outliers[i] == j + 1:
             clusters[j + 1] = 0
 
-# 4. Hierachical Agglomerative 결과 출력
 unique_labels = sorted(list(set(clusters)))
 
 clust = [[] for _ in unique_labels]
 for i, cluster_label in enumerate(clusters):
     clust[unique_labels.index(cluster_label)].append(data.index[i])
 
-# Print and plot the clusters
+# 3. Print and plot the clusters
 for i, firms in enumerate(clust):
     plot_clusters(unique_labels[i] - 1, firms, data.index, mat)  # Use the imported function

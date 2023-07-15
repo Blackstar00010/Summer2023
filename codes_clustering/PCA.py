@@ -2,7 +2,7 @@ from _table_generate import *
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
-# 1. 파일 불러오기 및 PCA함수
+# 파일 불러오기 및 PCA함수
 first = True
 if first == True:
     input_dir = '../files/momentum'
@@ -40,7 +40,7 @@ if first == True:
         print('variance_ratio: ', pca.explained_variance_ratio_)
         print('sum of variance_ratio: ', np.sum(pca.explained_variance_ratio_))
 
-# 2. 최적 n_components 찾기
+# 1. Searching optimal n_components
 if len(data) < 20:
     n_components = len(data)
 
@@ -62,7 +62,7 @@ pca.fit(mat)
 t = variance_ratio(pca)
 n_components = n_components + 1
 
-# 3. PCA 진행 및 결과
+# 2. PCA
 # get_pd_from_pca에 넣을 columns 생성
 cols = []
 for i in range(1, n_components + 1):
@@ -102,7 +102,7 @@ print(df_combined)
 # Graph after PCA
 mat_new = pca.inverse_transform(pca_mat)
 
-# Mom1-Mom2 PCA before after
+# 3. Mom1-Mom2 PCA before after
 plt.scatter(mat[:, 0], mat[:, 1], alpha=0.2)
 plt.scatter(mat_new[:, 0], mat_new[:, 1], alpha=0.8)
 plt.axis('equal')
