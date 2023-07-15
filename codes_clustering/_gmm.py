@@ -83,9 +83,12 @@ def init_params(shape, K):
     :param K: 생성할 정규분포 갯수
     """
     N, D = shape
-    mu = np.random.rand(K, D)
-    cov = np.array([np.eye(D)] * K)
-    alpha = np.array([1.0 / K] * K)
+    # mu = np.random.rand(K, D)
+    # cov = np.array([np.eye(D)] * K)
+    # alpha = np.array([1.0 / K] * K)
+    mu = np.random.uniform(0, 1, size=(K, D))
+    cov = np.array([np.eye(D) for _ in range(K)])
+    alpha = np.full(K, 1.0 / K)
     debug("Parameters initialized.")
     debug("mu:", mu, "cov:", cov, "alpha:", alpha, sep="\n")
     return mu, cov, alpha
