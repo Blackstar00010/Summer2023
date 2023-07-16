@@ -98,4 +98,4 @@ clusters.insert(0, outliers)
 
 # 4. Print and plot the clusters
 for i, firms in enumerate(clusters):
-    plot_clusters(unique_labels[i]-1, firms, data.index, mat)
+    plot_clusters(unique_labels[i] - 1, firms, data.index, mat)
