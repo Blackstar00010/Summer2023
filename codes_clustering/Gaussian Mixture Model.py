@@ -20,10 +20,12 @@ def gmm_bic_score(estimator, X):
 '''
 바꾼 이유
 GMM-EM을 사용하면 Cluster 수를 지정해줘야 하기 때문에 최적 Cluster 못찾음.
-BayesianGaussianMixture는 Cluster 수를 데이터로부터 알아서 추론.
+(BayesianGaussianMixture는 Cluster 수를 데이터로부터 알아서 추론.)
+outlier 구하기 위해 sklearn에 함수 사용
 '''
 
-# 1. 최적 covariance 찾기
+# 1. Gaussian Mixture Model
+# Optimal covariance
 param_grid = {
     "covariance_type": ["spherical", "tied", "diag", "full"],
 }
@@ -47,48 +49,53 @@ min_row_index = df.iloc[:, 1].idxmin()
 min_row_covariance = df.iloc[min_row_index, 0]
 print(min_row_covariance)
 
-# 2. GMM
-dpgmm = mixture.BayesianGaussianMixture(n_components=40, covariance_type=min_row_covariance).fit(mat)
-
+# Optimal Cluster
+n_components = 40
+dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type=min_row_covariance).fit(mat)
 cluster_labels = dpgmm.predict(mat)
 
+unique_labels = sorted(list(set(cluster_labels)))
+
 clusters = [[] for _ in range(40)]
-clusters2 = [[] for _ in range(40)]
+
+for i, cluster_num in enumerate(cluster_labels):
+    clusters[cluster_num].append(i)
+
+empty_cluster_indices = [idx for idx, cluster in enumerate(clusters) if not cluster]
+
+n_components = n_components - len(empty_cluster_indices)
+
+# Outlier
+dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type=min_row_covariance).fit(mat)
+cluster_labels = dpgmm.predict(mat)
+
+unique_labels = sorted(list(set(cluster_labels)))
+
+clusters = [[] for _ in range(n_components)]
 
 for i, cluster_num in enumerate(cluster_labels):
     clusters[cluster_num].append(data.index[i])
-    clusters2[cluster_num].append(i)
 
-clusters = [sublist for sublist in clusters if sublist]
-clusters2 = [sublist for sublist in clusters2 if sublist]
+probabilities = dpgmm.predict_proba(mat)
 
-unique_labels = []
-for _ in range(len(clusters)):
-    unique_labels.append(_)
+cluster_prob_mean = np.mean(probabilities, axis=0)
 
-# 3. Outlier(미완)
 threshold = 0.01
 outliers = []
 
-# 각 클러스터에서 이상치 판별
-for cluster in clusters2:
-    cluster_size = len(clusters2)
-    cluster_probabilities = dpgmm.predict_proba(mat[cluster])
+for i, prob_mean in enumerate(cluster_prob_mean):
+    if prob_mean < threshold:
+        outliers.append(clusters[i])
 
-    # 클러스터에 속하는 각 데이터 포인트에 대해 확률 평균 계산
-    cluster_prob_mean = np.mean(cluster_probabilities, axis=0)
-    print(cluster_prob_mean)
+# 원본에서 outlier제거.
+clusters = [x for x in clusters if x not in outliers]
+# 빈리스트도 Outlier로 간주되기 때문에 가끔 생기는 결측값 제거.
+outliers = [sublist for sublist in outliers if sublist]
+# 2차원 리스트를 1차원 리스트로 전환.
+outliers = [item for sublist in outliers for item in sublist]
+# 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
+clusters.insert(0, outliers)
 
-    # 클러스터의 데이터 포인트 중 확률 평균이 임계값보다 작은 것을 이상치로 판별
-    for i, prob_mean in enumerate(cluster_prob_mean):
-        print(i)
-        print(prob_mean)
-        # if prob_mean < threshold:
-        #     outliers.append(cluster[i])
-
-# 이상치(outlier) 리스트 출력
-print("Outliers:", outliers)
-
-# # 4. Print and plot the clusters
-# for i, firms in enumerate(clusters):
-#     plot_clusters(unique_labels[i], firms, data.index, mat)
+# 4. Print and plot the clusters
+for i, firms in enumerate(clusters):
+    plot_clusters(unique_labels[i]-1, firms, data.index, mat)

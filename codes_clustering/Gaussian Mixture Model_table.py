@@ -26,7 +26,8 @@ for file in Gaussian_Mixture_Model:
     # PCA 주성분 데이터만 가지고 있는 mat
     mat = data.values[:, 1:].astype(float)
 
-    # 1. 최적 covariance 찾기
+    # 1. Gaussian Mixture Model
+    # Optimal covariance
     param_grid = {
         "covariance_type": ["spherical", "tied", "diag", "full"],
     }
@@ -47,25 +48,49 @@ for file in Gaussian_Mixture_Model:
     )
 
     min_row_index = df.iloc[:, 1].idxmin()
+    # BIC가 가장 작은 게 optimal.
     min_row_covariance = df.iloc[min_row_index, 0]
 
-    # 2. GMM
-    dpgmm = mixture.BayesianGaussianMixture(n_components=40, covariance_type=min_row_covariance).fit(mat)
-
+    # Optimal Cluster
+    n_components = 40
+    dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type=min_row_covariance).fit(mat)
     cluster_labels = dpgmm.predict(mat)
 
     clusters = [[] for _ in range(40)]
 
     for i, cluster_num in enumerate(cluster_labels):
+        clusters[cluster_num].append(i)
+
+    empty_cluster_indices = [idx for idx, cluster in enumerate(clusters) if not cluster]
+
+    # Cluster  40개를 전부 사용하지 않으므로 빈 리스트 갯수를 40에서 빼주면 optimal Cluster Number.
+    n_components = n_components - len(empty_cluster_indices)
+
+    # Outlier
+    dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type=min_row_covariance).fit(mat)
+    cluster_labels = dpgmm.predict(mat)
+
+    clusters = [[] for _ in range(n_components)]
+
+    for i, cluster_num in enumerate(cluster_labels):
         clusters[cluster_num].append(data.index[i])
 
-    clusters = [sublist for sublist in clusters if sublist]
+    # 모든 회사에 대하여 각 회사가 특정 cluster에 속할 확률을 나타냄.
+    probabilities = dpgmm.predict_proba(mat)
 
-    unique_labels = []
-    for _ in range(len(clusters)):
-        unique_labels.append(_)
+    # cluster에 대하여 회사들이 그 cluster에서 속할 평균 확률을 계산.
+    cluster_prob_mean = np.mean(probabilities, axis=0)
 
-    # 2. Outlier(예정)
+    threshold = 0.01
+    outliers = []
+
+    # cluster_prob_mean이 threshold보다 작다면 outlier로 간주.
+    for i, prob_mean in enumerate(cluster_prob_mean):
+        if prob_mean < threshold:
+            outliers.append(clusters[i])
+
+    # 원본에서 outlier제거.
+    clusters = [x for x in clusters if x not in outliers]
 
     # 3. Save CSV
     # columns = ['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index']
