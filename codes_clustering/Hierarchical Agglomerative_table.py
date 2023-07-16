@@ -56,11 +56,6 @@ for file in Hierarchical_Agglomerative:
     for i, cluster_label in enumerate(clusters):
         clust[unique_labels.index(cluster_label)].append(data.index[i])
 
-    for cluster_num, firms in enumerate(clust):
-        # Sort firms based on momentum_1
-        firms_sorted = sorted(firms, key=lambda x: data.loc[x, '1'])
-        print(firms_sorted)
-
     # 3. Save CSV
     # columns = ['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index']
-    new_table_generate(data, clust, output_dir, file)
+    #new_table_generate(data, clust, output_dir, file)

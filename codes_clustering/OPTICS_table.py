@@ -36,4 +36,4 @@ for file in optics:
 
     # 2. Save CSV
     # columns = ['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index']
-    new_table_generate(data, clusters, output_dir, file)
+    #new_table_generate(data, clusters, output_dir, file)
