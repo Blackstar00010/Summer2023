@@ -1,68 +1,101 @@
-from _gmm import *
-import pandas as pd
-import matplotlib.pyplot as plt
+from sklearn import mixture
+from _table_generate import *
 from _Cluster_Plot import plot_clusters
+from sklearn.mixture import GaussianMixture
+from sklearn.model_selection import GridSearchCV
 
-# 1. 파일 불러오기
-data = pd.read_csv('../files/PCA/2018-01.csv', header=None, index_col=[0])
-firm_list = data.index[1:]
-data = data[1:]
-LS = data.values
-mata = LS[0:, 1:]
-mata = mata.astype(float)
-LS = LS.astype(float)
-
-# 2. GMM 구현
-Y = mata
-matY = np.matrix(Y, copy=True)
-K = 4
-mu, cov, alpha = GMM_EM(matY, K, 100)
-N = Y.shape[0]
-gamma = getExpectation(matY, mu, cov, alpha)
-category = gamma.argmax(axis=1).flatten().tolist()[0]
-
-# TODO : for loop
-# Cluster 생성
-class1 = np.array([Y[i] for i in range(N) if category[i] == 0])
-class2 = np.array([Y[i] for i in range(N) if category[i] == 1])
-class3 = np.array([Y[i] for i in range(N) if category[i] == 2])
-class4 = np.array([Y[i] for i in range(N) if category[i] == 3])
-
-# 리스트를 생성하여 각 클래스에 해당하는 회사이름 할당
-class_indices = []
-for i in range(K):
-    indices = [data.index[index] for index, c in enumerate(category) if c == i][0:]
-    class_indices.append(indices)
-
-# Cluster 그래프확인
-# TODO : 알아서
-plt.plot(class1[:, 0], class1[:, 1], 'rs', label="class1")
-plt.plot(class2[:, 0], class2[:, 1], 'bo', label="class2")
-plt.plot(class3[:, 0], class3[:, 1], 'go', label="class3")
-plt.plot(class4[:, 0], class4[:, 1], 'cd', label="class4")
-plt.legend(loc="best")
-plt.title("GMM Clustering By EM Algorithm")
-plt.show()
-
-# Cluster별 갯수확인
-print(len(class1))
-print(len(class2))
-print(len(class3))
-print(len(class4))
-
-# 3. Outlier선별(예정)
+# 파일 불러오기
+input_dir = '../files/Clustering/PCA(1-48)'
+file = '1993-01.csv'
+data = read_and_preprocess_data(input_dir, file)
+mat = data.values[:, 1:].astype(float)
 
 
-# 4. GMM 결과출력
-data_array = mata
-firm_names = firm_list
+def gmm_bic_score(estimator, X):
+    """Callable to pass to GridSearchCV that will use the BIC score."""
+    # Make it negative since GridSearchCV expects a score to maximize
+    return -estimator.bic(X)
 
-# TODO: unique_label -> cluster_label
-unique_labels = []
-for i in range(1, K + 1):
-    unique_labels.append(i)
 
-# Print and plot the clusters
-for i, firms in enumerate(class_indices):
-    # outlier = -1 조건 맞추기 위해 TODO
-    plot_clusters(unique_labels[i] - 1, firms, firm_names, data_array)  # Use the imported function
+'''
+바꾼 이유
+GMM-EM을 사용하면 Cluster 수를 지정해줘야 하기 때문에 최적 Cluster 못찾음.
+(BayesianGaussianMixture는 Cluster 수를 데이터로부터 알아서 추론.)
+outlier 구하기 위해 sklearn에 함수 사용
+'''
+
+# 1. Gaussian Mixture Model
+# Optimal covariance
+param_grid = {
+    "covariance_type": ["spherical", "tied", "diag", "full"],
+}
+grid_search = GridSearchCV(
+    GaussianMixture(), param_grid=param_grid, scoring=gmm_bic_score
+)
+grid_search.fit(mat)
+
+df = pd.DataFrame(grid_search.cv_results_)[
+    ["param_covariance_type", "mean_test_score"]
+]
+df["mean_test_score"] = -df["mean_test_score"]
+df = df.rename(
+    columns={
+        "param_covariance_type": "Type of covariance",
+        "mean_test_score": "BIC score",
+    }
+)
+
+min_row_index = df.iloc[:, 1].idxmin()
+min_row_covariance = df.iloc[min_row_index, 0]
+print(min_row_covariance)
+
+# Optimal Cluster
+n_components = 40
+dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type=min_row_covariance).fit(mat)
+cluster_labels = dpgmm.predict(mat)
+
+unique_labels = sorted(list(set(cluster_labels)))
+
+clusters = [[] for _ in range(40)]
+
+for i, cluster_num in enumerate(cluster_labels):
+    clusters[cluster_num].append(i)
+
+empty_cluster_indices = [idx for idx, cluster in enumerate(clusters) if not cluster]
+
+n_components = n_components - len(empty_cluster_indices)
+
+# Outlier
+dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type=min_row_covariance).fit(mat)
+cluster_labels = dpgmm.predict(mat)
+
+unique_labels = sorted(list(set(cluster_labels)))
+
+clusters = [[] for _ in range(n_components)]
+
+for i, cluster_num in enumerate(cluster_labels):
+    clusters[cluster_num].append(data.index[i])
+
+probabilities = dpgmm.predict_proba(mat)
+
+cluster_prob_mean = np.mean(probabilities, axis=0)
+
+threshold = 0.01
+outliers = []
+
+for i, prob_mean in enumerate(cluster_prob_mean):
+    if prob_mean < threshold:
+        outliers.append(clusters[i])
+
+# 원본에서 outlier제거.
+clusters = [x for x in clusters if x not in outliers]
+# 빈리스트도 Outlier로 간주되기 때문에 가끔 생기는 결측값 제거.
+outliers = [sublist for sublist in outliers if sublist]
+# 2차원 리스트를 1차원 리스트로 전환.
+outliers = [item for sublist in outliers for item in sublist]
+# 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
+clusters.insert(0, outliers)
+
+# 4. Print and plot the clusters
+for i, firms in enumerate(clusters):
+    plot_clusters(unique_labels[i] - 1, firms, data.index, mat)
