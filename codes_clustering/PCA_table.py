@@ -1,7 +1,4 @@
-import os
 import urllib.parse
-import numpy as np
-import pandas as pd
 from _table_generate import *
 from sklearn.decomposition import PCA
 
@@ -42,6 +39,7 @@ for file in momentum:
     def print_variance_ratio(pca):
         print('variance_ratio: ', pca.explained_variance_ratio_)
         print('sum of variance_ratio: ', np.sum(pca.explained_variance_ratio_))
+
 
     # get_pd_from_pca에 넣을 columns 생성
     cols = []

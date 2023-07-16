@@ -1,6 +1,6 @@
 import os
-from sklearn.cluster import KMeans
 from _table_generate import read_and_preprocess_data, new_table_generate
+from K_Means import perform_kmeans
 
 # Define the number of clusters k
 k_values = [50]
@@ -26,23 +26,7 @@ for file in momentum:
     if n_sample <= k_values[0]:
         continue
 
-    # Perform k-means clustering for each value of k
-    clusters_k = []
-
-    for k in k_values:
-        kmeans = KMeans(n_clusters=k, n_init=10, random_state=0)  # n_init setting to suppress warning
-        kmeans.fit(data_array)  # Compute k-means clustering
-        cluster_labels = kmeans.labels_  # Label of each point (ndarray of shape)
-
-        clusters = [[] for _ in range(k)]  # List of lists
-
-        for i, cluster in enumerate(cluster_labels):
-            # i: firm index
-            # cluster: cluster index
-            clusters[cluster].append(firm_names[i])
-
-        clusters_k.append(clusters)
-
+    clusters_k = perform_kmeans(data_array, firm_names)
 
     for clusters in clusters_k:
         new_table_generate(data, clusters, output_dir, file)

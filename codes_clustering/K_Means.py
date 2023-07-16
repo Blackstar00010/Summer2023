@@ -13,22 +13,28 @@ firm_names = data.index  # Get the first column (firm names)
 # Define the number of clusters k
 k_values = [10]
 
-# Perform k-means clustering for each value of k
-clusters_k = []
 
-for k in k_values:
-    kmeans = KMeans(n_clusters=k, n_init=10, random_state=0)  # n_init setting to suppress warning
-    kmeans.fit(data_array)  # Compute K-Means clustering
-    cluster_labels = kmeans.labels_  # Label of each point (ndarray of shape)
+def perform_kmeans(k_values, data_array, firm_names):
+    # Perform k-means clustering for each value of k
+    clusters_k = []
 
-    clusters = [[] for _ in range(k)]
+    for k in k_values:
+        kmeans = KMeans(n_clusters=k, n_init=10, random_state=0)  # n_init setting to suppress warning
+        kmeans.fit(data_array)  # Compute K-Means clustering
+        cluster_labels = kmeans.labels_  # Label of each point (ndarray of shape)
 
-    for i, cluster in enumerate(cluster_labels):
-        # i: firm index
-        # cluster: cluster index
-        clusters[cluster].append(firm_names[i])
+        clusters = [[] for _ in range(k)]
 
-    clusters_k.append(clusters)
+        for i, cluster in enumerate(cluster_labels):
+            # i: firm index
+            # cluster: cluster index
+            clusters[cluster].append(firm_names[i])
+
+        clusters_k.append(clusters)
+    return clusters_k
+
+
+clusters_k = perform_kmeans(k_values, data_array, firm_names)
 
 # Print the clusters for each k value & plot the clusters
 for i, clusters in enumerate(clusters_k):
