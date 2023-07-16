@@ -1,5 +1,4 @@
-import seaborn as sns
-from matplotlib import pyplot as plt
+from sklearn import mixture
 from _table_generate import *
 from _Cluster_Plot import plot_clusters
 from sklearn.mixture import GaussianMixture
@@ -7,21 +6,19 @@ from sklearn.model_selection import GridSearchCV
 
 # 파일 불러오기
 input_dir = '../files/Clustering/PCA(1-48)'
-file = '2018-01.csv'
+file = '1993-01.csv'
 data = read_and_preprocess_data(input_dir, file)
 mat = data.values[:, 1:].astype(float)
 
 
-# 1. GMM
 def gmm_bic_score(estimator, X):
     """Callable to pass to GridSearchCV that will use the BIC score."""
     # Make it negative since GridSearchCV expects a score to maximize
     return -estimator.bic(X)
 
 
-# 최적 mean, covariance, K찾기
+# 1. 최적 covariance 찾기
 param_grid = {
-    "n_components": range(1, 7),
     "covariance_type": ["spherical", "tied", "diag", "full"],
 }
 grid_search = GridSearchCV(
@@ -30,42 +27,35 @@ grid_search = GridSearchCV(
 grid_search.fit(mat)
 
 df = pd.DataFrame(grid_search.cv_results_)[
-    ["param_n_components", "param_covariance_type", "mean_test_score"]
+    ["param_covariance_type", "mean_test_score"]
 ]
 df["mean_test_score"] = -df["mean_test_score"]
 df = df.rename(
     columns={
-        "param_n_components": "Number of components",
         "param_covariance_type": "Type of covariance",
         "mean_test_score": "BIC score",
     }
 )
 
-cluster_labels = grid_search.predict(mat)
+min_row_index = df.iloc[:, 1].idxmin()
+min_row_covariance = df.iloc[min_row_index, 0]
+print(min_row_covariance)
 
-unique_labels = sorted(list(set(cluster_labels)))
+# 2. GMM
+dpgmm = mixture.BayesianGaussianMixture(n_components=10, covariance_type=min_row_covariance).fit(mat)
 
-clusters = [[] for _ in range(len(unique_labels))]
+cluster_labels = dpgmm.predict(mat)
+
+clusters = [[] for _ in range(10)]
 
 for i, cluster_num in enumerate(cluster_labels):
     clusters[cluster_num].append(data.index[i])
 
-# 2. Lowest BIC is the best model.
-sns.catplot(
-    data=df,
-    kind="bar",
-    x="Number of components",
-    y="BIC score",
-    hue="Type of covariance",
-)
-plt.show()
+clusters = [sublist for sublist in clusters if sublist]
 
-# Assuming your DataFrame is named df
-min_row_index = df.iloc[:, 2].idxmin()
-
-# Select the row with the smallest value in the 4th column
-min_row = df.loc[min_row_index]
-print(min_row)
+unique_labels = []
+for _ in range(len(clusters)):
+    unique_labels.append(_)
 
 # 3. Outlier(예정)
 
