@@ -1,5 +1,5 @@
-from matplotlib import pyplot as plt
 import seaborn as sns
+from matplotlib import pyplot as plt
 from _table_generate import *
 from _Cluster_Plot import plot_clusters
 from sklearn.mixture import GaussianMixture
@@ -7,7 +7,7 @@ from sklearn.model_selection import GridSearchCV
 
 # 파일 불러오기
 input_dir = '../files/Clustering/PCA(1-48)'
-file = '1992-12.csv'
+file = '2018-01.csv'
 data = read_and_preprocess_data(input_dir, file)
 mat = data.values[:, 1:].astype(float)
 
@@ -50,7 +50,7 @@ clusters = [[] for _ in range(len(unique_labels))]
 for i, cluster_num in enumerate(cluster_labels):
     clusters[cluster_num].append(data.index[i])
 
-# 2. Lowest BIC
+# 2. Lowest BIC is the best model.
 sns.catplot(
     data=df,
     kind="bar",
