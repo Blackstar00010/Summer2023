@@ -15,7 +15,6 @@ if first == True:
     # mom1을 제외한 mat/PCA(2-49)
     mat = np.delete(mat, 0, axis=1)
 
-
     # # mom49를 제외한 mat/PCA(1-48)
     # mat = np.delete(mat, 48, axis=1)
 

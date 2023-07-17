@@ -15,9 +15,16 @@ firm_names = data.index  # Get the first column (firm names)
 eps = 0.92  # Maximum distance between two samples to be considered as neighbors
 min_samples = 9  # Minimum number of samples in a neighborhood for a point to be considered as a core point
 
-# Perform DBSCAN clustering
-dbscan = DBSCAN(eps=eps, min_samples=min_samples)
-cluster_labels = dbscan.fit_predict(data_array)
+
+def perform_DBSCAN (data_array, eps, min_samples):
+    # Perform DBSCAN clustering
+    dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+    cluster_labels = dbscan.fit_predict(data_array)
+
+    return cluster_labels
+
+
+cluster_labels = perform_DBSCAN(data_array, eps, min_samples)
 
 # Get the unique cluster labels
 unique_labels = sorted(list(set(cluster_labels)))

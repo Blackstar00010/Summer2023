@@ -1,29 +1,11 @@
 from _table_generate import *
 from sklearn.decomposition import PCA
+from PCA_single import get_pca_data, get_pd_from_pca, variance_ratio
 
 # 파일 불러오기
 input_dir = '../files/momentum'
 output_dir = '../files/Clustering/PCA(2-49)'
 momentum = sorted(filename for filename in os.listdir(input_dir))
-
-# 1. PCA Function
-first = True
-if first == True:
-    def get_pca_data(data, n_components):
-        pca = PCA(n_components=n_components)
-        pca.fit(data)
-        return pca.transform(data), pca
-
-
-    def get_pd_from_pca(pca_data, cols=None):
-        if cols is None:
-            cols = ['pca_component_{}'.format(i + 1) for i in range(pca_data.shape[1])]
-        return pd.DataFrame(pca_data, columns=cols)
-
-
-    def variance_ratio(pca):
-        sum = np.sum(pca.explained_variance_ratio_)
-        return sum
 
 # CSV 파일 하나에 대해서 각각 실행.
 for file in momentum:
@@ -36,7 +18,7 @@ for file in momentum:
     # mom1을 제외한 mat/PCA(2-49)
     mat = np.delete(mat, 0, axis=1)
 
-    # # mom49를 제외한 mat/PCA(1-48)
+    # mom49를 제외한 mat/PCA(1-48)
     # mat = np.delete(mat, 48, axis=1)
 
     # 2. 최적 n_components 찾기
@@ -93,6 +75,6 @@ for file in momentum:
     df_combined.index = data.index
 
     # 4. Save CSV
-    # Columns=['Original Mom1', 'data after PCA', ...]
-    # output_file = os.path.join(output_dir, file)
-    # df_combined.to_csv(output_file, index=True)
+    # Column format: ['Original Mom1', 'data after PCA', ...]
+    output_file = os.path.join(output_dir, file)
+    df_combined.to_csv(output_file, index=True)

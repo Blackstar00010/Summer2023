@@ -6,8 +6,8 @@ from _Cluster_Plot import plot_clusters
 # Performs just one CSV file
 
 # Read data from CSV file
-data = pd.read_csv('../files/momentum/2017-01.csv', index_col = 0)  # TODO 안뜸 시발
-data_array = data.values  # Exclude the first column (firm names)
+data = pd.read_csv('../files/Clustering/PCA(1-48)/2016-01.csv', index_col = 0)
+data_array = data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
 firm_names = data.index  # Get the first column (firm names)
 
 # Define the number of clusters k
