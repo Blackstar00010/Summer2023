@@ -4,7 +4,7 @@ from sklearn.cluster import KMeans
 # Clusters the firms using K-Means algorithm
 # Performs just one CSV file
 # Read data from CSV file
-input_dir = '../files/Clustering/PCA(1-48)'
+input_dir = '../files/PCA/PCA(1-48)'
 file = '2016-01.csv'
 data = read_and_preprocess_data(input_dir, file)
 data_array = data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1

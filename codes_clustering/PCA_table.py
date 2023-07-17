@@ -4,7 +4,7 @@ from PCA_single import get_pca_data, get_pd_from_pca, variance_ratio
 
 # 파일 불러오기
 input_dir = '../files/momentum'
-output_dir = '../files/Clustering/PCA(2-49)'
+output_dir = '../files/PCA/PCA(2-49)'
 momentum = sorted(filename for filename in os.listdir(input_dir))
 
 # CSV 파일 하나에 대해서 각각 실행.

@@ -3,7 +3,7 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import linkage, fcluster
 
 # 파일 불러오기
-input_dir = '../files/Clustering/PCA(1-48)'
+input_dir = '../files/PCA/PCA(1-48)'
 output_dir = '../files/Clustering/Hierarchical_Agglomerative'
 Hierarchical_Agglomerative = sorted(filename for filename in os.listdir(input_dir))
 

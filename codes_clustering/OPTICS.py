@@ -3,7 +3,7 @@ from _Cluster_Plot import plot_clusters
 from sklearn.cluster import OPTICS
 
 # 파일 불러오기
-input_dir = '../files/Clustering/PCA(1-48)'
+input_dir = '../files/PCA/PCA(1-48)'
 file = '2018-01.csv'
 data = read_and_preprocess_data(input_dir, file)
 mat = data.values[:, 1:].astype(float)

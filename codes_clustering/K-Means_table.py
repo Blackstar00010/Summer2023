@@ -6,7 +6,7 @@ from K_Means import perform_kmeans
 k_values = [50]
 
 # Directory containing the input files
-input_dir = '../files/Clustering/PCA(1-48)'
+input_dir = '../files/PCA/PCA(1-48)'
 momentum = sorted(filename for filename in os.listdir(input_dir))
 
 # Directory to save the output files
