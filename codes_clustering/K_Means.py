@@ -1,12 +1,13 @@
-import pandas as pd
+from _table_generate import *
 from sklearn.cluster import KMeans
 from _Cluster_Plot import plot_clusters
 
 # Clusters the firms using K-Means algorithm
 # Performs just one CSV file
-
 # Read data from CSV file
-data = pd.read_csv('../files/Clustering/PCA(1-48)/2016-01.csv', index_col=0)
+input_dir = '../files/Clustering/PCA(1-48)'
+file = '2016-01.csv'
+data = read_and_preprocess_data(input_dir, file)
 data_array = data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
 firm_names = data.index  # Get the first column (firm names)
 
@@ -36,10 +37,8 @@ def perform_kmeans(k_values, data_array, firm_names):
 
 if __name__ == "__main__":
     clusters_k = perform_kmeans(k_values, data_array, firm_names)
-
     # Print the clusters for each k value & plot the clusters
     for i, clusters in enumerate(clusters_k):
         print(f'Clusters for k = {k_values[i]}:')
         for j, firms in enumerate(clusters):
             plot_clusters(j, firms, firm_names, data_array)  # Use the imported function
-        print()

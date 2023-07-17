@@ -73,8 +73,9 @@ for file in momentum:
     combined_matrix = np.hstack((first_column_matrix, mat_pd_pca_matrix))
     df_combined = pd.DataFrame(combined_matrix)
     df_combined.index = data.index
+    print(df_combined)
 
     # 4. Save CSV
     # Column format: ['Original Mom1', 'data after PCA', ...]
-    output_file = os.path.join(output_dir, file)
-    df_combined.to_csv(output_file, index=True)
+    # output_file = os.path.join(output_dir, file)
+    # df_combined.to_csv(output_file, index=True)
