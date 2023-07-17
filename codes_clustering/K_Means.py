@@ -12,7 +12,7 @@ data_array = data.values[:, 1:].astype(float)  # Exclude the first column (firm 
 firm_names = data.index  # Get the first column (firm names)
 
 # Define the number of clusters k
-k_values = [10]
+k_values = [5, 10]
 
 
 def perform_kmeans(k_values, data_array, firm_names):

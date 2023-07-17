@@ -43,6 +43,8 @@ def find_outliers_hac(threshold):
 
 
 outliers = find_outliers_hac(6)
+
+print(outliers)
 for i in range(1, len(outliers)):
     for j in range(0, len(clusters)):
         if outliers[i] == j + 1:
