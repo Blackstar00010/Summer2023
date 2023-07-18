@@ -27,5 +27,3 @@ for file in files:
 
     # Write the result to a new CSV file
     performance.to_csv(os.path.join(directory, 'performance_' + file), index=False)
-
-
