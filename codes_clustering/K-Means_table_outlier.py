@@ -22,7 +22,5 @@ for file in kmeans:
 
     clusters_k = perform_kmeans(k_values, data_array, firm_names)
 
-    for clusters in clusters_k:
-        print(file)
-        print(clusters_k)
-        new_table_generate(data, clusters, output_dir, file)
+    for i, clusters in enumerate(clusters_k):
+        new_table_generate(data, clusters, output_dir, f'{k_values[i]}_{file}')
