@@ -33,8 +33,6 @@ outlier_cluster_indices = []
 
 outliers = [[] for _ in range(len(unique_labels))]
 
-
-
 for i, cluster in enumerate(clusters):
     for j, distance in enumerate(cluster):
         if distance == 0 or distance / max(cluster) >= 0.85:
