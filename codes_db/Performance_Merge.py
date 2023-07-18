@@ -1,27 +1,31 @@
+import os
 import pandas as pd
 
 # Read the data from the CSV files
-df1 = pd.read_csv('../files/combined_mom1_data.csv')
-df2 = pd.read_csv('../files/combined_LS_data.csv')
+df1 = pd.read_csv('../files/mom1_data_combined.csv')
 
-# Save the 'Firm Name' column before dropping it
-firm_names = df1['Firm Name']
+directory = '../files/position_LS/equal_weight/'
+files = [f for f in os.listdir(directory) if f.endswith('.csv')]
 
-# Drop the 'Firm Name' column and calculate the element-wise product
-df1 = df1.drop(columns=['Firm Name'])
-df2 = df2.drop(columns=['Firm Name'])
+for file in files:
+    df2 = pd.read_csv(os.path.join(directory, file))
 
-# Shift the columns of df2 to the left
-df2 = df2.shift(periods=1, axis="columns")
+    # Find the common columns between df1 and df2
+    common_columns = df1.columns.intersection(df2.columns)
 
-performance = df1.mul(df2)
+    # Keep only the common columns in both dataframes
+    df1 = df1[common_columns]
+    df2 = df2[common_columns]
 
-# Create a new DataFrame with 'Firm Name' as the first column
-df_result = pd.concat([firm_names, performance], axis=1)
+    # Shift the columns of df2 to the left
+    df2 = df2.shift(periods=1, axis="columns")
 
-# Drop columns that are all NaN
-df_result = df_result.dropna(axis=1, how='all')
+    performance = df1.mul(df2)
 
-# Write the result to a new CSV file
-df_result.to_csv('../files/combined_performance_data.csv', index=False)
+    # Drop columns that are all NaN
+    performance = performance.dropna(axis=1, how='all')
+
+    # Write the result to a new CSV file
+    performance.to_csv(os.path.join(directory, 'performance_' + file), index=False)
+
 

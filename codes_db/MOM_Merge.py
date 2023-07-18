@@ -24,4 +24,4 @@ for file in long_short:
 
 merged_df = merged_df.sort_values('Firm Name')
 
-merged_df.to_csv('../files/combined_mom1_data.csv', index=False)
+merged_df.to_csv('../files/mom1_data_combined.csv', index=False)
