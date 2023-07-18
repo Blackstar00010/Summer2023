@@ -19,6 +19,7 @@ for file in files:
 
     # Shift the columns of df2 to the left
     df2 = df2.shift(periods=1, axis="columns")
+    df2=df2.iloc[:,2:]
 
     performance = df1.mul(df2)
 
