@@ -25,4 +25,4 @@ for file in kmeans:
     for clusters in clusters_k:
         print(file)
         print(clusters_k)
-        #new_table_generate(data, clusters, output_dir, file)
+        new_table_generate(data, clusters, output_dir, file)
