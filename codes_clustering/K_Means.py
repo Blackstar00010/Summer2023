@@ -10,13 +10,13 @@ file = '2018-01.csv'
 data = read_and_preprocess_data(input_dir, file)
 data_array = data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
 firm_names = data.index  # Get the first column (firm names)
-
 # Define the number of clusters k
 k_values = [5, 10]
 
 
-def perform_kmeans(k_values, data_array):
+def perform_kmeans(k_values, data_array, firm_names):
     # Perform k-means clustering for each value of k
+
     clusters_k = []
 
     for k in k_values:
@@ -29,20 +29,20 @@ def perform_kmeans(k_values, data_array):
         for i, cluster in enumerate(cluster_labels):
             # i: firm index
             # cluster: cluster index
-            clusters[cluster].append(data.index[i])
+            clusters[cluster].append(firm_names[i])
 
         clusters_k.append(clusters)
     return clusters_k
 
 
 if __name__ == "__main__":
-    clusters_k = perform_kmeans(k_values, data_array)
+    clusters_k = perform_kmeans(k_values, data_array, firm_names)
 
     # Print the clusters for each k value & plot the clusters
     for i, clusters in enumerate(clusters_k):
         print(f'Clusters for k = {k_values[i]}:')
         for j, firms in enumerate(clusters):
-            plot_clusters(j, firms, data.index, data_array)  # Use the imported function
+            plot_clusters(j, firms, firm_names, data_array)  # Use the imported function
 
 '''
 def perform_kmeans(k_values, data_array, firm_names):

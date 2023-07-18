@@ -13,7 +13,7 @@ data_array = data.values[:, 1:].astype(float)  # Exclude the first column (firm 
 firm_names = data.index  # Get the first column (firm names)
 
 
-def outliers(data_array, K):
+def outliers(data_array, firm_names, K):
     kmeans = KMeans(n_clusters=K, n_init=10, random_state=0)
     kmeans.fit(data_array)
     cluster_labels = kmeans.labels_  # 각 회사가 속한 Cluster Label
@@ -24,7 +24,7 @@ def outliers(data_array, K):
     clusters_index = [[] for _ in range(K)]  # Cluster별 index 분류
     for i, cluster_num in enumerate(cluster_labels):
         clusters[cluster_num].append(cluster_distance_min[i])
-        clusters_index[cluster_num].append(data.index[i])
+        clusters_index[cluster_num].append(firm_names[i])
 
     outliers = [[] for _ in range(K)]  # Cluster별 outliers's distance 분류
     for i, cluster in enumerate(clusters):
@@ -43,8 +43,15 @@ def outliers(data_array, K):
                 else:
                     continue
 
-    clusters_index = [sublist for sublist in clusters_index if sublist]  # 빈 리스트 제거
     outliers_index = [item for sublist in outliers_index for item in sublist]  # 2차원 리스트 1차원으로
+
+    # a에 있는 값을 b에서 빼기
+    for value in outliers_index:
+        for row in clusters_index:
+            if value in row:
+                row.remove(value)
+
+    clusters_index = [sublist for sublist in clusters_index if sublist]  # 빈 리스트 제거
 
     clust = []
     clust.append(outliers_index)
@@ -54,24 +61,25 @@ def outliers(data_array, K):
     return clust
 
 
-def perform_kmeans(k_values, data_array):
+def perform_kmeans(k_values, data_array, firm_names):
     clusters_k = []
     for k in k_values:
-        clusters_k.append(outliers(data_array, k))
+        clusters_k.append(outliers(data_array, firm_names, k))
     return clusters_k
+
 
 if __name__ == "__main__":
     # Define the number of clusters k
     k_values = [5, 10]
 
-    clusters_k = perform_kmeans(k_values, data_array)
+    clusters_k = perform_kmeans(k_values, data_array, firm_names)
     # Print the clusters for each k value & plot the clusters
     for i, clusters in enumerate(clusters_k):
         print(f'Clusters for k = {k_values[i]}:')
         for j, firms in enumerate(clusters):
             plot_clusters(j-1, firms, firm_names, data_array)  # Use the imported function
 
-first=False
+first = False
 if first:
     kmeans = KMeans(n_clusters=5, n_init=10, random_state=0)
     kmeans.fit(data_array)
@@ -92,27 +100,29 @@ if first:
                     cluster) >= 0.85:  # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 85%이상이면 outlier 분류
                 outliers[i].append(distance)
 
-    print(len(clusters[0]))
-    print(len(clusters_index[0]))
-    print(outliers)
-
     outliers_index = [[] for _ in range(5)]  # Cluster별 outliers's index 분류
     for i, cluster_dis in enumerate(clusters):
         for j, outlier_dis in enumerate(outliers[i]):
             for k, firm in enumerate(cluster_dis):
                 if outlier_dis == firm:
                     outliers_index[i].append(clusters_index[i][k])
-                    #clusters_index[i].remove(clusters_index[i][k])  # 해당 index clusters_index에서 삭제
                 else:
                     continue
 
-    clusters_index = [sublist for sublist in clusters_index if sublist]  # 빈 리스트 제거
     outliers_index = [item for sublist in outliers_index for item in sublist]  # 2차원 리스트 1차원으로
+
+    # a에 있는 값을 b에서 빼기
+    for value in outliers_index:
+        for row in clusters_index:
+            if value in row:
+                row.remove(value)
+
+    clusters_index = [sublist for sublist in clusters_index if sublist]  # 빈 리스트 제거
 
     clust = []
     clust.append(outliers_index)
     for i in range(len(clusters_index)):
         clust.append(clusters_index[i])
 
-    for i in range(6):
+    for i in range(len(clust)):
         print(clust[i])
