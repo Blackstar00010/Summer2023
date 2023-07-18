@@ -1,9 +1,9 @@
 import os
 from _table_generate import read_and_preprocess_data, new_table_generate
-from K_Means import perform_kmeans
+from K_Means_outlier import perform_kmeans
 
 # Define the number of clusters k
-k_values = [50]
+k_values = [5, 10]
 
 # Directory containing the input files
 input_dir = '../files/PCA/PCA(1-48)'
@@ -26,7 +26,7 @@ for file in momentum:
     if n_sample <= k_values[0]:
         continue
 
-    clusters_k = perform_kmeans(k_values, data_array, firm_names)
+    clusters_k = perform_kmeans(k_values, data_array)
 
-    # for clusters in clusters_k:
-    #     new_table_generate(data, clusters, output_dir, file)
+    for clusters in clusters_k:
+        new_table_generate(data, clusters, output_dir, file)

@@ -70,23 +70,3 @@ if __name__ == "__main__":
         print(f'Clusters for k = {k_values[i]}:')
         for j, firms in enumerate(clusters):
             plot_clusters(j-1, firms, firm_names, data_array)  # Use the imported function
-'''
-def perform_kmeans(k_values, data_array, firm_names):
-    # Perform k-means clustering for each value of k
-    clusters_k = []
-
-    for k in k_values:
-        kmeans = KMeans(n_clusters=k, n_init=10, random_state=0)  # n_init setting to suppress warning
-        kmeans.fit(data_array)  # Compute K-Means clustering
-        cluster_labels = kmeans.labels_  # Label of each point (ndarray of shape)
-
-        clusters = [[] for _ in range(k)]
-
-        for i, cluster in enumerate(cluster_labels):
-            # i: firm index
-            # cluster: cluster index
-            clusters[cluster].append(firm_names[i])
-
-        clusters_k.append(clusters)
-    return clusters_k
-    '''
