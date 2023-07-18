@@ -59,11 +59,12 @@ def outliers(k_values, data_array, firm_names):
             # Identify outliers as points whose distance from the cluster center
             # is 85% or more of the maximum distance within the cluster
             cluster_outliers = firm_names[np.isin(firm_names, cluster)][min_distances / min_distances.max() >= 0.85]
-            outliers.append(list(cluster_outliers))
+            outliers.extend(list(cluster_outliers))  # Use extend instead of append
 
-        outliers_k.append(outliers)
+        outliers_k.append(outliers)  # Add the flattened list of outliers to outliers_k
 
     return clusters_k, outliers_k
+
 
 
 if __name__ == "__main__":
