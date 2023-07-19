@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from _table_generate import *
 from _Cluster_Plot import plot_clusters
 from scipy.spatial.distance import pdist, squareform
-from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
+from scipy.cluster.hierarchy import dendrogram, linkage, fcluster, maxdists
 
 # 데이터 불러오기
 input_dir = '../files/PCA/PCA(1-48)'
@@ -17,6 +17,8 @@ distance_matrix = squareform(dist_matrix)
 
 # 연결 매트릭스 계산
 Z = linkage(dist_matrix, method='ward')
+maxdist=maxdists(Z)
+print(maxdist)
 
 # 덴드로그램 시각화
 dendrogram(Z)

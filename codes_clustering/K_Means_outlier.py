@@ -6,8 +6,8 @@ from _Cluster_Plot import plot_clusters
 # Performs just one CSV file
 # Read data from CSV file
 input_dir = '../files/PCA/PCA(1-48)'
-# file = '2016-01.csv'
-file = '1992-09.csv'
+file = '2016-01.csv'
+#file = '1992-09.csv'
 data = read_and_preprocess_data(input_dir, file)
 data_array = data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
 firm_names = data.index  # Get the first column (firm names)
@@ -30,20 +30,17 @@ def outliers(data_array, firm_names, K):
     for i, cluster in enumerate(clusters):
         for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
             if distance == 0 or distance / max(
-                    cluster) >= 0.85:  # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 85%이상이면 outlier 분류
+                    cluster) >= 0.99:  # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 85%이상이면 outlier 분류
                 outliers[i].append(distance)
 
-    outliers_index = [[] for _ in range(K)]  # Cluster별 outliers's index 분류
+    outliers_index = []  # Cluster별 outliers's index 분류
     for i, cluster_dis in enumerate(clusters):
         for j, outlier_dis in enumerate(outliers[i]):
             for k, firm in enumerate(cluster_dis):
                 if outlier_dis == firm:
-                    outliers_index[i].append(clusters_index[i][k])
-                    #clusters_index[i].remove(clusters_index[i][k])  # 해당 index clusters_index에서 삭제
+                    outliers_index.append(clusters_index[i][k])
                 else:
                     continue
-
-    outliers_index = [item for sublist in outliers_index for item in sublist]  # 2차원 리스트 1차원으로
 
     # a에 있는 값을 b에서 빼기
     for value in outliers_index:
@@ -77,7 +74,7 @@ if __name__ == "__main__":
     for i, clusters in enumerate(clusters_k):
         print(f'Clusters for k = {k_values[i]}:')
         for j, firms in enumerate(clusters):
-            plot_clusters(j-1, firms, firm_names, data_array)  # Use the imported function
+            plot_clusters(j - 1, firms, firm_names, data_array)  # Use the imported function
 
 first = False
 if first:
