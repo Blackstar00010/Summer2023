@@ -25,8 +25,6 @@ for file in files:
     df1 = df1.loc[df2.index]
     print(df1['Firm Name']) #ToDo 정렬을 다시 해줘야 한다.
 
-
-
     print(df1)
     print(df2)
 
@@ -54,7 +52,7 @@ for file in files:
     print(performance)
 
     # Drop columns that are all NaN
-    #performance = performance.dropna(axis=1, how='all')
+    performance = performance.dropna(axis=1, how='all')
 
     # Write the result to a new CSV file
     performance.to_csv(os.path.join(directory, 'performance_' + file), index=False)
