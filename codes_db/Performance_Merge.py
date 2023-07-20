@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 # Read the data from the CSV files
-#df1 = pd.read_csv('../files/mom1_data_combined.csv')
+# df1 = pd.read_csv('../files/mom1_data_combined.csv')
 
 directory = '../files/position_LS/equal_weight/'
 files = [f for f in os.listdir(directory) if f.endswith('.csv')]
@@ -18,45 +18,23 @@ for file in files:
     df1 = df1[common_columns]
     df2 = df2[common_columns]
 
-    print(df1)
-    print(df2)
-
-    # df1.reset_index(drop=True, inplace=True)
-    # df2.reset_index(drop=True, inplace=True)
     merged_df = pd.merge(df1, df2[['Firm Name']], on='Firm Name')
-    df1=merged_df
-    print(merged_df)
-    #df1 = df1[[common_firm_names['Firm Name'].isin(df1['Firm Name'])]
-    # common_indices = df2.iloc[:, 0].isin(common_firm_names['Firm Name'])
-    # df1 = df1.loc[df2.iloc[:, 0][common_indices]]
-    #df1 = df1.loc[df2.iloc[:,0]]
-    #print(df1['Firm Name']) #ToDo 정렬을 다시 해줘야 한다.
-
-    print(df1)
-    print(df2)
+    df1 = merged_df
 
     # Save the first column (index column)
     first_column = df2.iloc[:, 0]
-    print(first_column)
-    print(df1.iloc[:, 0])
 
     # Shift all but the first column
     df2.iloc[:, 1:] = df2.iloc[:, 1:].shift(periods=1, axis="columns")
 
     # Concatenate the first column back
     df2 = pd.concat([first_column, df2.iloc[:, 1:]], axis=1)
-    print(df2)
-    print('-----------------------')
+
     # Multiply only the numeric columns
     numeric_performance = df1.iloc[:, 1:].mul(df2.iloc[:, 1:])
-    print(numeric_performance)
-    print(df1.iloc[:,1:])
-    print(df2.iloc[:,1:])
 
     # Concatenate the index column with the result ToDo: this is the problem.
     performance = pd.concat([df1.iloc[:, 0], numeric_performance], axis=1)
-    print(df1.iloc[:,0])
-    print(performance)
 
     # Drop columns that are all NaN
     performance = performance.dropna(axis=1, how='all')
