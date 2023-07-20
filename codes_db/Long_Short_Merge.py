@@ -11,7 +11,7 @@ for subdir in subdirectories:
     directory = os.path.join(base_directory, subdir)
     long_short = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
 
-    merged_df = pd.DataFrame()
+    merged_df = pd.DataFrame() 
 
     for file in long_short:
         data = pd.read_csv(os.path.join(directory, file))

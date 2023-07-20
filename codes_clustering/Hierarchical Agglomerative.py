@@ -18,6 +18,10 @@ distance_matrix = squareform(dist_matrix)
 # 연결 매트릭스 계산
 Z = linkage(dist_matrix, method='ward')
 
+# copheric distance 계산
+copheric_dis = cophenet(Z)
+copheric_dis_matrix = squareform(copheric_dis)
+
 # 덴드로그램 시각화
 dendrogram(Z)
 plt.title('Dendrogram')
@@ -29,8 +33,8 @@ plt.show()
 k = 80
 clusters = fcluster(Z, k, criterion='maxclust')
 
-
 # 2. Outlier
+'''
 def find_outliers_hac(threshold):
     cluster_distances = []
     for i in range(0, len(clusters)):
@@ -42,7 +46,21 @@ def find_outliers_hac(threshold):
     return outliers
 
 
-outliers = find_outliers_hac(6)
+outliers = find_outliers_hac(6)'''
+
+
+def find_outliers_hac(threshold):
+    cluster_distances = []
+    for i in range(0, len(clusters)):
+        average_distance = sum(copheric_dis_matrix[i]) / len(copheric_dis_matrix[i])
+        percentile = average_distance / max(copheric_dis)
+        cluster_distances.append(percentile)
+
+    # 클러스터링 결과 중 평균 거리 이상의 데이터 포인트를 outlier로 식별
+    outliers = np.where(np.array(cluster_distances) > threshold)[0]
+    return outliers
+
+outliers = find_outliers_hac(0.5)
 
 for i in range(1, len(outliers)):
     for j in range(0, len(clusters)):
