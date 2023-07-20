@@ -14,7 +14,7 @@ kmeans = sorted(filename for filename in os.listdir(input_dir))
 for file in kmeans:
     data = read_and_preprocess_data(input_dir, file)
     data_array = data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
-    firm_names=data.index
+    firm_names = data.index
     n_sample = data_array.shape[0]  # number of values in the file
     # Skip if the number of values are less than k
     if n_sample <= k_values[0]:

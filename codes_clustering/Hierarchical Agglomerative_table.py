@@ -57,5 +57,5 @@ for file in Hierarchical_Agglomerative:
         clust[unique_labels.index(cluster_label)].append(data.index[i])
 
     # 3. Save CSV
-    # columns = ['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index']
-    #new_table_generate(data, clust, output_dir, file)
+    columns = ['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index']
+    new_table_generate(data, clust, output_dir, file)
