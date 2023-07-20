@@ -40,4 +40,4 @@ for file in files:
     performance = performance.dropna(axis=1, how='all')
 
     # Write the result to a new CSV file
-    performance.to_csv(os.path.join(directory, 'performance_' + file), index=False)
+    performance.to_csv(os.path.join('../files/position_LS/equal_weight_performance/', 'performance_' + file), index=False)
