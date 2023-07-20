@@ -21,9 +21,16 @@ for file in files:
     print(df1)
     print(df2)
 
-    df1 = df1[df2['Firm Name'].isin(df1['Firm Name']) & df1['Firm Name'].isin(df2['Firm Name'])]
-    df1 = df1.loc[df2.index]
-    print(df1['Firm Name']) #ToDo 정렬을 다시 해줘야 한다.
+    # df1.reset_index(drop=True, inplace=True)
+    # df2.reset_index(drop=True, inplace=True)
+    merged_df = pd.merge(df1, df2[['Firm Name']], on='Firm Name')
+    df1=merged_df
+    print(merged_df)
+    #df1 = df1[[common_firm_names['Firm Name'].isin(df1['Firm Name'])]
+    # common_indices = df2.iloc[:, 0].isin(common_firm_names['Firm Name'])
+    # df1 = df1.loc[df2.iloc[:, 0][common_indices]]
+    #df1 = df1.loc[df2.iloc[:,0]]
+    #print(df1['Firm Name']) #ToDo 정렬을 다시 해줘야 한다.
 
     print(df1)
     print(df2)
