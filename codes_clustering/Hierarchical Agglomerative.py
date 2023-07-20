@@ -29,6 +29,7 @@ plt.show()
 k = 80
 clusters = fcluster(Z, k, criterion='maxclust')
 
+
 # 2. Outlier
 def find_outliers_hac(threshold):
     cluster_distances = []
