@@ -3,7 +3,7 @@ from _table_generate import *
 from _Cluster_Plot import plot_clusters
 from scipy.spatial.distance import pdist, squareform
 from sklearn.cluster import AgglomerativeClustering
-from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import *
 
 # 데이터 불러오기
 input_dir = '../files/PCA/PCA(1-48)'
@@ -47,6 +47,48 @@ clust = [[] for _ in unique_labels]
 for i, cluster_label in enumerate(clusters):
     clust[unique_labels.index(cluster_label)].append(data.index[i])
 
-# 3. Print and plot the clusters
-for i, firms in enumerate(clust):
-    plot_clusters(unique_labels[i] - 1, firms, data.index, mat)  # Use the imported function
+# # 3. Print and plot the clusters
+# for i, firms in enumerate(clust):
+#     plot_clusters(unique_labels[i] - 1, firms, data.index, mat)  # Use the imported function
+
+first = True
+if first:
+    dist_matrix = pdist(mat, metric='euclidean')
+
+    Z = linkage(dist_matrix, method='ward')
+
+    dendrogram(Z)
+    plt.title('Dendrogram')
+    plt.xlabel('Samples')
+    plt.ylabel('Distance')
+    plt.show()
+
+    copheric_dis=cophenet(Z)
+    copheric_dis_matrix=squareform(copheric_dis)
+
+    #
+    # for i in range(0, len(clusters)):
+    #     cluster_distances = []
+    #     average_distance = sum(copheric_dis_matrix[i]) / len(copheric_dis_matrix[i])
+    #     print(average_distance)
+    #     percentile = average_distance / max(copheric_dis)
+    #     cluster_distances.append(average_distance)
+    #     print(percentile)
+
+    def find_outliers_hac(threshold):
+        cluster_distances = []
+        for i in range(0, len(clusters)):
+            average_distance = sum(copheric_dis_matrix[i]) / len(copheric_dis_matrix[i])
+            percentile=average_distance/max(copheric_dis)
+            cluster_distances.append(percentile)
+
+        # 클러스터링 결과 중 평균 거리 이상의 데이터 포인트를 outlier로 식별
+        outliers = np.where(np.array(cluster_distances) > threshold)[0]
+        return outliers
+
+
+    clusters = fcluster(Z, 2, criterion='inconsistent')
+    MR = maxRstat(Z, R, 3)
+    fcluster(Z, t=0.8, criterion='monocrit', monocrit=MR)
+
+    print(clusters)

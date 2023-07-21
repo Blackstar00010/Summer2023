@@ -30,7 +30,7 @@ plt.ylabel('Distance')
 plt.show()
 
 # Cluster k개 생성
-k = 200
+k = 80
 clusters = fcluster(Z, k, criterion='maxclust')
 
 # 2. Outlier
@@ -71,7 +71,9 @@ def find_outliers_hac(threshold):
     outliers = np.where(np.array(cluster_distances) > max(copheric_dis)*threshold)[0]
     return outliers
 
-outliers = find_outliers_hac(0.5)
+outliers = find_outliers_hac(0.9)
+
+print(outliers)
 
 for i in range(1, len(outliers)):
     for j in range(0, len(clusters)):
