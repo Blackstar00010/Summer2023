@@ -21,7 +21,7 @@ for file in momentum:
     eps = 0.6805  # Maximum distance between two samples to be considered as neighbors
     min_samples = 2  # Minimum number of samples in a neighborhood for a point to be considered as a core point
 
-    cluster_labels = perform_DBSCAN(data_array, eps, min_samples)
+    cluster_labels = perform_DBSCAN(data_array, eps, min_samples,)
 
     # Get the unique cluster labels (excluding noise)
     unique_labels = set(label for label in cluster_labels if label != -1)

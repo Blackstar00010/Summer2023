@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from sklearn.cluster import DBSCAN
+from _table_generate import *
 import numpy as np
 
 # Prints cases that makes more than 2 clusters
@@ -22,21 +23,14 @@ successful_params = {}
 
 # Process each file
 for file in files:
-    # Read data from CSV file
-    data = pd.read_csv(os.path.join(input_dir, file), index_col=0)  # Set the first column as index
-
-    # Replace infinities with NaN
-    data.replace([np.inf, -np.inf], np.nan, inplace=True)
-    # Drop rows with NaN values
-    data.dropna(inplace=True)
-
+    data=read_and_preprocess_data(input_dir, file)
     data_array = data.values  # Get the data values
 
     # Iterate over all combinations of eps and min_samples
     for eps in eps_values:
         for min_samples in min_samples_values:
             # Perform DBSCAN clustering
-            dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+            dbscan = DBSCAN(eps=eps, min_samples=min_samples, metric='manhattan')
             cluster_labels = dbscan.fit_predict(data_array)
 
             # Get the unique cluster labels (excluding noise)
