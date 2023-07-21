@@ -29,8 +29,11 @@ for filename in os.listdir(directory):
     # Concatenate the means DataFrame to the result DataFrame
     result_df = pd.concat([result_df, column_means_df], ignore_index=True)
 
-    # Add the file name (without extension) to the list
-    file_names.append(filename[:-4])
+    # Remove 'performance_' and '_combined_LS' from the file name
+    cleaned_filename = filename.replace('performance_', '').replace('_combined_LS', '')
+
+    # Add the cleaned file name (without extension) to the list
+    file_names.append(cleaned_filename[:-4])
 
 # Add a new column to the result DataFrame with the file names
 result_df.insert(0, 'Clustering Method', file_names)
