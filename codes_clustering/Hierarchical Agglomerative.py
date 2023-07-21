@@ -17,6 +17,11 @@ distance_matrix = squareform(dist_matrix)
 
 # 연결 매트릭스 계산
 Z = linkage(dist_matrix, method='ward') # ward method는 cluster 간의 variance를 minimize
+'''we adopt the average linkage, which is defined as the average distance between
+the data points in one cluster and the data points in another cluster
+논문과는 다른 부분. average method대신 ward method 사용.
+'''
+
 
 # 덴드로그램 시각화
 dendrogram(Z)
@@ -50,6 +55,9 @@ def find_outliers_hac(threshold):
     # 클러스터링 결과 중 평균 거리 이상의 데이터 포인트를 outlier로 식별
     outliers = np.where(np.array(cluster_distances) > max(copheric_dis) * threshold)[0]
     # avg_cpr_distance가 max_cophenet distance의 alpha percentile보다 크면 outlier
+    '''In our empirical study, we specify the maximum distance rather than the number of clusters K, 
+    using a method similar to the method adopted for k-means clustering: 
+    e is set as an α percentile of the distances between a pair of nearest data points'''
     return outliers
 
 
