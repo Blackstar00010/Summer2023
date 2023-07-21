@@ -38,7 +38,7 @@ copheric_dis_matrix = squareform(copheric_dis)
 
 
 # Cluster k개 생성
-k = 50
+k = 10
 clusters = fcluster(Z, k, criterion='maxclust')
 
 

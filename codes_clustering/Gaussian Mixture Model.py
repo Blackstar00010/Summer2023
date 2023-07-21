@@ -3,6 +3,7 @@ from _table_generate import *
 from _Cluster_Plot import plot_clusters
 from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import GridSearchCV
+from t_SNE import *
 
 # 파일 불러오기
 input_dir = '../files/PCA/PCA(1-48)'
@@ -80,7 +81,7 @@ probabilities = dpgmm.predict_proba(mat)
 
 cluster_prob_mean = np.mean(probabilities, axis=0)
 
-threshold = 0.01
+threshold = 0.5
 outliers = []
 
 for i, prob_mean in enumerate(cluster_prob_mean):
@@ -99,3 +100,5 @@ clusters.insert(0, outliers)
 # 4. Print and plot the clusters
 for i, firms in enumerate(clusters):
     plot_clusters(unique_labels[i] - 1, firms, data.index, mat)
+
+t_SNE(mat, dpgmm)

@@ -1,10 +1,11 @@
 from _table_generate import *
 from _Cluster_Plot import plot_clusters
 from sklearn.cluster import OPTICS
+from t_SNE import *
 
 # 파일 불러오기
 input_dir = '../files/PCA/PCA(1-48)'
-file = '2018-01.csv'
+file = '1993-01.csv'
 data = read_and_preprocess_data(input_dir, file)
 mat = data.values[:, 1:].astype(float)
 
@@ -24,3 +25,5 @@ for i, cluster in enumerate(cluster_labels):
 # 2. Print and plot the clusters
 for i, firms in enumerate(clusters):
     plot_clusters(unique_labels[i], firms, data.index, mat)
+
+t_SNE(mat, clust)

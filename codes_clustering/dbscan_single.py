@@ -3,11 +3,12 @@ from sklearn.cluster import DBSCAN
 from _Cluster_Plot import plot_clusters
 from sklearn.neighbors import NearestNeighbors
 from _table_generate import *
+from t_SNE import *
 
 # Clusters the firms using DBSCAN algorithm
 # Performs just one CSV file
 input_dir = '../files/PCA/PCA(1-48)'
-file='2018-01.csv'
+file='1993-01.csv'
 # Read data from CSV file
 data = read_and_preprocess_data(input_dir, file)
 data_array = data.values  # Exclude the first column (firm names)
@@ -23,7 +24,7 @@ def perform_DBSCAN (data_array, eps, min_samples):
     dbscan = DBSCAN(eps=eps, min_samples=min_samples, metric='manhattan')
     cluster_labels = dbscan.fit_predict(data_array)
 
-    return cluster_labels
+    return cluster_labels, dbscan
 
 
 # NearestNeighbors 모델 생성
@@ -36,14 +37,15 @@ distances, indices = nn_model.kneighbors(data_array)
 # 각 데이터 포인트의 평균 최근접 이웃 거리 계산
 average_distances = np.mean(distances[:, 1:], axis=1)
 
-cluster_labels = perform_DBSCAN(data_array, eps, min_samples)
+cluster_labels, dbscan = perform_DBSCAN(data_array, eps, min_samples)
+t_SNE(data_array, dbscan)
 
-# 클러스터 레이블 출력 및 평균 최근접 이웃 거리 출력
-print("DBSCAN Cluster Labels:", cluster_labels)
-print("Average Distances to MinPts Neighbors:", average_distances)
+# # 클러스터 레이블 출력 및 평균 최근접 이웃 거리 출력
+# print("DBSCAN Cluster Labels:", cluster_labels)
+# print("Average Distances to MinPts Neighbors:", average_distances)
 
 average_distance=sum(average_distances)/len(average_distances)
-print(average_distance*0.5)
+# print(average_distance*0.5)
 
 # Get the unique cluster labels
 unique_labels = sorted(list(set(cluster_labels)))
