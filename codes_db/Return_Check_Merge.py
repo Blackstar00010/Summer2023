@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import matplotlib.pyplot as plt
 
 directory = '../files/position_LS/equal_weight_performance/'
 performance = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
@@ -9,24 +10,16 @@ file_names = []  # List to store the file names
 
 # Loop over all files in the directory
 for filename in os.listdir(directory):
-    # Construct full file path
     file_path = os.path.join(directory, filename)
-
-    # Load the file into a DataFrame
     df = pd.read_csv(file_path)
 
     # Calculate the average of non-NaN values in each column (excluding the 'Firm Name' column)
     column_means = df.iloc[:, 1:].mean()
 
-    # Replace NaN values with 0 only in columns where not all values are NaN
-    for column in df.columns:
-        if not df[column].isna().all():
-            df[column].fillna(0, inplace=True)
-
     # Convert the Series of column means to a DataFrame and transpose it
     column_means_df = pd.DataFrame(column_means).T
 
-    # Concatenate the means DataFrame to the result DataFrame
+    # Concat the means DataFrame to the result DataFrame
     result_df = pd.concat([result_df, column_means_df], ignore_index=True)
 
     # Remove 'performance_' and '_combined_LS' from the file name
@@ -51,3 +44,14 @@ result_df = pd.concat([clustering_method, date_columns_df], axis=1)
 
 # Save a new CSV file
 result_df.to_csv('../files/position_Ls/result.csv', index=False)
+
+# Plot a graph for each row
+for i in range(len(result_df)):
+    plt.figure(figsize=(10, 6))
+    plt.plot(result_df.columns[1:], result_df.iloc[i, 1:])
+    plt.title(result_df.iloc[i, 0])
+    plt.xlabel('Date')
+    plt.ylabel('Average Value')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
