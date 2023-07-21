@@ -49,5 +49,5 @@ date_columns_df = date_columns_df.sort_index(axis=1)
 # Concatenate the 'Clustering Method' column back with the sorted date columns
 result_df = pd.concat([clustering_method, date_columns_df], axis=1)
 
-# Save the result DataFrame to a new CSV file
+# Save a new CSV file
 result_df.to_csv('../files/position_Ls/result.csv', index=False)
