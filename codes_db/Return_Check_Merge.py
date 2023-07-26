@@ -39,13 +39,51 @@ date_columns_df = result_df.drop('Clustering Method', axis=1)
 date_columns_df.columns = pd.to_datetime(date_columns_df.columns, errors='coerce')
 date_columns_df = date_columns_df.sort_index(axis=1)
 
-# Concatenate the 'Clustering Method' column back with the sorted date columns
+# Concat the 'Clustering Method' column back with the sorted date columns
 result_df = pd.concat([clustering_method, date_columns_df], axis=1)
 
 # Save a new CSV file
 result_df.to_csv('../files/position_Ls/result.csv', index=False)
 
-# Plot a graph for each row
+# Add 1 to all data values
+result_df.iloc[:, 1:] = result_df.iloc[:, 1:] + 1
+
+# Calculate the cumulative product
+result_df.iloc[:, 1:] = result_df.iloc[:, 1:].cumprod(axis=1)
+
+# Subtract 1 to get back to the original scale
+result_df.iloc[:, 1:] = result_df.iloc[:, 1:] - 1
+
+plt.figure(figsize=(10, 6))
+
+for i in range(len(result_df)):
+    plt.plot(result_df.columns[1:], result_df.iloc[i, 1:], label=result_df.iloc[i, 0])
+
+plt.title('Average Values Over Time')
+plt.xlabel('Date')
+plt.ylabel('cumulative Value')
+plt.xticks(rotation=45)
+plt.legend()  # Add a legend to distinguish different lines
+plt.tight_layout()
+plt.show()
+
+'''
+# all in one
+plt.figure(figsize=(10, 6))
+
+for i in range(len(result_df)):
+    plt.plot(result_df.columns[1:], result_df.iloc[i, 1:], label=result_df.iloc[i, 0])
+
+plt.title('Average Values Over Time')
+plt.xlabel('Date')
+plt.ylabel('Average Value')
+plt.xticks(rotation=45)
+plt.legend()  # Add a legend to distinguish different lines
+plt.tight_layout()
+plt.show()
+'''
+
+'''# Plot a graph for each row
 for i in range(len(result_df)):
     plt.figure(figsize=(10, 6))
     plt.plot(result_df.columns[1:], result_df.iloc[i, 1:])
@@ -55,3 +93,4 @@ for i in range(len(result_df)):
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
+'''
