@@ -13,6 +13,7 @@ start_date = pd.to_datetime('1990-01-01')
 end_date = pd.to_datetime('2022-12-01')
 months = pd.date_range(start_date, end_date)
 
+print('[', end='')
 for current_date in months:
     window = df.loc[:current_date].tail(50)
 
@@ -32,3 +33,9 @@ for current_date in months:
 
     filename = current_date.strftime('%Y-%m') + '.csv'
     mom.to_csv('../files/momentum_adj/' + filename, index_label='Momentum Index')
+
+    print('-', end='')
+    if int(current_date.strftime('%m')) == 12:
+        print(f'] {current_date.strftime("%Y")} done!\n[')
+if int(current_date.strftime('%m')) != 12:
+    print(f'] {current_date.strftime("%Y-%m")} done!\n[')
