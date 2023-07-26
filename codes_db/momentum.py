@@ -13,6 +13,7 @@ start_date = pd.to_datetime('1990-01-01')
 end_date = pd.to_datetime('2022-12-01')
 months = pd.date_range(start_date, end_date)
 
+# jamesd: print shits = progress bar
 print('[', end='')
 for current_date in months:
     window = df.loc[:current_date].tail(50)
