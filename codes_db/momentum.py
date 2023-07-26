@@ -5,13 +5,13 @@ import pandas as pd
 # mom_1 = r_{t-1}
 # mom_i = \prod_{j=t-i-1}^{t-2} (r_j+1) - 1, i \in 1,...,4
 
-df = pd.read_csv('../files/history/first_day_of_month.csv')
+df = pd.read_csv('../files/history/adj_first_day_of_month.csv')
 df['Date'] = pd.to_datetime(df['Date'])
 df.set_index('Date', inplace=True)
 
 start_date = pd.to_datetime('1990-01-01')
 end_date = pd.to_datetime('2022-12-01')
-months = pd.date_range(start_date, end_date, freq='MS', tz='UTC')
+months = pd.date_range(start_date, end_date)
 
 for current_date in months:
     window = df.loc[:current_date].tail(50)
@@ -31,4 +31,4 @@ for current_date in months:
     mom = mom.dropna(how='any')
 
     filename = current_date.strftime('%Y-%m') + '.csv'
-    mom.to_csv('../files/momentum/' + filename, index_label='Momentum Index')
+    mom.to_csv('../files/momentum_adj/' + filename, index_label='Momentum Index')

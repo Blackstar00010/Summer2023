@@ -4,7 +4,7 @@ import pandas as pd
 
 dir = "../files/history/"
 
-df = pd.read_csv(dir + "filtered_price_data.csv")
+df = pd.read_csv(dir + "adj_price_data1983.csv")
 
 dates = df['Date']
 
@@ -18,4 +18,4 @@ df_filtered = df[df['Month Start Flag'] == False]
 
 df_filtered = df_filtered.drop(columns='Month Start Flag')
 
-df_filtered.to_csv(dir + "first_day_of_month.csv", index=False)
+df_filtered.to_csv(dir + "adj_first_day_of_month.csv", index=False)
