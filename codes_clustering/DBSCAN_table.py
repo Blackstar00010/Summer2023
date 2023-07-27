@@ -1,5 +1,4 @@
 import os
-from sklearn.cluster import DBSCAN
 from _table_generate import read_and_preprocess_data, new_table_generate
 from dbscan_single import perform_DBSCAN
 

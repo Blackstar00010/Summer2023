@@ -6,7 +6,7 @@ from _Cluster_Plot import plot_clusters
 # Performs just one CSV file
 # Read data from CSV file
 input_dir = '../files/PCA/PCA(1-48)'
-file = '2016-01.csv'
+file = '2017-01.csv'
 #file = '1992-09.csv'
 data = read_and_preprocess_data(input_dir, file)
 data_array = data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
@@ -16,17 +16,18 @@ firm_names = data.index  # Get the first column (firm names)
 def outliers(data_array, firm_names, K):
     kmeans = KMeans(n_clusters=K, n_init=10, random_state=0)
     kmeans.fit(data_array)
-    cluster_labels = kmeans.labels_  # 각 회사가 속한 Cluster Label
-    distance = kmeans.fit_transform(data_array)  # K개의 중심점과 각 포인트들 사이의 거리
-    cluster_distance_min = np.min(distance, axis=1)  # 자기가 속한 클러스터 내에서 중심과의 거리
+    cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
+    distance = kmeans.fit_transform(data_array)  # Distance btw K central points and each point
+    cluster_distance_min = np.min(distance, axis=1)  # Distance between the point and the central point
 
     clusters = [[] for _ in range(K)]  # Cluster별 distance 분류
+
     clusters_index = [[] for _ in range(K)]  # Cluster별 index 분류
     for i, cluster_num in enumerate(cluster_labels):
         clusters[cluster_num].append(cluster_distance_min[i])
         clusters_index[cluster_num].append(firm_names[i])
 
-    outliers = [[] for _ in range(K)]  # Cluster별 outliers's distance 분류
+    outliers = [[] for _ in range(K)]  # Cluster별 outliers' distance 분류
     for i, cluster in enumerate(clusters):
         for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
             if distance == 0 or distance / max(

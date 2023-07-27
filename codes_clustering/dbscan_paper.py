@@ -1,36 +1,44 @@
+import os
+from _table_generate import *
+from sklearn.cluster import DBSCAN
+from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import NearestNeighbors
-import numpy as np
 
-class DBSCAN:
-    def __init__(self, eps, min_samples):
-        self.eps = eps
-        self.min_samples = min_samples
+# Directory containing the input files
+input_dir = '../files/momentum'
+momentum_files = sorted(filename for filename in os.listdir(input_dir))
 
-    def fit(self, X):
-        neighbors = NearestNeighbors(radius=self.eps).fit(X)
-        neighborhoods = neighbors.radius_neighbors(X, return_distance=False)
+# Directory to save the output files
+output_dir = '../files/Clustering/DBSCAN'
 
-        core_samples = np.array([len(neighbors) >= self.min_samples for neighbors in neighborhoods])
-        labels = np.full(X.shape[0], -1)
-        cluster_id = 0
+# Alpha for determining epsilon
+alpha = 0.5  # Adjust this value based on your needs
 
-        for point in range(X.shape[0]):
-            if not core_samples[point] or labels[point] != -1:
-                continue
+for file in momentum_files:
+    # Load the data
+    data = read_and_preprocess_data(input_dir, file)
 
-            labels[point] = cluster_id
-            self._expand_cluster(X, labels, core_samples, neighborhoods, point, cluster_id)
-            cluster_id += 1
+    data_array = data.values  # Exclude the first column (firm names)
+    firm_names = data.index  # Get the first column (firm names)
 
-        self.labels_ = labels
-        return self
+    # Standardize the numerical data
+    data_std = StandardScaler().fit_transform(data_array)
 
-    def _expand_cluster(self, X, labels, core_samples, neighborhoods, point, cluster_id):
-        for neighbor in neighborhoods[point]:
-            if labels[neighbor] == -1:
-                labels[neighbor] = cluster_id
-                if core_samples[neighbor]:
-                    self._expand_cluster(X, labels, core_samples, neighborhoods, neighbor, cluster_id)
+    # Compute MinPts
+    MinPts = int(np.log(len(data_std)))
 
-    def predict(self, X):
-        return self.labels_
+    # Compute epsilon
+    nbrs = NearestNeighbors(n_neighbors=MinPts).fit(data_std)
+    distances, indices = nbrs.kneighbors(data_std)
+    distanceDec = sorted(distances[:, MinPts - 1], reverse=True)
+    eps = np.percentile(distanceDec, alpha * 100)
+
+    # Apply DBSCAN
+    db = DBSCAN(eps=eps, min_samples=MinPts, metric='manhattan').fit(data_std)
+    labels = db.labels_
+
+    # Add the cluster labels to the original data
+    data['cluster'] = labels
+
+    # Save the data with cluster labels
+    data.to_csv(os.path.join(output_dir, 'clustered_' + file), index=False)

@@ -3,8 +3,8 @@ from sklearn.decomposition import PCA
 from PCA_single import get_pca_data, get_pd_from_pca, variance_ratio
 
 # 파일 불러오기
-input_dir = '../files/momentum'
-output_dir = '../files/PCA/PCA(2-49)'
+input_dir = '../files/momentum_adj'
+output_dir = '../files/PCA/PCA(1-48)_adj'
 momentum = sorted(filename for filename in os.listdir(input_dir))
 
 # CSV 파일 하나에 대해서 각각 실행.
@@ -16,10 +16,10 @@ for file in momentum:
     mom1 = mat[:, 0]
 
     # mom1을 제외한 mat/PCA(2-49)
-    mat = np.delete(mat, 0, axis=1)
+    # mat = np.delete(mat, 0, axis=1)
 
     # mom49를 제외한 mat/PCA(1-48)
-    # mat = np.delete(mat, 48, axis=1)
+    mat = np.delete(mat, 48, axis=1)
 
     # 2. 최적 n_components 찾기
 
@@ -73,11 +73,11 @@ for file in momentum:
     combined_matrix = np.hstack((first_column_matrix, mat_pd_pca_matrix))
     df_combined = pd.DataFrame(combined_matrix)
     df_combined.index = data.index
-    print(file)
+    '''print(file)
     print(n_components)
-    print(t)
+    print(t)'''
 
     # 4. Save CSV
     # Column format: ['Original Mom1', 'data after PCA', ...]
-    # output_file = os.path.join(output_dir, file)
-    # df_combined.to_csv(output_file, index=True)
+    output_file = os.path.join(output_dir, file)
+    df_combined.to_csv(output_file, index=True)

@@ -29,6 +29,7 @@ def perform_DBSCAN (data_array, eps, min_samples):
 
 # NearestNeighbors 모델 생성
 nn_model = NearestNeighbors(n_neighbors=10, metric='manhattan')
+print(nn_model)
 nn_model.fit(data_array)
 
 # 각 데이터 포인트에 대한 최근접 이웃 인덱스와 거리 계산
@@ -36,6 +37,7 @@ distances, indices = nn_model.kneighbors(data_array)
 
 # 각 데이터 포인트의 평균 최근접 이웃 거리 계산
 average_distances = np.mean(distances[:, 1:], axis=1)
+print(average_distances)
 
 cluster_labels, dbscan = perform_DBSCAN(data_array, eps, min_samples)
 t_SNE(data_array, dbscan)
@@ -44,10 +46,10 @@ t_SNE(data_array, dbscan)
 # print("DBSCAN Cluster Labels:", cluster_labels)
 # print("Average Distances to MinPts Neighbors:", average_distances)
 
-average_distance=sum(average_distances)/len(average_distances)
+average_distance = sum(average_distances)/len(average_distances)
 # print(average_distance*0.5)
 
-# Get the unique cluster labels
+'''# Get the unique cluster labels
 unique_labels = sorted(list(set(cluster_labels)))
 
 # Create a list to store firms in each cluster
@@ -60,7 +62,7 @@ for i, cluster_label in enumerate(cluster_labels):
 # Print and plot the clusters
 for i, firms in enumerate(clusters):
     plot_clusters(unique_labels[i], firms, firm_names, data_array)  # Use the imported function
-    print()
+    print()'''
 
 '''
 import pandas as pd

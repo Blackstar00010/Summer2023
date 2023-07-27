@@ -43,7 +43,7 @@ date_columns_df = date_columns_df.sort_index(axis=1)
 result_df = pd.concat([clustering_method, date_columns_df], axis=1)
 
 # Save a new CSV file
-result_df.to_csv('../files/position_Ls/result.csv', index=False)
+result_df.to_csv('../files/position_LS/result.csv', index=False)
 
 # Add 1 to all data values
 result_df.iloc[:, 1:] = result_df.iloc[:, 1:] + 1
@@ -83,7 +83,7 @@ plt.tight_layout()
 plt.show()
 '''
 
-'''# Plot a graph for each row
+# Plot a graph for each row
 for i in range(len(result_df)):
     plt.figure(figsize=(10, 6))
     plt.plot(result_df.columns[1:], result_df.iloc[i, 1:])
@@ -93,4 +93,3 @@ for i in range(len(result_df)):
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
-'''
