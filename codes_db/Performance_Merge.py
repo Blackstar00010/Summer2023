@@ -4,11 +4,11 @@ import pandas as pd
 # Read the data from the CSV files
 # df1 = pd.read_csv('../files/mom1_data_combined.csv')
 
-directory = '../files/position_LS/equal_weight/'
+directory = '../files/position_LS/equal_weight_adj/'
 files = [f for f in os.listdir(directory) if f.endswith('.csv')]
 
 for file in files:
-    df1 = pd.read_csv('../files/mom1_data_combined.csv')
+    df1 = pd.read_csv('../files/mom1_data_combined_adj.csv')
     df2 = pd.read_csv(os.path.join(directory, file))
 
     # Find the common columns between df1 and df2
@@ -40,4 +40,4 @@ for file in files:
     performance = performance.dropna(axis=1, how='all')
 
     # Write the result to a new CSV file
-    performance.to_csv(os.path.join('../files/position_LS/equal_weight_performance/', 'performance_' + file), index=False)
+    performance.to_csv(os.path.join('../files/position_LS/equal_weight_performance_adj/', 'performance_' + file), index=False)

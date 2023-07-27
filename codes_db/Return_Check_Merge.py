@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-directory = '../files/position_LS/equal_weight_performance/'
+directory = '../files/position_LS/equal_weight_performance_adj/'
 performance = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
 
 result_df = pd.DataFrame()
@@ -43,7 +43,7 @@ date_columns_df = date_columns_df.sort_index(axis=1)
 result_df = pd.concat([clustering_method, date_columns_df], axis=1)
 
 # Save a new CSV file
-result_df.to_csv('../files/position_LS/result.csv', index=False)
+result_df.to_csv('../files/position_LS/result_adj.csv', index=False)
 
 # Add 1 to all data values
 result_df.iloc[:, 1:] = result_df.iloc[:, 1:] + 1

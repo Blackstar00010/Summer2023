@@ -3,11 +3,11 @@ from _table_generate import read_and_preprocess_data, new_table_generate
 from dbscan_single import perform_DBSCAN
 
 # Directory containing the input files
-input_dir = '../files/momentum'
+input_dir = '../files/momentum_adj'
 momentum = sorted(filename for filename in os.listdir(input_dir))
 
 # Directory to save the output files
-output_dir = '../files/Clustering/DBSCAN'
+output_dir = '../files/Clustering_adj/DBSCAN'
 
 for file in momentum:
     # Read CSV file and delete +-inf values

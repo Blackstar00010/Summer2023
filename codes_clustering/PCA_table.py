@@ -9,7 +9,8 @@ momentum = sorted(filename for filename in os.listdir(input_dir))
 
 # CSV 파일 하나에 대해서 각각 실행.
 for file in momentum:
-
+    if file=='.DS_Store':
+        continue
     data = read_and_preprocess_data(input_dir, file)
     mat = data.values.astype(float)
 

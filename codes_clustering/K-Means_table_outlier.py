@@ -6,8 +6,8 @@ from K_Means_outlier import perform_kmeans
 k_values = [5]
 
 # Directory containing the input files
-input_dir = '../files/PCA/PCA(1-48)'
-output_dir = '../files/Clustering/K-Means_outlier'
+input_dir = '../files/PCA/PCA(1-48)_adj'
+output_dir = '../files/Clustering_adj/K_Means_outlier'
 kmeans = sorted(filename for filename in os.listdir(input_dir))
 
 # Process each file

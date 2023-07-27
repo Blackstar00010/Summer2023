@@ -3,8 +3,8 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import linkage, fcluster
 
 # 파일 불러오기
-input_dir = '../files/PCA/PCA(1-48)'
-output_dir = '../files/Clustering/Hierarchical_Agglomerative'
+input_dir = '../files/PCA/PCA(1-48)_adj'
+output_dir = '../files/Clustering_adj/Hierarchical_Agglomerative'
 Hierarchical_Agglomerative = sorted(filename for filename in os.listdir(input_dir))
 
 
@@ -37,7 +37,7 @@ for file in Hierarchical_Agglomerative:
     # 연결 매트릭스 계산
     Z = linkage(dist_matrix, method='ward')
 
-    # Cluster k개 생성
+    # Cluster k개 생성^^
     k = 80
     clusters = fcluster(Z, k, criterion='maxclust')
 

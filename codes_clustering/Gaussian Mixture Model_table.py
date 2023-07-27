@@ -4,8 +4,8 @@ from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import GridSearchCV
 
 # 파일 불러오기
-input_dir = '../files/PCA/PCA(1-48)'
-output_dir = '../files/Clustering/Gaussian_Mixture_Model'
+input_dir = '../files/PCA/PCA(1-48)_adj'
+output_dir = '../files/Clustering_adj/Gaussian_Mixture_Model'
 Gaussian_Mixture_Model = sorted(filename for filename in os.listdir(input_dir))
 
 

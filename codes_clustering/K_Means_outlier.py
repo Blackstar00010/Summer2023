@@ -5,7 +5,7 @@ from _Cluster_Plot import plot_clusters
 # Clusters the firms using K-Means algorithm
 # Performs just one CSV file
 # Read data from CSV file
-input_dir = '../files/PCA/PCA(1-48)'
+input_dir = '../files/PCA/PCA(1-48)_adj'
 file = '2017-01.csv'
 #file = '1992-09.csv'
 data = read_and_preprocess_data(input_dir, file)
