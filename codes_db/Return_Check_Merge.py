@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 directory = '../files/position_LS/equal_weight_performance_adj/'
 performance = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
 
+
+
 result_df = pd.DataFrame()
 file_names = []  # List to store the file names
 
@@ -93,3 +95,7 @@ for i in range(len(result_df)):
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()'''
+
+directory = '../files/monthly_return_of_index/'
+performance = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
+df = pd.read_csv('data.csv')
