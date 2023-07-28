@@ -2,8 +2,8 @@ from _table_generate import *
 from sklearn.cluster import OPTICS
 
 # 파일 불러오기
-input_dir = '../files/PCA/PCA(1-48)'
-output_dir = '../files/Clustering/OPTICS'
+input_dir = '../files/PCA/PCA(1-48)_adj'
+output_dir = '../files/Clustering_adj/OPTICS'
 optics = sorted(filename for filename in os.listdir(input_dir))
 
 # CSV 파일 하나에 대해서 실행
@@ -36,4 +36,4 @@ for file in optics:
 
     # 2. Save CSV
     # columns = ['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index']
-    #new_table_generate(data, clusters, output_dir, file)
+    new_table_generate(data, clusters, output_dir, file)

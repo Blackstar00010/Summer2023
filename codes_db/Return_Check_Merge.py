@@ -56,6 +56,7 @@ result_df.iloc[:, 1:] = result_df.iloc[:, 1:] - 1
 
 plt.figure(figsize=(10, 6))
 
+
 for i in range(len(result_df)):
     plt.plot(result_df.columns[1:], result_df.iloc[i, 1:], label=result_df.iloc[i, 0])
 
