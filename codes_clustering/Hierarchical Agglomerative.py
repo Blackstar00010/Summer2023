@@ -12,16 +12,15 @@ mat = data.values[:, 1:].astype(float)
 
 # 1. Hierachical Agglomerative
 # 거리 행렬 계산
-dist_matrix = pdist(mat, metric='euclidean') # data point pair 간의 euclidean distance/firm수 combination 2
+dist_matrix = pdist(mat, metric='euclidean')  # data point pair 간의 euclidean distance/firm수 combination 2
 distance_matrix = squareform(dist_matrix)
 
 # 연결 매트릭스 계산
-Z = linkage(dist_matrix, method='ward') # ward method는 cluster 간의 variance를 minimize
+Z = linkage(dist_matrix, method='ward')  # ward method는 cluster 간의 variance를 minimize
 '''we adopt the average linkage, which is defined as the average distance between
 the data points in one cluster and the data points in another cluster
 논문과는 다른 부분. average method대신 ward method 사용.
 '''
-
 
 # 덴드로그램 시각화
 dendrogram(Z)
@@ -67,7 +66,6 @@ for i in range(0, len(outliers)):
     for j in range(0, len(clusters)):
         if outliers[i] == j + 1:
             clusters[j + 1] = 0
-
 
 unique_labels = sorted(list(set(clusters)))
 
