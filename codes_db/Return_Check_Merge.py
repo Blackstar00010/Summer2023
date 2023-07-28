@@ -56,7 +56,6 @@ result_df.iloc[:, 1:] = result_df.iloc[:, 1:] - 1
 
 plt.figure(figsize=(10, 6))
 
-
 for i in range(len(result_df)):
     plt.plot(result_df.columns[1:], result_df.iloc[i, 1:], label=result_df.iloc[i, 0])
 
@@ -84,7 +83,7 @@ plt.tight_layout()
 plt.show()
 '''
 
-# Plot a graph for each row
+'''# Plot a graph for each row
 for i in range(len(result_df)):
     plt.figure(figsize=(10, 6))
     plt.plot(result_df.columns[1:], result_df.iloc[i, 1:])
@@ -93,4 +92,4 @@ for i in range(len(result_df)):
     plt.ylabel('Average Value')
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.show()
+    plt.show()'''
