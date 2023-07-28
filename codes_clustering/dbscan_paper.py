@@ -1,47 +1,51 @@
-import os
 from _table_generate import *
 from sklearn.cluster import DBSCAN
-from sklearn.preprocessing import StandardScaler
-from sklearn.neighbors import NearestNeighbors
-from t_SNE import *
+import numpy as np
+
+# Prints cases that makes more than 2 clusters
+# Prints the eps and min_samples value
+
+# Define DBSCAN parameters
+eps_values = np.linspace(0.01, 4., 101)  # eps values from 0.01 to 1.01
+min_samples_values = range(2, 51)  # min_samples values from 2 to 50
 
 # Directory containing the input files
-input_dir = '../files/momentum'
-momentum_files = sorted(filename for filename in os.listdir(input_dir))
+input_dir = '../files/PCA/PCA(1-48)'
 
-# Directory to save the output files
-output_dir = '../files/Clustering/DBSCAN'
+# Get a list of all the files in the input directory
+files = sorted(os.listdir(input_dir))
 
-# Alpha for determining epsilon
-alpha = 0.5  # Adjust this value based on your needs
+# Dictionary to store the successful parameter combinations for each file
+successful_params = []
 
-for file in momentum_files:
-    # Load the data
-    data = read_and_preprocess_data(input_dir, file)
+# Process each file
+for file in files:
+    data=read_and_preprocess_data(input_dir, file)
+    data_array = data.values  # Get the data values
 
-    data_array = data.values  # Exclude the first column (firm names)
-    firm_names = data.index  # Get the first column (firm names)
+    # Iterate over all combinations of eps and min_samples
+    for eps in eps_values:
+        for min_samples in min_samples_values:
+            # Perform DBSCAN clustering
+            dbscan = DBSCAN(eps=eps, min_samples=min_samples, metric='manhattan')
+            cluster_labels = dbscan.fit_predict(data_array)
 
-    # Standardize the numerical data
-    data_std = StandardScaler().fit_transform(data_array)
+            # Get the unique cluster labels (excluding noise)
+            unique_labels = set(label for label in cluster_labels if label != -1)
 
-    # Compute MinPts
-    MinPts = int(np.log(len(data_std)))
+            # If there are more than two clusters, add the parameter combination to the successful_params dictionary
+            if len(unique_labels) >= 2:
+                if file not in successful_params:
+                    successful_params[file] = []
+                successful_params[file].append((eps, min_samples))
 
-    # Compute epsilon
-    nbrs = NearestNeighbors(n_neighbors=MinPts).fit(data_std)
-    distances, indices = nbrs.kneighbors(data_std)
-    distanceDec = sorted(distances[:, MinPts - 1], reverse=True)
-    eps = np.percentile(distanceDec, alpha * 100)
+    print(files)
+    print(successful_params)
 
-    # Apply DBSCAN
-    db = DBSCAN(eps=eps, min_samples=MinPts, metric='manhattan').fit(data_std)
-    labels = db.labels_
-
-    # Add the cluster labels to the original data
-    data['cluster'] = labels
-
-    # # Save the data with cluster labels
-    # data.to_csv(os.path.join(output_dir, 'clustered_' + file), index=False)
-
-    t_SNE(data_array, db)
+# # Find the parameter combinations that are successful for all files
+# common_params = set(successful_params[files[0]])
+# for file in files[1:]:
+#     common_params &= set(successful_params[file])
+#
+# print(files)
+# print('Common parameter combinations:', common_params)

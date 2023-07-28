@@ -1,7 +1,5 @@
-import os
-import pandas as pd
-from sklearn.cluster import DBSCAN
 from _table_generate import *
+from sklearn.cluster import DBSCAN
 import numpy as np
 
 # Prints cases that makes more than 2 clusters
@@ -12,7 +10,7 @@ eps_values = np.linspace(0.01, 4., 101)  # eps values from 0.01 to 1.01
 min_samples_values = range(2, 51)  # min_samples values from 2 to 50
 
 # Directory containing the input files
-input_dir = '../files/momentum'
+input_dir = '../files/PCA/PCA(1-48)'
 
 # Get a list of all the files in the input directory
 files = sorted(os.listdir(input_dir))

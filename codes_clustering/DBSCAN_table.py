@@ -1,33 +1,27 @@
-import os
-from _table_generate import read_and_preprocess_data, new_table_generate
-from dbscan_single import perform_DBSCAN
+from dbscan_single import *
 
 # Directory containing the input files
-input_dir = '../files/momentum_adj'
-momentum = sorted(filename for filename in os.listdir(input_dir))
+input_dir = '../files/PCA/PCA(1-48)_adj'
+output_dir = '../files/Clustering_adj/DBSCAN'
+DBSCAN = sorted(filename for filename in os.listdir(input_dir))
 
 # Directory to save the output files
-output_dir = '../files/Clustering_adj/DBSCAN'
 
-for file in momentum:
+
+for file in DBSCAN:
     # Read CSV file and delete +-inf values
     data = read_and_preprocess_data(input_dir, file)
+    data_array = data.values[:, 1:].astype(float)
+    firm_names = data.index
 
-    data_array = data.values  # Exclude the first column (firm names)
-    firm_names = data.index  # Get the first column (firm names)
+    # cluster_labels, dbscan = perform_DBSCAN(data_array, eps, min_samples)
+    cluster_labels, dbscan = perform_DBSCAN2(data_array)
 
-    # Define DBSCAN parameters
-    eps = 0.6805  # Maximum distance between two samples to be considered as neighbors
-    min_samples = 2  # Minimum number of samples in a neighborhood for a point to be considered as a core point
+    # Get the unique cluster labels
+    unique_labels = sorted(list(set(cluster_labels)))
 
-    cluster_labels = perform_DBSCAN(data_array, eps, min_samples)
+    clust = [[] for _ in unique_labels]
+    for i, cluster_label in enumerate(cluster_labels):
+        clust[unique_labels.index(cluster_label)].append(data.index[i])
 
-    # Get the unique cluster labels (excluding noise)
-    unique_labels = set(label for label in cluster_labels if label != -1)
-
-    clusters = [[] for _ in unique_labels]
-    for i, label in enumerate(cluster_labels):
-        if label != -1:  # Exclude noise
-            clusters[label].append(firm_names[i])
-
-    new_table_generate(data, clusters, output_dir, file)
+    new_table_generate(data, clust, output_dir, file)
