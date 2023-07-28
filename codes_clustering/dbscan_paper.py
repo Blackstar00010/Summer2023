@@ -3,6 +3,7 @@ from _table_generate import *
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import NearestNeighbors
+from t_SNE import *
 
 # Directory containing the input files
 input_dir = '../files/momentum'
@@ -40,5 +41,7 @@ for file in momentum_files:
     # Add the cluster labels to the original data
     data['cluster'] = labels
 
-    # Save the data with cluster labels
-    data.to_csv(os.path.join(output_dir, 'clustered_' + file), index=False)
+    # # Save the data with cluster labels
+    # data.to_csv(os.path.join(output_dir, 'clustered_' + file), index=False)
+
+    t_SNE(data_array, db)
