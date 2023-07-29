@@ -47,16 +47,12 @@ lab=True
 if lab:
     file = '../files/monthly_return_of_index.csv'
     df = pd.read_csv(file)
-    df.columns = df.iloc[0]
-    df = df.iloc[1:]
-    df = df.iloc[0:, 1:]
-    # result_df = result_df.iloc[0:, 1:]
-    df.columns = result_df.columns
-    combined_df = pd.concat([result_df, df], axis=0)
-    # combined_df.insert(0, 'Clustering Method', ['Gaussian', 'Agglomerative', 'K_Means_Outlier', 'OPTICS', 'Reversal'])
-    combined_df.index = ['Gaussian', 'Agglomerative', 'K_Means_Outlier', 'OPTICS', 'Reversal']
-    result_df=combined_df
-    result_df = result_df.astype(float)
+    df = df.iloc[1:] # Jan data eliminate
+    df = df.iloc[0:, 1:] # save only data
+    df.columns = result_df.columns # columns name should be same with result_df
+    result_df = pd.concat([result_df, df], axis=0) # add monthly_return right below result_df
+    result_df.index = ['Gaussian', 'Agglomerative', 'K_Means_Outlier', 'OPTICS', 'Reversal']
+    result_df = result_df.astype(float) # set data type as float(df.value was str actually.)
     print(result_df)
 
 # # Save a new CSV file
