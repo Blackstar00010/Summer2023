@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 directory = '../files/position_LS/equal_weight_performance_adj/'
 performance = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
 
-
-
 result_df = pd.DataFrame()
 file_names = []  # List to store the file names
 
@@ -43,18 +41,35 @@ date_columns_df = date_columns_df.sort_index(axis=1)
 
 # Concat the 'Clustering Method' column back with the sorted date columns
 result_df = pd.concat([clustering_method, date_columns_df], axis=1)
+result_df.set_index('Clustering Method', inplace=True)
 
-# Save a new CSV file
-result_df.to_csv('../files/position_LS/result_adj.csv', index=False)
+lab=True
+if lab:
+    file = '../files/monthly_return_of_index.csv'
+    df = pd.read_csv(file)
+    df.columns = df.iloc[0]
+    df = df.iloc[1:]
+    df = df.iloc[0:, 1:]
+    # result_df = result_df.iloc[0:, 1:]
+    df.columns = result_df.columns
+    combined_df = pd.concat([result_df, df], axis=0)
+    # combined_df.insert(0, 'Clustering Method', ['Gaussian', 'Agglomerative', 'K_Means_Outlier', 'OPTICS', 'Reversal'])
+    combined_df.index = ['Gaussian', 'Agglomerative', 'K_Means_Outlier', 'OPTICS', 'Reversal']
+    result_df=combined_df
+    result_df = result_df.astype(float)
+    print(result_df)
+
+# # Save a new CSV file
+# result_df.to_csv('../files/position_LS/result_adj.csv', index=False)
 
 # Add 1 to all data values
-result_df.iloc[:, 1:] = result_df.iloc[:, 1:] + 1
+result_df.iloc[:, 0:] = result_df.iloc[:, 0:] + 1
 
 # Calculate the cumulative product
-result_df.iloc[:, 1:] = result_df.iloc[:, 1:].cumprod(axis=1)
+result_df.iloc[:, 0:] = result_df.iloc[:, 0:].cumprod(axis=1)
 
 # Subtract 1 to get back to the original scale
-result_df.iloc[:, 1:] = result_df.iloc[:, 1:] - 1
+result_df.iloc[:, 0:] = result_df.iloc[:, 0:] - 1
 
 plt.figure(figsize=(10, 6))
 
@@ -65,12 +80,12 @@ plt.title('Average Values Over Time')
 plt.xlabel('Date')
 plt.ylabel('cumulative Value')
 plt.xticks(rotation=45)
-plt.legend()  # Add a legend to distinguish different lines
+plt.legend(result_df.index)  # Add a legend to distinguish different lines
 plt.tight_layout()
 plt.show()
 
-'''
-# all in one
+
+'''# all in one
 plt.figure(figsize=(10, 6))
 
 for i in range(len(result_df)):
@@ -82,20 +97,16 @@ plt.ylabel('Average Value')
 plt.xticks(rotation=45)
 plt.legend()  # Add a legend to distinguish different lines
 plt.tight_layout()
-plt.show()
-'''
+plt.show()'''
 
-'''# Plot a graph for each row
+
+# Plot a graph for each row
 for i in range(len(result_df)):
     plt.figure(figsize=(10, 6))
     plt.plot(result_df.columns[1:], result_df.iloc[i, 1:])
-    plt.title(result_df.iloc[i, 0])
+    plt.title(result_df.index[i])
     plt.xlabel('Date')
     plt.ylabel('Average Value')
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.show()'''
-
-directory = '../files/monthly_return_of_index/'
-performance = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
-df = pd.read_csv('data.csv')
+    plt.show()
