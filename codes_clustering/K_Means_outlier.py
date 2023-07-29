@@ -1,4 +1,4 @@
-from _table_generate import *
+from t_SNE import *
 from sklearn.cluster import KMeans
 from _Cluster_Plot import plot_clusters
 
@@ -7,7 +7,7 @@ from _Cluster_Plot import plot_clusters
 # Read data from CSV file
 input_dir = '../files/PCA/PCA(1-48)_adj'
 file = '2017-01.csv'
-#file = '1992-09.csv'
+# file = '1992-09.csv'
 data = read_and_preprocess_data(input_dir, file)
 data_array = data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
 firm_names = data.index  # Get the first column (firm names)
@@ -56,28 +56,34 @@ def outliers(data_array, firm_names, K):
     for i in range(len(clusters_index)):
         clust.append(clusters_index[i])
 
-    return clust
+    return clust, kmeans
 
 
 def perform_kmeans(k_values, data_array, firm_names):
     clusters_k = []
+    kmean_data = []
     for k in k_values:
-        clusters_k.append(outliers(data_array, firm_names, k))
-    return clusters_k
+        clust, kmeans = outliers(data_array, firm_names, k)
+        clusters_k.append(clust)
+        kmean_data.append(kmeans)
+    return clusters_k, kmean_data
 
 
 if __name__ == "__main__":
     # Define the number of clusters k
     k_values = [5, 10]
 
-    clusters_k = perform_kmeans(k_values, data_array, firm_names)
+    clusters_k, kmean_data = perform_kmeans(k_values, data_array, firm_names)
     # Print the clusters for each k value & plot the clusters
     for i, clusters in enumerate(clusters_k):
         print(f'Clusters for k = {k_values[i]}:')
         for j, firms in enumerate(clusters):
             plot_clusters(j - 1, firms, firm_names, data_array)  # Use the imported function
 
-first = False
+    for i, kmeans in enumerate(kmean_data):
+        t_SNE(data_array, kmeans)
+
+'''first = False
 if first:
     kmeans = KMeans(n_clusters=5, n_init=10, random_state=0)
     kmeans.fit(data_array)
@@ -123,4 +129,4 @@ if first:
         clust.append(clusters_index[i])
 
     for i in range(len(clust)):
-        print(clust[i])
+        print(clust[i])'''

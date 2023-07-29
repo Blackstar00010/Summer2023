@@ -6,6 +6,10 @@ from matplotlib.ticker import NullFormatter
 
 
 def t_SNE(data, cluster):
+    '''
+    :param data: Mom data after PCA
+    :param cluster: Original clutering data
+    '''
     perplexities = [5, 30, 50, 100]
     clusters = cluster.fit_predict(data)
 
