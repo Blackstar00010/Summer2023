@@ -5,7 +5,18 @@ import numpy as np
 # Prints cases that makes more than 2 clusters
 # Prints the eps and min_samples value
 
-# Define DBSCAN parameters
+def dbscan_casecheck (eps_values, min_samples_values, input):
+    successful_params = []
+
+    data_array = input.values
+
+    for eps in eps_values:
+        for min_samples in min_samples_values:
+
+
+
+
+'''# Define DBSCAN parameters
 eps_values = np.linspace(0.01, 4., 101)  # eps values from 0.01 to 1.01
 min_samples_values = range(2, 51)  # min_samples values from 2 to 50
 
@@ -20,7 +31,7 @@ successful_params = []
 
 # Process each file
 for file in files:
-    data=read_and_preprocess_data(input_dir, file)
+    data = read_and_preprocess_data(input_dir, file)
     data_array = data.values  # Get the data values
 
     # Iterate over all combinations of eps and min_samples
@@ -48,4 +59,4 @@ for file in files:
 #     common_params &= set(successful_params[file])
 #
 # print(files)
-# print('Common parameter combinations:', common_params)
+# print('Common parameter combinations:', common_params)'''

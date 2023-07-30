@@ -1,10 +1,9 @@
 from t_SNE import *
-from _Cluster_Plot import *
 from collections import Counter
 from sklearn.cluster import DBSCAN
 from sklearn.metrics import silhouette_score
-from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
+from dbscan_checkcheck import successful_params
 
 input_dir = '../files/PCA/PCA(1-48)'
 file = '2022-12.csv'
@@ -12,6 +11,10 @@ data = read_and_preprocess_data(input_dir, file)
 data_array = data.values[:, 1:].astype(float)
 firm_names = data.index
 
+eps_values = np.linspace(0.01, 2., 100)
+min_samples_values = range(2, 20)
+
+successful_params = successful_params(data, eps_values, min_samples_values)
 
 # # Define DBSCAN parameters
 # eps = 1.9651  # Maximum distance between two samples to be considered as neighbors
@@ -26,7 +29,7 @@ firm_names = data.index
 #     return cluster_labels, dbscan
 
 
-def perform_DBSCAN2(data_array):
+def perform_DBSCAN2(data_array, successful_params):
     lab = True
     if lab:
         # list into dataframe
@@ -46,22 +49,22 @@ def perform_DBSCAN2(data_array):
         # distances = distances[:, 1]
 
 
-        eps = np.arange(0.01, 3., 0.1)
+        eps_values = np.linspace(0.01, 4., 101)
         min_samples = range(2, 16)
         # returns array of ranging from 0.05 to 0.13 with step of 0.01
 
         output = []
 
-        for ms in min_samples:
-            for ep in eps:
-                labels = DBSCAN(min_samples=ms, eps=ep, metric='manhattan').fit(stdDf).labels_
+        for eps in [i[0] for i in successful_params]:
+            for ms in [i[1] for i in successful_params]:
+                labels = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(stdDf).labels_
 
                 if len(Counter(labels)) == 1:
                     continue
 
                 score = silhouette_score(stdDf, labels)
                 #silhouette score 높을 수록 클러스터링 잘 된것. from -1 to 1
-                output.append((ms, ep, score))
+                output.append((ms, eps, score))
 
         min_samples, eps, score = sorted(output, key=lambda x: x[-1])[-1]
         print(f"Best silhouette_score: {score}")
