@@ -35,3 +35,19 @@ def new_table_generate(data, clusters, output_dir, file):
 
     # Save the output to a CSV file in the output directory
     LS_table.to_csv(os.path.join(output_dir, file), index=False)
+
+
+def reversal_table_generate(data, output_dir, file):
+    LS_table_reversal = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short'])
+    firm_lists = data.index
+    firm_sorted = sorted(firm_lists, key=lambda x: data.loc[x, '0'])
+    long_short = [0] * len(firm_sorted)
+    for i in range(10):
+        long_short[i] = 1
+        long_short[-i - 1] = -1
+
+    for i, firm in enumerate(firm_sorted):
+        LS_table_reversal.loc[len(LS_table_reversal)] = [firm, data.loc[firm, '0'], long_short[i]]
+
+    # Save the output to a CSV file in the output directory
+    LS_table_reversal.to_csv(os.path.join(output_dir, file), index=False)
