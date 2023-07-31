@@ -1,11 +1,8 @@
-from _table_generate import *
 from sklearn.cluster import DBSCAN
 
 
-def successful_params(data, eps_values, min_samples_values):
+def successful_params(data_array, eps_values, min_samples_values):
     successful_params = []
-
-    data_array = data.values
 
     for eps in eps_values:
         for min_samples in min_samples_values:
