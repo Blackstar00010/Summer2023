@@ -5,7 +5,7 @@ from sklearn.cluster import DBSCAN
 from sklearn.neighbors import NearestNeighbors
 
 input_dir = '../files/PCA/PCA(1-48)'
-file = '2022-12.csv'
+file = '1993-01.csv'
 data = read_and_preprocess_data(input_dir, file)
 data_array = data.values[:, 1:].astype(float)
 firm_names = data.index
@@ -33,11 +33,11 @@ def perform_DBSCAN(data_array):
     labels = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(data_array).labels_
     dbscan = DBSCAN(min_samples=ms, eps=eps, metric='manhattan')
 
-    return labels, dbscan
+    return labels
 
 
 if __name__ == "__main__":
-    labels, dbscan = perform_DBSCAN(data_array)
+    labels = perform_DBSCAN(data_array)
 
     # Get the unique cluster labels
     unique_labels = sorted(list(set(labels)))
@@ -50,4 +50,4 @@ if __name__ == "__main__":
     for i, firms in enumerate(clust):
         plot_clusters(unique_labels[i], firms, data.index, data_array)  # Use the imported function
 
-    t_SNE(data_array, dbscan)
+    t_SNE(data_array, labels)

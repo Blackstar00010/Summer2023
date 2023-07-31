@@ -5,7 +5,7 @@ from t_SNE import *
 
 # 데이터 불러오기
 input_dir = '../files/PCA/PCA(1-48)'
-file = '2018-01.csv'
+file = '1993-01.csv'
 data = read_and_preprocess_data(input_dir, file)
 mat = data.values[:, 1:].astype(float)
 

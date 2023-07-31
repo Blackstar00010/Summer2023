@@ -5,7 +5,7 @@ from sklearn.metrics import silhouette_score
 from dbscan_checkcheck import successful_params
 
 input_dir = '../files/PCA/PCA(1-48)'
-file = '2022-12.csv'
+file = '1993-01.csv'
 data = read_and_preprocess_data(input_dir, file)
 data_array = data.values[:, 1:].astype(float)
 firm_names = data.index
@@ -36,13 +36,12 @@ def perform_DBSCAN2(data_array, successful_params):
 
 
         labels = DBSCAN(min_samples=min_samples, eps=eps, metric='manhattan').fit(data_array).labels_
-        dbscan = DBSCAN(eps=eps, min_samples=min_samples, metric='manhattan')
 
-    return labels, dbscan
+    return labels
 
 
 if __name__ == "__main__":
-    labels, dbscan = perform_DBSCAN2(data_array, successful_params)
+    labels = perform_DBSCAN2(data_array, successful_params)
 
     # Get the unique cluster labels
     unique_labels = sorted(list(set(labels)))
@@ -55,4 +54,4 @@ if __name__ == "__main__":
     for i, firms in enumerate(clust):
         plot_clusters(unique_labels[i], firms, data.index, data_array)  # Use the imported function
 
-    # t_SNE(data_array, dbscan)
+    t_SNE(data_array, labels)
