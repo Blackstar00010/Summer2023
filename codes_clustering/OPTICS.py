@@ -26,4 +26,4 @@ for i, cluster in enumerate(cluster_labels):
 for i, firms in enumerate(clusters):
     plot_clusters(unique_labels[i], firms, data.index, mat)
 
-t_SNE(mat, clust)
+t_SNE(mat, cluster_labels)

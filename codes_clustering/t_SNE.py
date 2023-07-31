@@ -5,13 +5,12 @@ from sklearn import datasets, manifold
 from matplotlib.ticker import NullFormatter
 
 
-def t_SNE(data, cluster):
+def t_SNE(data, clusters):
     '''
     :param data: Mom data after PCA
-    :param cluster: Original clutering data
+    :param clusters: Original clutering data
     '''
     perplexities = [5, 30, 50, 100]
-    clusters = cluster.fit_predict(data)
 
     # t-SNE를 사용하여 2차원으로 차원 축소
 

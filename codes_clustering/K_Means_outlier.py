@@ -56,32 +56,27 @@ def outliers(data_array, firm_names, K):
     for i in range(len(clusters_index)):
         clust.append(clusters_index[i])
 
-    return clust, kmeans
+    return clust
 
 
 def perform_kmeans(k_values, data_array, firm_names):
     clusters_k = []
-    kmean_data = []
     for k in k_values:
-        clust, kmeans = outliers(data_array, firm_names, k)
+        clust = outliers(data_array, firm_names, k)
         clusters_k.append(clust)
-        kmean_data.append(kmeans)
-    return clusters_k, kmean_data
+    return clusters_k
 
 
 if __name__ == "__main__":
     # Define the number of clusters k
     k_values = [5, 10]
 
-    clusters_k, kmean_data = perform_kmeans(k_values, data_array, firm_names)
+    clusters_k = perform_kmeans(k_values, data_array, firm_names)
     # Print the clusters for each k value & plot the clusters
     for i, clusters in enumerate(clusters_k):
         print(f'Clusters for k = {k_values[i]}:')
         for j, firms in enumerate(clusters):
             plot_clusters(j - 1, firms, firm_names, data_array)  # Use the imported function
-
-    for i, kmeans in enumerate(kmean_data):
-        t_SNE(data_array, kmeans)
 
 '''first = False
 if first:

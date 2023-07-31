@@ -50,4 +50,4 @@ if __name__ == "__main__":
     for i, firms in enumerate(clust):
         plot_clusters(unique_labels[i], firms, data.index, data_array)  # Use the imported function
 
-    # t_SNE(data_array, dbscan)
+    t_SNE(data_array, dbscan)
