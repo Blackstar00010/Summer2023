@@ -10,8 +10,8 @@ data = read_and_preprocess_data(input_dir, file)
 data_array = data.values[:, 1:].astype(float)
 firm_names = data.index
 
-eps_values = np.linspace(0.01, 5., 100)
-min_samples_values = range(2, 21)
+eps_values = np.linspace(0.01, 3., 300)
+min_samples_values = range(2, 20)
 
 successful_params = successful_params(data_array, eps_values, min_samples_values)
 
@@ -55,4 +55,4 @@ if __name__ == "__main__":
     for i, firms in enumerate(clust):
         plot_clusters(unique_labels[i], firms, data.index, data_array)  # Use the imported function
 
-    t_SNE(data_array, dbscan)
+    # t_SNE(data_array, dbscan)
