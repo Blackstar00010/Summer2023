@@ -10,30 +10,22 @@ data = read_and_preprocess_data(input_dir, file)
 data_array = data.values[:, 1:].astype(float)
 firm_names = data.index
 
-ms = int(math.log(len(data_array)))
-
-nbrs = NearestNeighbors(n_neighbors=ms + 1).fit(data_array)
-distances, indices = nbrs.kneighbors(data_array)
-
-# 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
-avg_distances = np.mean(distances[:, 1:], axis=1)
-
-# 결과 출력
-print("Average distances to the nearest MinPts neighbor points:")
-print(avg_distances)
-
 
 def perform_DBSCAN(data_array):
     ms = int(math.log(len(data_array)))
 
-    nbrs = NearestNeighbors(n_neighbors=ms + 1).fit(data)
-    distances, indices = nbrs.kneighbors(data)
-
     # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
+    nbrs = NearestNeighbors(n_neighbors=ms + 1).fit(data_array)
+    distances, indices = nbrs.kneighbors(data_array)
     avg_distances = np.mean(distances[:, 1:], axis=1)
-    avg_distances = sum(avg_distances) / len(data_array)
 
-    eps = 0.4 * avg_distances
+    # Sort the average distances in ascending order
+    sorted_distances = np.sort(avg_distances)
+
+    # Calculate the index for the alpha percentile (alpha)
+    alpha_percentile_index = int(len(sorted_distances) * 0.9)
+
+    eps = sorted_distances[alpha_percentile_index]
 
     print(ms)
     print(eps)
