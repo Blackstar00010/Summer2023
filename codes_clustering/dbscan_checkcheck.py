@@ -1,6 +1,5 @@
 from _table_generate import *
 from sklearn.cluster import DBSCAN
-import numpy as np
 
 
 def successful_params(data, eps_values, min_samples_values):
