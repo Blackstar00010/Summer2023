@@ -31,7 +31,6 @@ def perform_DBSCAN(data_array):
     print(eps)
 
     labels = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(data_array).labels_
-    dbscan = DBSCAN(min_samples=ms, eps=eps, metric='manhattan')
 
     return labels
 
