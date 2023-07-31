@@ -42,7 +42,8 @@ def reversal_table_generate(data, output_dir, file):
     firm_lists = data.index
     firm_sorted = sorted(firm_lists, key=lambda x: data.loc[x, '0'])
     long_short = [0] * len(firm_sorted)
-    for i in range(10):
+    t=int(len(firm_lists)*0.1)
+    for i in range(t):
         long_short[i] = 1
         long_short[-i - 1] = -1
 
