@@ -38,14 +38,8 @@ def perform_DBSCAN(data_array):
     print(ms)
     print(eps)
 
-    lab = True
-    if lab:
-        # 결과 출력
-        print("Average distances to the nearest MinPts neighbor points:")
-        print(avg_distances)
-
-        labels = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(data_array).labels_
-        dbscan = DBSCAN(min_samples=ms, eps=eps, metric='manhattan')
+    labels = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(data_array).labels_
+    dbscan = DBSCAN(min_samples=ms, eps=eps, metric='manhattan')
 
     return labels, dbscan
 
