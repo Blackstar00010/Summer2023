@@ -60,7 +60,7 @@ def find_outliers_hac(threshold):
     return outliers
 
 
-outliers = find_outliers_hac(0.9)
+outliers = find_outliers_hac(0.5)
 
 for i in range(0, len(outliers)):
     for j in range(0, len(clusters)):

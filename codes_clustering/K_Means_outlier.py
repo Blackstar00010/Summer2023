@@ -6,7 +6,7 @@ from _Cluster_Plot import plot_clusters
 # Performs just one CSV file
 # Read data from CSV file
 input_dir = '../files/PCA/PCA(1-48)_adj'
-file = '2017-01.csv'
+file = '2016-12.csv'
 # file = '1992-09.csv'
 data = read_and_preprocess_data(input_dir, file)
 data_array = data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
@@ -30,8 +30,7 @@ def outliers(data_array, firm_names, K):
     outliers = [[] for _ in range(K)]  # Cluster별 outliers' distance 분류
     for i, cluster in enumerate(clusters):
         for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
-            if distance == 0 or distance / max(
-                    cluster) >= 0.5:  # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 85%이상이면 outlier 분류
+            if distance == 0 or distance / max(cluster) >= 0.1:  # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 85%이상이면 outlier 분류
                 outliers[i].append(distance)
 
     outliers_index = []  # Cluster별 outliers's index 분류
@@ -71,7 +70,7 @@ def perform_kmeans(k_values, data_array, firm_names):
 
 if __name__ == "__main__":
     # Define the number of clusters k
-    k_values = [5, 10]
+    k_values = [10]
 
     clusters_k, kmean_data = perform_kmeans(k_values, data_array, firm_names)
     # Print the clusters for each k value & plot the clusters
