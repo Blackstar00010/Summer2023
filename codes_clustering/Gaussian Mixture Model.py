@@ -101,4 +101,4 @@ clusters.insert(0, outliers)
 for i, firms in enumerate(clusters):
     plot_clusters(unique_labels[i] - 1, firms, data.index, mat)
 
-t_SNE(mat, dpgmm)
+t_SNE(mat, cluster_labels)

@@ -1,19 +1,22 @@
-from _table_generate import *
-from _Cluster_Plot import plot_clusters
-from sklearn.cluster import OPTICS
+import math
 from t_SNE import *
+from sklearn.cluster import OPTICS
+from _Cluster_Plot import plot_clusters
+from sklearn.neighbors import NearestNeighbors
 
 # 파일 불러오기
 input_dir = '../files/PCA/PCA(1-48)'
 file = '1993-01.csv'
 data = read_and_preprocess_data(input_dir, file)
-mat = data.values[:, 1:].astype(float)
+data_array = data.values[:, 1:].astype(float)
+
+ms = int(math.log(len(data_array)))
 
 # 1. OPTICS
-clust = OPTICS(min_samples=3, xi=0.1, min_cluster_size=3)
+clust = OPTICS(min_samples=ms, xi=0.1, min_cluster_size=3)
 # min_samples = 포함할 최소 데이터 수, xi = 거리, min_cluster_size = 생성될 최소 군집 수
 
-cluster_labels = clust.fit_predict(mat)
+cluster_labels = clust.fit_predict(data_array)
 
 unique_labels = list(set(cluster_labels))
 
@@ -24,6 +27,6 @@ for i, cluster in enumerate(cluster_labels):
 
 # 2. Print and plot the clusters
 for i, firms in enumerate(clusters):
-    plot_clusters(unique_labels[i], firms, data.index, mat)
+    plot_clusters(unique_labels[i], firms, data.index, data_array)
 
-t_SNE(mat, clust)
+t_SNE(data_array, cluster_labels)

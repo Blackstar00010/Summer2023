@@ -5,13 +5,12 @@ from sklearn import datasets, manifold
 from matplotlib.ticker import NullFormatter
 
 
-def t_SNE(data, cluster):
+def t_SNE(data, clusters):
     '''
     :param data: Mom data after PCA
-    :param cluster: Original clutering data
+    :param clusters: Original clutering data
     '''
     perplexities = [5, 30, 50, 100]
-    clusters = cluster.fit_predict(data)
 
     # t-SNE를 사용하여 2차원으로 차원 축소
 
@@ -41,6 +40,42 @@ def t_SNE(data, cluster):
         plt.show()
         print()
 
+def t_SNE2(data, cluster):
+    '''
+    :param data: Mom data after PCA
+    :param clusters: Original clutering data
+    '''
+    perplexities = [5, 30, 50, 100]
+
+    clusters=cluster.fit_predict(data)
+
+    # t-SNE를 사용하여 2차원으로 차원 축소
+
+    for i in range(4):
+        perplexity=perplexities[i]
+
+        tsne = manifold.TSNE(
+            n_components=2,
+            random_state=0,
+            perplexity=perplexity,
+            learning_rate="auto",
+            n_iter=1000,
+        )
+
+        X_tsne = tsne.fit_transform(data)
+        plt.figure(figsize=(8, 6))
+        plt.suptitle("Perplexity=%d" % perplexity)
+        sc = plt.scatter(X_tsne[:, 0], X_tsne[:, 1], c=clusters, cmap='plasma')
+
+        plt.title('t-SNE Visualization')
+        plt.xlabel('t-SNE Dimension 1')
+        plt.ylabel('t-SNE Dimension 2')
+
+        # 클러스터 라벨을 추가하여 범례(legend) 표시
+        handles, labels = sc.legend_elements()
+        plt.legend(handles, labels)
+        plt.show()
+        print()
 
 if __name__ == "__main__":
     n_samples = 150

@@ -1,4 +1,4 @@
-from dbscan_single import *
+from dbscan1 import *
 
 # Directory containing the input files
 input_dir = '../files/PCA/PCA(1-48)_adj'

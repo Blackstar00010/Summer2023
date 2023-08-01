@@ -1,12 +1,11 @@
-import matplotlib.pyplot as plt
-from _table_generate import *
 from _Cluster_Plot import plot_clusters
 from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import *
+from t_SNE import *
 
 # 데이터 불러오기
 input_dir = '../files/PCA/PCA(1-48)'
-file = '2018-01.csv'
+file = '1993-01.csv'
 data = read_and_preprocess_data(input_dir, file)
 mat = data.values[:, 1:].astype(float)
 
@@ -34,6 +33,7 @@ copheric_dis = cophenet(Z)
 copheric_dis_matrix = squareform(copheric_dis)
 # cophenet: dendrogram과 original data 사이 similarity을 나타내는 correlation coefficient
 # 숫자가 클 수록 원본데이터와 유사도가 떨어짐. dendrogram에서 distance의미.
+
 
 
 # Cluster k개 생성
@@ -76,3 +76,5 @@ for i, cluster_label in enumerate(clusters):
 # 3. Print and plot the clusters
 for i, firms in enumerate(clust):
     plot_clusters(unique_labels[i] - 1, firms, data.index, mat)  # Use the imported function
+
+t_SNE(mat, clusters)
