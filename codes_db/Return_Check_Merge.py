@@ -45,7 +45,7 @@ result_df.set_index('Clustering Method', inplace=True)
 
 lab=True
 if lab:
-    file = '../files/monthly_return_of_index.csv'
+    file = '../files/month_return.csv'
     df = pd.read_csv(file)
     df = df.iloc[1:] # Jan data eliminate
     df = df.iloc[0:, 1:] # save only data
@@ -61,8 +61,12 @@ if lab:
 # Add 1 to all data values
 result_df.iloc[:, 0:] = result_df.iloc[:, 0:] + 1
 
+print(result_df)
+
 # Calculate the cumulative product
 result_df.iloc[:, 0:] = result_df.iloc[:, 0:].cumprod(axis=1)
+
+print(result_df)
 
 # Subtract 1 to get back to the original scale
 result_df.iloc[:, 0:] = result_df.iloc[:, 0:] - 1

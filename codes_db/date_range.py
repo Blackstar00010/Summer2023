@@ -1,8 +1,7 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 
 # Load the CSV file
-df = pd.read_csv('../files/history/index_close_mret.csv')
+df = pd.read_csv('../files/history/index_close_m.csv')
 
 # Convert the date column to datetime
 df['Date'] = pd.to_datetime(df['Date'])
@@ -18,4 +17,4 @@ filtered_df = filtered_df.T
 filtered_df = filtered_df.iloc[:2]
 
 # Save the filtered data to a new CSV file
-filtered_df.to_csv('../files/monthly_return_of_index.csv', index=False)
+filtered_df.to_csv('../files/monthly_return.csv', index=False)
