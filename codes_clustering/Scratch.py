@@ -1,7 +1,8 @@
 from _table_generate import *
 from sklearn.cluster import DBSCAN
 from dbscan_checkcheck import successful_params
-dbscan=False
+
+dbscan = False
 if dbscan:
     input_dir = '../files/PCA/PCA(1-48)'
     file = '2022-12.csv'
@@ -44,5 +45,3 @@ Reversal = sorted(filename for filename in os.listdir(input_dir))
 for file in Reversal:
     data = read_and_preprocess_data(input_dir, file)
     reversal_table_generate(data, output_dir, file)
-
-

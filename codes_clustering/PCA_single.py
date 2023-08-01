@@ -110,6 +110,7 @@ if __name__ == "__main__":
     print('-' * 100)
     print(data)
     print(data_normalized)
+    print(data_normalized.mean())
     # Graph after PCA
     mat_new = pca.inverse_transform(pca_mat)
 
