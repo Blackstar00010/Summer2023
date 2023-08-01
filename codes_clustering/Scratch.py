@@ -44,3 +44,5 @@ Reversal = sorted(filename for filename in os.listdir(input_dir))
 for file in Reversal:
     data = read_and_preprocess_data(input_dir, file)
     reversal_table_generate(data, output_dir, file)
+
+

@@ -43,13 +43,13 @@ def new_table_generate(data, clusters, output_dir, file):
 
     for cluster_num, firms in enumerate(clusters):
         # Sort firms based on momentum_1
-        firms_sorted = sorted(firms, key=lambda x: data.loc[x, '1'])
+        firms_sorted = sorted(firms, key=lambda x: data.loc[x, '0'])
         long_short = [0] * len(firms_sorted)
         mom_diffs = []
 
         for i in range(len(firms_sorted) // 2):
             # Calculate the mom1 difference for each pair
-            mom_diff = abs(data.loc[firms_sorted[i], '1'] - data.loc[firms_sorted[-i - 1], '1'])
+            mom_diff = abs(data.loc[firms_sorted[i], '0'] - data.loc[firms_sorted[-i - 1], '0'])
             mom_diffs.append(mom_diff)
 
         # Calculate the cross-sectional standard deviation of all pairs' mom1 differences
@@ -57,14 +57,14 @@ def new_table_generate(data, clusters, output_dir, file):
 
         for i in range(len(firms_sorted) // 2):
             # Only assign long-short indices if the mom1 difference is greater than the standard deviation
-            if abs(data.loc[firms_sorted[i], '1'] - data.loc[firms_sorted[-i - 1], '1']) > std_dev:
+            if abs(data.loc[firms_sorted[i], '0'] - data.loc[firms_sorted[-i - 1], '0']) > std_dev:
                 long_short[i] = 1  # 1 to the low ones
                 long_short[-i - 1] = -1  # -1 to the high ones
                 # 0 to middle point when there are odd numbers in a cluster
 
         # Add the data to the new table
         for i, firm in enumerate(firms_sorted):
-            LS_table.loc[len(LS_table)] = [firm, data.loc[firm, '1'], long_short[i], cluster_num + 1]
+            LS_table.loc[len(LS_table)] = [firm, data.loc[firm, '0'], long_short[i], cluster_num + 1]
 
     # Save the output to a CSV file in the output directory
     LS_table.to_csv(os.path.join(output_dir, file), index=False)

@@ -20,7 +20,6 @@ for file in kmeans:
     if n_sample <= k_values[0]:
         continue
 
-    clusters_k = perform_kmeans(k_values, data_array, firm_names)
-
+    clusters_k, kmean_data = perform_kmeans(k_values, data_array, firm_names)
     for i, clusters in enumerate(clusters_k):
         new_table_generate(data, clusters, output_dir, file)
