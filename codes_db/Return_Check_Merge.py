@@ -47,13 +47,17 @@ lab=True
 if lab:
     file = '../files/month_return.csv'
     df = pd.read_csv(file)
+    column_name=pd.read_csv('../files/position_LS/result_adj.csv')
+    column_name=column_name.iloc[:,0]
+    column_name= list(column_name)
+    column_name.append('Reversal')
+    column_name.append('Benchmark')
     df = df.iloc[1:]  # Jan data eliminate
     df = df.iloc[0:, 1:]  # save only data
     df.columns = result_df.columns  # columns name should be same with result_df
     result_df = pd.concat([result_df, df], axis=0)  # add monthly_return right below result_df
-    result_df.index = ['Gaussian', 'Agglomerative', 'K_Means_Outlier', 'OPTICS', 'Reversal', 'Market']
+    result_df.index = column_name
     result_df = result_df.astype(float)  # set data type as float(df.value was str actually.)
-    print(result_df)
 
 # # Save a new CSV file
 # result_df.to_csv('../files/position_LS/result_adj.csv', index=False)
@@ -61,12 +65,8 @@ if lab:
 # Add 1 to all data values
 result_df.iloc[:, 0:] = result_df.iloc[:, 0:] + 1
 
-print(result_df)
-
 # Calculate the cumulative product
 result_df.iloc[:, 0:] = result_df.iloc[:, 0:].cumprod(axis=1)
-
-print(result_df)
 
 # Subtract 1 to get back to the original scale
 result_df.iloc[:, 0:] = result_df.iloc[:, 0:] - 1
