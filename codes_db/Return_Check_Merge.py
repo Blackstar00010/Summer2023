@@ -31,6 +31,7 @@ for filename in os.listdir(directory):
 # Add a new column to the result DataFrame with the file names
 result_df.insert(0, 'Clustering Method', file_names)
 
+
 # Separate the 'Clustering Method' column from the date columns
 clustering_method = result_df['Clustering Method']
 date_columns_df = result_df.drop('Clustering Method', axis=1)
@@ -43,20 +44,21 @@ date_columns_df = date_columns_df.sort_index(axis=1)
 result_df = pd.concat([clustering_method, date_columns_df], axis=1)
 result_df.set_index('Clustering Method', inplace=True)
 file_names.append('Benchmark')
+
 lab=True
 if lab:
     file = '../files/month_return.csv'
     df = pd.read_csv(file)
-
     df = df.iloc[1:]  # Jan data eliminate
     df = df.iloc[0:, 1:]  # save only data
     df.columns = result_df.columns  # columns name should be same with result_df
     result_df = pd.concat([result_df, df], axis=0)  # add monthly_return right below result_df
     result_df.index = file_names
-    result_df = result_df.astype(float)  # set data type as float(df.value was str actually.)
+    result_df=result_df.astype(float)  # set data type as float(df.value was str actually.)
 
 # # Save a new CSV file
-# result_df.to_csv('../files/position_LS/result_adj.csv', index=False)
+result_df = result_df.fillna(0)
+result_df.to_csv('../files/position_LS/result_adj.csv', index=True)
 
 # Add 1 to all data values
 result_df.iloc[:, 0:] = result_df.iloc[:, 0:] + 1
@@ -79,22 +81,6 @@ plt.xticks(rotation=45)
 plt.legend(result_df.index)  # Add a legend to distinguish different lines
 plt.tight_layout()
 plt.show()
-
-
-'''# all in one
-plt.figure(figsize=(10, 6))
-
-for i in range(len(result_df)):
-    plt.plot(result_df.columns[1:], result_df.iloc[i, 1:], label=result_df.iloc[i, 0])
-
-plt.title('Average Values Over Time')
-plt.xlabel('Date')
-plt.ylabel('Average Value')
-plt.xticks(rotation=45)
-plt.legend()  # Add a legend to distinguish different lines
-plt.tight_layout()
-plt.show()'''
-
 
 # Plot a graph for each row
 for i in range(len(result_df)):
