@@ -4,7 +4,7 @@ from sklearn.cluster import OPTICS
 
 # 파일 불러오기
 input_dir = '../files/PCA/PCA(1-48)'
-file = '1993-01.csv'
+file = '2018-01.csv'
 data = read_and_preprocess_data(input_dir, file)
 data_array = data.values[:, 1:].astype(float)
 firm_names = data.index

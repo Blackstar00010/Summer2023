@@ -4,19 +4,10 @@ from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import GridSearchCV
 from t_SNE import *
 
-
 def gmm_bic_score(estimator, X):
     """Callable to pass to GridSearchCV that will use the BIC score."""
     # Make it negative since GridSearchCV expects a score to maximize
     return -estimator.bic(X)
-
-
-'''
-바꾼 이유
-GMM-EM을 사용하면 Cluster 수를 지정해줘야 하기 때문에 최적 Cluster 못찾음.
-(BayesianGaussianMixture는 Cluster 수를 데이터로부터 알아서 추론.)
-outlier 구하기 위해 sklearn에 함수 사용
-'''
 
 
 def GMM(data, threshold):
@@ -100,7 +91,7 @@ def GMM(data, threshold):
 if __name__ == "__main__":
     # 파일 불러오기
     input_dir = '../files/PCA/PCA(1-48)'
-    file = '1993-01.csv'
+    file = '2018-01.csv'
     data = read_and_preprocess_data(input_dir, file)
     mat = data.values[:, 1:].astype(float)
 
@@ -176,11 +167,15 @@ if __name__ == "__main__":
     # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
     clusters.insert(0, outliers)
 
-    print(clusters)
-    print(len(clusters))
-
     # 4. Print and plot the clusters
     for i, firms in enumerate(clusters):
         plot_clusters(unique_labels[i] - 1, firms, data.index, mat)
 
     t_SNE(mat, cluster_labels)
+
+'''
+바꾼 이유
+GMM-EM을 사용하면 Cluster 수를 지정해줘야 하기 때문에 최적 Cluster 못찾음.
+(BayesianGaussianMixture는 Cluster 수를 데이터로부터 알아서 추론.)
+outlier 구하기 위해 sklearn에 함수 사용
+'''
