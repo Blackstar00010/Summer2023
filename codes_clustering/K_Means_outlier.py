@@ -79,8 +79,8 @@ if __name__ == "__main__":
         for j, firms in enumerate(clusters):
             plot_clusters(j - 1, firms, firm_names, data_array)  # Use the imported function
 
-    for i, kmeans in enumerate(kmean_data):
-        t_SNE(data_array, kmeans)
+    # for i, kmeans in enumerate(kmean_data):
+    #     t_SNE(data_array, kmeans)
 
 '''first = False
 if first:

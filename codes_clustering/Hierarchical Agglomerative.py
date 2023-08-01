@@ -72,6 +72,7 @@ unique_labels = sorted(list(set(clusters)))
 clust = [[] for _ in unique_labels]
 for i, cluster_label in enumerate(clusters):
     clust[unique_labels.index(cluster_label)].append(data.index[i])
+    print(clust)
 
 # 3. Print and plot the clusters
 for i, firms in enumerate(clust):
