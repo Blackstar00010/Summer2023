@@ -42,21 +42,17 @@ date_columns_df = date_columns_df.sort_index(axis=1)
 # Concat the 'Clustering Method' column back with the sorted date columns
 result_df = pd.concat([clustering_method, date_columns_df], axis=1)
 result_df.set_index('Clustering Method', inplace=True)
-
+file_names.append('Benchmark')
 lab=True
 if lab:
     file = '../files/month_return.csv'
     df = pd.read_csv(file)
-    column_name=pd.read_csv('../files/position_LS/result_adj.csv')
-    column_name=column_name.iloc[:,0]
-    column_name= list(column_name)
-    column_name.append('Reversal')
-    column_name.append('Benchmark')
+
     df = df.iloc[1:]  # Jan data eliminate
     df = df.iloc[0:, 1:]  # save only data
     df.columns = result_df.columns  # columns name should be same with result_df
     result_df = pd.concat([result_df, df], axis=0)  # add monthly_return right below result_df
-    result_df.index = column_name
+    result_df.index = file_names
     result_df = result_df.astype(float)  # set data type as float(df.value was str actually.)
 
 # # Save a new CSV file

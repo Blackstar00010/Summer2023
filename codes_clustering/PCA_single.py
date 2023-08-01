@@ -3,8 +3,7 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
 # 파일 불러오기 및 PCA함수
-
-input_dir = '../files/momentum'
+input_dir = '../files/momentum_adj'
 file = '2022-12.csv'
 data = read_and_preprocess_data(input_dir, file)
 mat = data.values.astype(float)
@@ -12,11 +11,11 @@ mat = data.values.astype(float)
 mom1 = mat[:, 0]
 
 # mom1을 제외한 mat/PCA(2-49)
-mat = np.delete(mat, 0, axis=1)
-
+# mat = np.delete(mat, 0, axis=1)
 
 # # mom49를 제외한 mat/PCA(1-48)
-# mat = np.delete(mat, 48, axis=1)
+mat = np.delete(mat, 48, axis=1)
+
 
 def get_pca_data(data, n_components=2):
     pca = PCA(n_components=n_components)
@@ -58,10 +57,10 @@ if __name__ == "__main__":
         else:
             n_components -= 1
 
-    pca = PCA(n_components + 1)
+    pca = PCA(n_components + 2)
     pca.fit(mat)
     t = variance_ratio(pca)
-    n_components = n_components + 1
+    n_components = n_components + 2
 
     # 2. PCA
     # get_pd_from_pca에 넣을 columns 생성
@@ -100,11 +99,11 @@ if __name__ == "__main__":
     print(mat_pd_pca)
     print(df_combined)
 
-    # Graph after PCA
-    mat_new = pca.inverse_transform(pca_mat)
-
-    # 3. Mom1-Mom2 PCA before after
-    plt.scatter(mat[:, 0], mat[:, 1], alpha=0.2)
-    plt.scatter(mat_new[:, 0], mat_new[:, 1], alpha=0.8)
-    plt.axis('equal')
-    plt.show()
+    # # Graph after PCA
+    # mat_new = pca.inverse_transform(pca_mat)
+    #
+    # # 3. Mom1-Mom2 PCA before after
+    # plt.scatter(mat[:, 0], mat[:, 1], alpha=0.2)
+    # plt.scatter(mat_new[:, 0], mat_new[:, 1], alpha=0.8)
+    # plt.axis('equal')
+    # plt.show()

@@ -40,10 +40,10 @@ for file in momentum:
         else:
             n_components -= 1
 
-    pca = PCA(n_components + 1)
+    pca = PCA(n_components + 2)
     pca.fit(mat)
     t = variance_ratio(pca)
-    n_components = n_components + 1
+    n_components = n_components + 2
 
     # 3. PCA 진행 및 결과
 
@@ -74,9 +74,6 @@ for file in momentum:
     combined_matrix = np.hstack((first_column_matrix, mat_pd_pca_matrix))
     df_combined = pd.DataFrame(combined_matrix)
     df_combined.index = data.index
-    '''print(file)
-    print(n_components)
-    print(t)'''
 
     # 4. Save CSV
     # Column format: ['Original Mom1', 'data after PCA', ...]
