@@ -21,16 +21,15 @@ def perform_DBSCAN2(data_array, successful_params):
     if lab:
         output = []
 
-        for i, example in enumerate(successful_params):
-            for j in range(1):
-                eps = example[j]
-                ms = example[j + 1]
+        for set in successful_params:
+            eps = set[0]
+            ms = set[1]
 
-                labels = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(data_array).labels_
+            labels = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(data_array).labels_
 
-                score = silhouette_score(data_array, labels)
-                # silhouette score 높을 수록 클러스터링 잘 된것. from -1 to 1
-                output.append([ms, eps, score])
+            score = silhouette_score(data_array, labels)
+            # silhouette score 높을 수록 클러스터링 잘 된것. from -1 to 1
+            output.append([ms, eps, score])
 
         min_samples, eps, score = sorted(output, key=lambda x: x[-1])[-1]
 

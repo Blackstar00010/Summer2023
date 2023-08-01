@@ -45,7 +45,7 @@ if __name__ == "__main__":
     for i, cluster_label in enumerate(labels):
         clust[unique_labels.index(cluster_label)].append(data.index[i])
 
-    # 3. Print and plot the clusters
+    # Print and plot the clusters
     for i, firms in enumerate(clust):
         plot_clusters(unique_labels[i], firms, data.index, data_array)  # Use the imported function
 

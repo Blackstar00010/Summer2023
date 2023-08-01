@@ -5,8 +5,6 @@ input_dir = '../files/PCA/PCA(1-48)_adj'
 output_dir = '../files/Clustering_adj/DBSCAN'
 DBSCAN = sorted(filename for filename in os.listdir(input_dir))
 
-# Directory to save the output files
-
 
 for file in DBSCAN:
     # Read CSV file and delete +-inf values

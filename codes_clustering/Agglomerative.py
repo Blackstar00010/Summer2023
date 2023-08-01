@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 from _table_generate import *
-from _Cluster_Plot import plot_clusters
 from scipy.spatial.distance import pdist, squareform
 from sklearn.cluster import AgglomerativeClustering
 from scipy.cluster.hierarchy import *
