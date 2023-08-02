@@ -1,6 +1,4 @@
-from _table_generate import *
-from sklearn.decomposition import PCA
-from PCA_single import *
+from codes_clustering.PCA_and_tSNE import *
 
 # 파일 불러오기
 input_dir = '../files/momentum_adj'
@@ -16,7 +14,7 @@ for file in momentum:
     df_combined=generate_PCA_File(data)
     print(file)
 
-    # 4. Save CSV
-    # Column format: ['Original Mom1', 'data after PCA', ...]
-    output_file = os.path.join(output_dir, file)
-    df_combined.to_csv(output_file, index=True)
+    # # 4. Save CSV
+    # # Column format: ['Original Mom1', 'data after PCA', ...]
+    # output_file = os.path.join(output_dir, file)
+    # df_combined.to_csv(output_file, index=True)

@@ -1,4 +1,4 @@
-from _table_generate import *
+from Trash._table_generate import *
 from sklearn.cluster import DBSCAN
 from dbscan_checkcheck import successful_params
 

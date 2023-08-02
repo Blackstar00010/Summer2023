@@ -1,6 +1,6 @@
 import pandas as pd
 import hdbscan
-from _Cluster_Plot import plot_clusters
+from Trash._Cluster_Plot import plot_clusters
 
 # Read data from CSV file
 data = pd.read_csv('../files/momentum/2010-01.csv', index_col=0)

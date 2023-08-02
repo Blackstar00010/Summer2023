@@ -1,4 +1,4 @@
-from Gaussian_Mixture_Model import *
+from Trash.Gaussian_Mixture_Model import *
 
 # 파일 불러오기
 input_dir = '../files/PCA/PCA(1-48)_adj'

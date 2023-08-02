@@ -1,8 +1,8 @@
 from t_SNE import *
-from _Cluster_Plot import *
+from Trash._Cluster_Plot import *
 from sklearn.cluster import DBSCAN
 from sklearn.metrics import silhouette_score
-from dbscan_checkcheck import successful_params
+from Trash.dbscan_checkcheck import successful_params
 
 
 def perform_DBSCAN2(data_array, successful_params):

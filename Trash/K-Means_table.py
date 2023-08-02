@@ -1,6 +1,6 @@
 import os
 from _table_generate import read_and_preprocess_data, new_table_generate
-from K_Means import perform_kmeans
+from Trash.K_Means import perform_kmeans
 
 # Define the number of clusters k
 k_values = [5, 10]

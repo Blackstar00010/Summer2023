@@ -1,4 +1,4 @@
-from Hierarchical_Agglomerative import *
+from Trash.Hierarchical_Agglomerative import *
 # 파일 불러오기
 input_dir = '../files/PCA/PCA(1-48)_adj'
 output_dir = '../files/Clustering_adj/Hierarchical_Agglomerative'

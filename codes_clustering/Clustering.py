@@ -1,18 +1,16 @@
-import os
 import math
-import pandas as pd
 import numpy as np
-from sklearn.decomposition import PCA
+import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
+from sklearn.cluster import OPTICS
+from sklearn.cluster import DBSCAN
+from sklearn.neighbors import NearestNeighbors
 from sklearn import mixture
 from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import GridSearchCV
-from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import *
-from sklearn.cluster import OPTICS
-from sklearn.cluster import DBSCAN
-
-from sklearn.neighbors import NearestNeighbors
+from scipy.spatial.distance import pdist, squareform
 
 
 class Clustering:
@@ -24,6 +22,12 @@ class Clustering:
         self.Gaussian = []
         self.OPTIC = []
         self.HDBSCAN = []
+        self.K_Mean_labels = []
+        self.DBSCAN_labels = []
+        self.Agglomerative_labels = []
+        self.Gaussian_labels = []
+        self.OPTIC_labels = []
+        self.HDBSCAN_labels = []
 
     def outliers(self, K):
         data_array = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
@@ -32,6 +36,7 @@ class Clustering:
         kmeans = KMeans(n_clusters=K, n_init=10, random_state=0)
         kmeans.fit(data_array)
         cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
+        self.K_Mean_labels = cluster_labels
         distance = kmeans.fit_transform(data_array)  # Distance btw K central points and each point
         cluster_distance_min = np.min(distance, axis=1)  # Distance between the point and the central point
 
@@ -119,12 +124,16 @@ class Clustering:
         min_row_index = df.iloc[:, 1].idxmin()
         min_row_covariance = df.iloc[min_row_index, 0]
 
-        # Optimal Cluster
         n_components = 40
+        clusters = [[] for _ in range(40)]
+        if len(mat) < 40:
+            n_components = len(mat)
+            clusters = [[] for _ in range(len(mat))]
+
+        # Optimal Cluster
+
         dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type=min_row_covariance).fit(mat)
         cluster_labels = dpgmm.predict(mat)
-
-        clusters = [[] for _ in range(40)]
 
         for i, cluster_num in enumerate(cluster_labels):
             clusters[cluster_num].append(i)
@@ -136,6 +145,7 @@ class Clustering:
         # Outlier
         dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type=min_row_covariance).fit(mat)
         cluster_labels = dpgmm.predict(mat)
+        self.Gaussian_labels = cluster_labels
 
         clusters = [[] for _ in range(n_components)]
 
@@ -190,6 +200,7 @@ class Clustering:
         # Cluster k개 생성
         k = 10
         clusters = fcluster(Z, k, criterion='maxclust')
+        self.Agglomerative_labels = clusters
 
         # 2. Outlier
 
@@ -225,6 +236,8 @@ class Clustering:
 
         labels = OPTICS(cluster_method='xi', metric='braycurtis').fit(data_array).labels_
 
+        self.OPTIC_labels = labels
+
         # Get the unique cluster labels
         unique_labels = sorted(list(set(labels)))
 
@@ -252,6 +265,7 @@ class Clustering:
         eps = sorted_distances[alpha_percentile_index]
 
         cluster_labels = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(self.PCA_Data).labels_
+        self.DBSCAN_labels = cluster_labels
 
         # Get the unique cluster labels
         unique_labels = sorted(list(set(cluster_labels)))
@@ -260,94 +274,11 @@ class Clustering:
         for i, cluster_label in enumerate(cluster_labels):
             clust[unique_labels.index(cluster_label)].append(self.PCA_Data.index[i])
 
-        self.DBSCAN=clust
+        self.DBSCAN = clust
         return self.DBSCAN
 
 
-def read_and_preprocess_data(input_dir, file) -> pd.DataFrame:
-    data = pd.read_csv(os.path.join(input_dir, file), index_col=0)
-
-    # Replace infinities with NaN
-    data.replace([np.inf, -np.inf], np.nan, inplace=True)
-    # Drop rows with NaN values
-    data.dropna(inplace=True)
-
-    return data
-
-
-def get_pca_data(data, n_components=2):
-    pca = PCA(n_components=n_components)
-    pca.fit(data)
-    return pca.transform(data), pca
-
-
-def get_pd_from_pca(pca_data, cols=None):
-    if cols is None:
-        cols = ['pca_component_{}'.format(i + 1) for i in range(pca_data.shape[1])]
-    return pd.DataFrame(pca_data, columns=cols)
-
-
-def variance_ratio(pca):
-    sum = np.sum(pca.explained_variance_ratio_)
-    return sum
-
-
-def print_variance_ratio(pca):
-    print('variance_ratio: ', pca.explained_variance_ratio_)
-    print('sum of variance_ratio: ', np.sum(pca.explained_variance_ratio_))
-
-
-def generate_PCA_Data(data: pd.DataFrame):
-    mom1 = data.values.astype(float)[:, 0]
-    data_normalized = (data - data.mean()) / data.std()
-
-    mat = data_normalized.values.astype(float)
-
-    # mom1을 제외한 mat/PCA(2-49)
-    # mat = np.delete(mat, 0, axis=1)
-
-    # # mom49를 제외한 mat/PCA(1-48)
-    mat = np.delete(mat, 48, axis=1)
-
-    # 1. Searching optimal n_components
-    if len(data) < 20:
-        n_components = len(data)
-
-    else:
-        n_components = 20
-
-    pca = PCA(n_components)
-    pca.fit(mat)
-    t = variance_ratio(pca)
-
-    while t > 0.99:
-        n_components -= 1
-        pca = PCA(n_components)
-        pca.fit(mat)
-        t = variance_ratio(pca)
-
-    while t < 0.99:
-        n_components += 1
-        pca = PCA(n_components)
-        pca.fit(mat)
-        t = variance_ratio(pca)
-
-    # 2. PCA
-    pca_mat, pca = get_pca_data(mat, n_components=n_components)
-    mat_pd_pca = get_pd_from_pca(pca_mat)
-    mat_pd_pca_matrix = mat_pd_pca.values
-
-    # Original Mom1 Combining
-    first_column = mom1
-    first_column_matrix = np.array(first_column).reshape(-1, 1)
-    combined_matrix = np.hstack((first_column_matrix, mat_pd_pca_matrix))
-    df_combined = pd.DataFrame(combined_matrix)
-    df_combined.index = data.index
-
-    return df_combined
-
-
-class LS_Table:
+class Result_Check_and_Save:
 
     def __init__(self, data: pd.DataFrame):
         self.PCA_Data = data
@@ -387,9 +318,8 @@ class LS_Table:
 
         # # Save the output to a CSV file in the output directory
         # LS_table.to_csv(os.path.join(output_dir, file), index=False)
-        # print(output_dir)
-        # print(file)
-
+        print(output_dir)
+        print(file)
 
     def reversal_table_generate(self, data, output_dir, file):
         LS_table_reversal = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short'])
@@ -407,190 +337,70 @@ class LS_Table:
         # # Save the output to a CSV file in the output directory
         # LS_table_reversal.to_csv(os.path.join(output_dir, file), index=False)
 
-        # print(output_dir)
-        # print(file)
+        print(output_dir)
+        print(file)
 
+    def plot_clusters_KMean(self, clusters):
+        firm_names = self.PCA_Data.index
+        data_array = self.PCA_Data.values[:, 1:].astype(float)
 
-class Companies:
-    def __init__(self, code_list: list):
-        """
-        :param code_list: list of RIC codes
-        """
-        self.ric_codes = code_list
-        self.isins = []
-        self.cusips = []
-        self.sedols = []
-        self._data_list = []
-        self._raw_data_list = []
+        for i, cluster in enumerate(clusters):
+            for j, firms in enumerate(cluster):
 
-    def fetch_symb(self, symb_type: str) -> pd.DataFrame:
-        """
-        Returns translation dataframe of ISIN/CUSIP/SEDOL.
-        :param symb_type: 'ISIN', 'CUSIP' or 'SEDOL'
-        :return: pd.DataFrame of columns 'RIC' and 'ISIN'/'CUSIP'/'SEDOL'
-        """
-        result = ek.get_symbology(self.ric_codes, from_symbol_type='RIC', to_symbol_type=symb_type)
-        result = result.reset_index()
-        result = result.rename(columns={'index': 'RIC'})
-        try:
-            symb = result[['RIC', symb_type]]
-        except KeyError:
-            result[symb_type] = ''
-            symb = result[['RIC', symb_type]]
-        except ek.EikonError as eke:
-            print('Error code: ', eke.code)
-            symb = self.fetch_symb(symb_type=symb_type)
-        return symb
+                if j == 0:
+                    print(f'Noise: {firms}')
+                    title = 'Noise'
+                else:
+                    print(f'Cluster {j}: {firms}')
+                    title = f'Cluster {j}'
 
-    def fetch_isin(self) -> pd.DataFrame:
-        """
-        Returns translation dataframe of ISIN Codes. Recommend using `fetch_symb('ISIN')` instead.
-        :return: pd.DataFrame of columns `RIC` and `ISIN`
-        """
-        self.isins = self.fetch_symb('ISIN')
-        return self.isins
+                # Plot the line graph for firms in the cluster
+                for firm in firms:
+                    firm_index = list(firm_names).index(firm)
+                    firm_data = data_array[firm_index]
 
-    def fetch_cusip(self) -> pd.DataFrame:
-        """
-        Returns translation dataframe of CUSIP Codes. Recommend using `fetch_symb('CUSIP')` instead.
-        :return: pd.DataFrame of columns `RIC` and `CUSIP`
-        """
-        self.cusips = self.fetch_symb('CUSIP')
-        return self.cusips
+                    plt.plot(range(1, len(firm_data) + 1), firm_data, label=firm)
 
-    def fetch_sedol(self) -> pd.DataFrame:
-        """
-        Returns translation dataframe of SEDOL Codes. Recommend using `fetch_symb('SEDOL')` instead.
-        :return: pd.DataFrame of columns `RIC` and `SEDOL`
-        """
-        self.sedols = self.fetch_symb('SEDOL')
-        return self.sedols
+                plt.xlabel('Characteristics')
+                plt.ylabel('Data Value')
+                plt.title(title)
 
-    def fetch_data(self, tr_list, start='1983-01-01', end='2023-06-30', period='FY') -> pd.DataFrame:
-        """
-        Fetches and returns data in pandas DataFrame without error.
-        This DataFrame is stored in this instance, so to view previous fetches, use show_history() function.
-        :param tr_list: list-like data of TR fields (e.g. ['TR.SharesOutstanding', 'TR.Revenue']
-        :param start: the first date to fetch data, in the format 'YYYY-MM-DD' (e.g. '1983-01-01')
-        :param end: the last date to fetch data, in the format 'YYYY-MM-DD' (e.g. '2020-12-31')
-        :param period: period of which the data is fetched. 'FY' by default (e.g. 'FY', 'FS', 'FQ', 'daily')
-        :return: DataFrame that contains RIC codes in 'Instrument' column and other data in columns named after TR field names
-        """
-        if len(start.split('-')) != 3 or len(end.split('-')) != 3:
-            raise ValueError('start and end values should be given in the format of "YYYY-MM-DD". ')
-        if period not in ['FY', 'FS', 'FQ', 'daily']:
-            raise ValueError('period value should be given as either "FY", "FS", "FQ", or "daily". ')
-        if type(tr_list) != list:
-            tr_list = [item for item in tr_list]
+                # List the firm names on the side of the graph
+                if len(firms) <= 10:
+                    plt.legend(loc='center right')
+                else:
+                    plt.legend(loc='center right', title=f'Total Firms: {len(firms)}', labels=firms[:10] + ['...'])
 
-        tr_and_date_list = tr_list + [item + '.CALCDATE' for item in tr_list]
-        tr_and_date_list.sort()
-        fields = []
-        [fields.append(ek.TR_Field(tr_item)) for tr_item in tr_and_date_list]
+                plt.show()
 
-        datedict = {"SDate": start, "EDate": end, 'Curn': 'GBP', 'Period': 'period' + '0', 'Frq': period}
+    def plot_clusters(self, cluster):
+        firm_names = self.PCA_Data.index
+        data_array = self.PCA_Data.values[:, 1:].astype(float)
 
-        try:
-            df, err = ek.get_data(self.ric_codes, fields, parameters=datedict, field_name=True)
-            self._raw_data_list.append(df)
-            for col in df.columns:
-                if col.count('.') < 2:  # if not calcdate
-                    continue
-                df[col] = df[col].astype(str)
-                df.loc[:, col] = df.loc[:, col].str[:10]
-                df[col].replace("<NA>", float('NaN'), inplace=True)
-                df[col].replace("", float('NaN'), inplace=True)
-            self._data_list.append(df)
-            return df
-        except ek.EikonError as eke:
-            print('Error code: ', eke.code)
-            if eke.code in _not_my_fault:
-                # sleep(1)
-                return self.fetch_data(tr_list, start=start, end=end, period=period)
-            elif eke.code == 429:
-                beep()
-                raise RuntimeError('Code 429: reached API calls limit')
+        for j, firms in enumerate(cluster):
+
+            if j == 0:
+                print(f'Noise: {firms}')
+                title = 'Noise'
             else:
-                raise RuntimeError('An error occurred; read the message above!')
+                print(f'Cluster {j}: {firms}')
+                title = f'Cluster {j}'
 
-    def fetch_price_data(self, start='2010-01-01', end='2023-06-30') -> pd.DataFrame:
-        """
-        Fetches and returns ohlc+v data in pandas DataFrame without error.
-        This DataFrame is stored in this instance, so to view previous fetches, use show_history() function.
-        :param start: the first date to fetch data, in the format 'YYYY-MM-DD' (e.g. '1983-01-01')
-        :param end: the last date to fetch data, in the format 'YYYY-MM-DD' (e.g. '2020-12-31')
-        :return: DataFrame that contains RIC codes in 'Instrument' column and other data in columns named after TR field names
-        """
-        if len(start.split('-')) != 3 or len(end.split('-')) != 3:
-            raise ValueError('start and end values should be given in the format of "YYYY-MM-DD". ')
+            # Plot the line graph for firms in the cluster
+            for firm in firms:
+                firm_index = list(firm_names).index(firm)
+                firm_data = data_array[firm_index]
 
-        tr_list = ['TR.OPENPRICE', 'TR.HIGHPRICE', 'TR.LOWPRICE', 'TR.CLOSEPRICE', 'TR.Volume']
-        tr_and_date_list = tr_list + [item + '.CALCDATE' for item in tr_list]
-        tr_and_date_list.sort()
-        fields = []
-        [fields.append(ek.TR_Field(tr_item)) for tr_item in tr_and_date_list]
+                plt.plot(range(1, len(firm_data) + 1), firm_data, label=firm)
 
-        datedict = {"SDate": start, "EDate": end, 'Curn': 'GBP'}
+            plt.xlabel('Characteristics')
+            plt.ylabel('Data Value')
+            plt.title(title)
 
-        df, err = ek.get_data(self.ric_codes, fields, parameters=datedict, field_name=True)
-        self._raw_data_list.append(df)
-        for col in df.columns:
-            if col[-9:] != '.CALCDATE':
-                continue
-            df[col] = df[col].astype(str)
-            df.loc[:, col] = df.loc[:, col].str[:10]
-            df[col].replace("<NA>", float('NaN'), inplace=True)
-            df[col].replace("", float('NaN'), inplace=True)
-        self._data_list.append(df)
-        return df
+            # List the firm names on the side of the graph
+            if len(firms) <= 10:
+                plt.legend(loc='center right')
+            else:
+                plt.legend(loc='center right', title=f'Total Firms: {len(firms)}', labels=firms[:10] + ['...'])
 
-    def get_history(self, index=None, raw=False) -> list:
-        """
-        Returns previous fetch(es) of data.
-        :param index: The indices of history (e.g. -1 -> last fetch, 0 -> first fetch, [0, -1] -> first and last fetch, None -> all)
-        :param raw: True if you want to fetch the history of raw data
-        :return: list of dataframe(s)
-        """
-        ret_list = self._raw_data_list if raw else self._data_list
-        if index is None:
-            return ret_list
-        elif type(index) is list:
-            return [ret_list[i] for i in index]
-        elif type(index) is int:
-            return [ret_list[index]]
-
-    def comp_specific_data(self, ric_code, raw=False) -> pd.DataFrame:
-        """
-        Returns a DataFrame whose Instrument column is ric_code from the last fetch
-        :param ric_code: the code of the firm to get
-        :param raw: True if you want to fetch from the last raw data
-        :return: DataFrame whose Instrument column is ric_code from the last fetch
-        """
-        if len(self.get_history(raw=raw)) < 1:
-            raise IndexError('No data has been fetched yet.')
-        last_df = self.get_history(-1, raw=raw)[0]
-        return last_df[last_df['Instrument'] == ric_code]
-
-    def set_history(self, dataframes, raw=False) -> None:
-        """
-        Sets the list of fetch history to the given dataframes.
-        :param dataframes: the list to set history as.
-        :param raw: True if you want to set the history of raw data
-        :return: None
-        """
-        if type(dataframes) is list:
-            self._data_list = dataframes if not raw else self._data_list
-            self._raw_data_list = dataframes if raw else self._raw_data_list
-        elif type(dataframes) is pd.DataFrame:
-            self._data_list = [dataframes] if not raw else self._data_list
-            self._raw_data_list = [dataframes] if raw else self._raw_data_list
-        else:
-            raise TypeError("The parameter given to set_history() should be a list or a pd.DataFrame.")
-
-    def clear_history(self, raw=False) -> None:
-        """
-        Clears all data history
-        :param raw: True if you want to clear the history of raw data
-        :return: None
-        """
-        self.set_history([], raw=raw)
+            plt.show()

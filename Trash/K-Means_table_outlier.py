@@ -1,4 +1,4 @@
-from K_Means_outlier import *
+from Trash.K_Means_outlier import *
 
 k_values = [10]
 input_dir = '../files/PCA/PCA(1-48)_adj'
