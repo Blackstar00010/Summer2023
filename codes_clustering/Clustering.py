@@ -3,12 +3,10 @@ import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
-from sklearn.cluster import OPTICS
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import KMeans, OPTICS, DBSCAN, HDBSCAN
 from sklearn.neighbors import NearestNeighbors
 from sklearn import mixture
-from sklearn.mixture import GaussianMixture
+from sklearn.mixture import BayesianGaussianMixture
 from sklearn.model_selection import GridSearchCV
 from scipy.cluster.hierarchy import *
 from scipy.spatial.distance import pdist, squareform
@@ -194,42 +192,11 @@ class Clustering:
         self.DBSCAN = clust
         return self.DBSCAN
 
-    def gmm_bic_score(self, estimator, X):
-        '''Callable to pass to GridSearchCV that will use the BIC score.
-        Make it negative since GridSearchCV expects a score to maximize.
-        BIC = T*ln(sum of squared residuals) + n*ln(T)
-        T = number of sample / n = number of parameter
-        The more residuals increase, the bigger BIC score.
-        ToDo: BIC Test를 위해 필요한데 작동원리 모르겠음.'''
-        return -estimator.bic(X)
-
     def GMM(self, threshold):
 
         mat = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Gaussian Mixture Model
-        # Optimal covariance
-        param_grid = {
-            "covariance_type": ["spherical", "tied", "diag", "full"],
-        }
-        grid_search = GridSearchCV(
-            GaussianMixture(), param_grid=param_grid, scoring=self.gmm_bic_score
-        )
-        grid_search.fit(mat)
-
-        df = pd.DataFrame(grid_search.cv_results_)[
-            ["param_covariance_type", "mean_test_score"]
-        ]
-        df["mean_test_score"] = -df["mean_test_score"]
-        df = df.rename(
-            columns={
-                "param_covariance_type": "Type of covariance",
-                "mean_test_score": "BIC score",
-            }
-        )
-
-        min_row_index = df.iloc[:, 1].idxmin()
-        min_row_covariance = df.iloc[min_row_index, 0]
 
         n_components = 40
         clusters = [[] for _ in range(40)]
@@ -239,7 +206,7 @@ class Clustering:
 
         # Optimal Cluster
 
-        dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type=min_row_covariance).fit(mat)
+        dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type="spherical").fit(mat)
         cluster_labels = dpgmm.predict(mat)
 
         for i, cluster_num in enumerate(cluster_labels):
@@ -250,7 +217,7 @@ class Clustering:
         n_components = n_components - len(empty_cluster_indices)
 
         # Clustering
-        dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type=min_row_covariance).fit(mat)
+        dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type="spherical").fit(mat)
         cluster_labels = dpgmm.predict(mat)
         self.Gaussian_labels = cluster_labels
 

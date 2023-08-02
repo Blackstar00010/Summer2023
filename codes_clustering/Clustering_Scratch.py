@@ -1,7 +1,8 @@
 import Clustering as C
 from PCA_and_tSNE import *
 
-file = '1999-01.csv'
+# file to check
+file = '1992-01.csv'
 
 # Plot K_mean cluster about individual csv file
 K_Mean = False
@@ -71,7 +72,7 @@ if dbscan:
     t_SNE(df_combined, Do_Clustering.DBSCAN_labels)
 
 # Plot GMM cluster about individual csv file
-GMM = False
+GMM = True
 if GMM:
     input_dir = '../files/momentum_adj'
 
@@ -86,8 +87,8 @@ if GMM:
     # Do clustering and get 2D list of cluster index
     Do_Clustering.Gaussian = Do_Clustering.GMM(0.1)
 
-    # # Plot clustering result
-    # Do_Result_Plot.Plot_clusters(Do_Clustering.Gaussian)
+    # Plot clustering result
+    Do_Result_Plot.Plot_clusters(Do_Clustering.Gaussian)
 
     # Plot t_SNE result
     t_SNE(df_combined, Do_Clustering.Gaussian_labels)
