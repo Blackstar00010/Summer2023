@@ -7,7 +7,7 @@ eps_values = np.linspace(0.01, 3., 100)
 min_samples_values = range(2, 20)
 
 for file in files:
-
+    print(file)
     data=read_and_preprocess_data(input_dir, file)
     df_combined=generate_PCA_Data(data)
 

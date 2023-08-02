@@ -95,9 +95,6 @@ class Clustering:
 
         mat = self.PCA_Data.values[:, 1:].astype(float)
 
-        if len(mat) < 10:
-            breakpoint()
-
         # 1. Gaussian Mixture Model
         # Optimal covariance
         param_grid = {
@@ -254,9 +251,6 @@ class Clustering:
 
         eps = sorted_distances[alpha_percentile_index]
 
-        print(ms)
-        print(eps)
-
         cluster_labels = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(self.PCA_Data).labels_
 
         # Get the unique cluster labels
@@ -393,8 +387,8 @@ class LS_Table:
 
         # # Save the output to a CSV file in the output directory
         # LS_table.to_csv(os.path.join(output_dir, file), index=False)
-        print(output_dir)
-        print(file)
+        # print(output_dir)
+        # print(file)
 
 
     def reversal_table_generate(self, data, output_dir, file):
@@ -413,8 +407,8 @@ class LS_Table:
         # # Save the output to a CSV file in the output directory
         # LS_table_reversal.to_csv(os.path.join(output_dir, file), index=False)
 
-        print(output_dir)
-        print(file)
+        # print(output_dir)
+        # print(file)
 
 
 class Companies:
