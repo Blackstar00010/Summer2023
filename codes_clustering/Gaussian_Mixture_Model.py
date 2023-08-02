@@ -91,7 +91,7 @@ def GMM(data, threshold):
 if __name__ == "__main__":
     # 파일 불러오기
     input_dir = '../files/PCA/PCA(1-48)_adj'
-    file = '2018-01.csv'
+    file = '2022-12.csv'
     data = read_and_preprocess_data(input_dir, file)
     mat = data.values[:, 1:].astype(float)
 
@@ -100,22 +100,17 @@ if __name__ == "__main__":
     param_grid = {
         "covariance_type": ["spherical", "tied", "diag", "full"],
     }
-    grid_search = GridSearchCV(
-        GaussianMixture(), param_grid=param_grid, scoring=gmm_bic_score
-    )
+    grid_search = GridSearchCV(GaussianMixture(), param_grid=param_grid, scoring=gmm_bic_score)
     grid_search.fit(mat)
 
-    df = pd.DataFrame(grid_search.cv_results_)[
-        ["param_covariance_type", "mean_test_score"]
-    ]
+    df = pd.DataFrame(grid_search.cv_results_)[["param_covariance_type", "mean_test_score"]]
     df["mean_test_score"] = -df["mean_test_score"]
     df = df.rename(
         columns={
             "param_covariance_type": "Type of covariance",
-            "mean_test_score": "BIC score",
-        }
-    )
+            "mean_test_score": "BIC score"})
 
+    print(df)
     min_row_index = df.iloc[:, 1].idxmin()
     min_row_covariance = df.iloc[min_row_index, 0]
     print(min_row_covariance)

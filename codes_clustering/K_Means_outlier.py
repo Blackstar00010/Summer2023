@@ -20,7 +20,7 @@ def outliers(data_array, firm_names, K):
     outliers = [[] for _ in range(K)]  # Cluster별 outliers' distance 분류
     for i, cluster in enumerate(clusters):
         for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
-            if distance == 0 or distance / max(cluster) >= 0.25:  # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 85%이상이면 outlier 분류
+            if distance == 0 or distance / max(cluster) >= 0.5:  # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 85%이상이면 outlier 분류
                 outliers[i].append(distance)
 
     outliers_index = []  # Cluster별 outliers's index 분류

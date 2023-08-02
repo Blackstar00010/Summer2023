@@ -26,6 +26,8 @@ if __name__ == "__main__":
 
     t_SNE(data_array, labels)
 
+
+
 '''good
 cityblock
 euclidean

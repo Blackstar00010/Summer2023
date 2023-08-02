@@ -30,9 +30,16 @@ def perform_DBSCAN(data_array):
     print(ms)
     print(eps)
 
-    labels = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(data_array).labels_
+    cluster_labels = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(data_array).labels_
 
-    return labels
+    # Get the unique cluster labels
+    unique_labels = sorted(list(set(cluster_labels)))
+
+    clust = [[] for _ in unique_labels]
+    for i, cluster_label in enumerate(cluster_labels):
+        clust[unique_labels.index(cluster_label)].append(data.index[i])
+
+    return clust
 
 
 if __name__ == "__main__":
