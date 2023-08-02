@@ -28,29 +28,3 @@ if __name__ == "__main__":
 
 
 
-'''good
-cityblock
-euclidean
-l2
-braycurtis
-
-
-bad
-cosine
-l1
-manhattan
-correlation
-dice
-hamming
-jaccard
-kulsinski
-mahalanobis
-minkowski
-rogerstanimoto
-russellrao
-seuclidean
-sokalsneath
-yule
-canberra
-chebyshev
-sqeuclidean'''

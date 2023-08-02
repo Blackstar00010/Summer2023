@@ -1,3 +1,4 @@
+import os
 import math
 import numpy as np
 import pandas as pd
@@ -22,6 +23,7 @@ class Clustering:
         self.Gaussian = []
         self.OPTIC = []
         self.HDBSCAN = []
+
         self.K_Mean_labels = []
         self.DBSCAN_labels = []
         self.Agglomerative_labels = []
@@ -29,7 +31,11 @@ class Clustering:
         self.OPTIC_labels = []
         self.HDBSCAN_labels = []
 
-    def outliers(self, K):
+    def outliers(self, K: int):
+        '''
+        :param K: int
+        :return: 2D list
+        '''
         data_array = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
         firm_names = self.PCA_Data.index
 
@@ -76,24 +82,125 @@ class Clustering:
         for i in range(len(clusters_index)):
             clust.append(clusters_index[i])
 
-        return clust, cluster_labels
+        return clust
 
-    def perform_kmeans(self, k_values) -> pd.DataFrame:
+    def perform_kmeans(self, k_values: list):
+        '''
+        :param k_values: list
+        :return: 3D list
+        '''
         clusters_k = []
         for k in k_values:
             n_sample = self.PCA_Data.shape[0]  # number of values in the file
             # Skip if the number of values are less than k
             if n_sample <= k_values[0]:
                 continue
-            clust, cluster_labels = self.outliers(k)
+            clust = self.outliers(k)
             clusters_k.append(clust)
 
         self.K_Mean = clusters_k
         return self.K_Mean
 
+    def HG(self, threshold: float):
+        mat = self.PCA_Data.values[:, 1:].astype(float)
+
+        # 1. Hierachical Agglomerative
+        # 거리 행렬 계산
+        dist_matrix = pdist(mat, metric='euclidean')  # data point pair 간의 euclidean distance/firm수 combination 2
+        distance_matrix = squareform(dist_matrix)
+
+        # 연결 매트릭스 계산
+        Z = linkage(dist_matrix, method='ward')  # ward method는 cluster 간의 variance를 minimize
+        '''we adopt the average linkage, which is defined as the average distance between
+        the data points in one cluster and the data points in another cluster
+        논문과는 다른 부분. average method대신 ward method 사용.
+        '''
+
+        # 덴드로그램 시각화
+        dendrogram(Z)
+        plt.title('Dendrogram')
+        plt.xlabel('Samples')
+        plt.ylabel('Distance')
+        plt.show()
+
+        # copheric distance 계산
+        copheric_dis = cophenet(Z)
+        copheric_dis_matrix = squareform(copheric_dis)
+        # cophenet: dendrogram과 original data 사이 similarity을 나타내는 correlation coefficient
+        # 숫자가 클 수록 원본데이터와 유사도가 떨어짐. dendrogram에서 distance의미.
+
+        print(max(copheric_dis))
+
+        # Cluster k개 생성
+        k = 10
+        clusters = fcluster(Z, k, criterion='maxclust')
+        self.Agglomerative_labels = clusters
+
+        # 2. Outlier
+
+        cluster_distances = []
+        for i in range(0, len(clusters)):
+            avg_cpr_distance = sum(copheric_dis_matrix[i]) / len(clusters)
+            # 각 회사별로 cophenet distance의 average distance를 구함.
+            cluster_distances.append(avg_cpr_distance)
+
+        # 클러스터링 결과 중 평균 거리 이상의 데이터 포인트를 outlier로 식별
+        outliers = np.where(np.array(cluster_distances) > max(copheric_dis) * threshold)[0]
+        # avg_cpr_distance가 max_cophenet distance의 alpha percentile보다 크면 outlier
+        '''In our empirical study, we specify the maximum distance rather than the number of clusters K, 
+        using a method similar to the method adopted for k-means clustering: 
+        e is set as an α percentile of the distances between a pair of nearest data points'''
+
+        for i in range(0, len(outliers)):
+            for j in range(0, len(clusters)):
+                if outliers[i] == j + 1:
+                    clusters[j + 1] = 0
+
+        unique_labels = sorted(list(set(clusters)))
+
+        clust = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(clusters):
+            clust[unique_labels.index(cluster_label)].append(self.PCA_Data.index[i])
+
+        self.Agglomerative = clust
+        return self.Agglomerative
+
+    def perform_DBSCAN(self):
+        ms = int(math.log(len(self.PCA_Data)))
+
+        # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
+        nbrs = NearestNeighbors(n_neighbors=ms + 1).fit(self.PCA_Data)
+        distances, indices = nbrs.kneighbors(self.PCA_Data)
+        avg_distances = np.mean(distances[:, 1:], axis=1)
+
+        # Sort the average distances in ascending order
+        sorted_distances = np.sort(avg_distances)
+
+        # Calculate the index for the alpha percentile (alpha)
+        alpha_percentile_index = int(len(sorted_distances) * 0.92)
+
+        eps = sorted_distances[alpha_percentile_index]
+
+        cluster_labels = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(self.PCA_Data).labels_
+        self.DBSCAN_labels = cluster_labels
+
+        # Get the unique cluster labels
+        unique_labels = sorted(list(set(cluster_labels)))
+
+        clust = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(cluster_labels):
+            clust[unique_labels.index(cluster_label)].append(self.PCA_Data.index[i])
+
+        self.DBSCAN = clust
+        return self.DBSCAN
+
     def gmm_bic_score(self, estimator, X):
-        """Callable to pass to GridSearchCV that will use the BIC score."""
-        # Make it negative since GridSearchCV expects a score to maximize
+        '''Callable to pass to GridSearchCV that will use the BIC score.
+        Make it negative since GridSearchCV expects a score to maximize.
+        BIC = T*ln(sum of squared residuals) + n*ln(T)
+        T = number of sample / n = number of parameter
+        The more residuals increase, the bigger BIC score.
+        ToDo: BIC Test를 위해 필요한데 작동원리 모르겠음.'''
         return -estimator.bic(X)
 
     def GMM(self, threshold):
@@ -142,7 +249,7 @@ class Clustering:
 
         n_components = n_components - len(empty_cluster_indices)
 
-        # Outlier
+        # Clustering
         dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type=min_row_covariance).fit(mat)
         cluster_labels = dpgmm.predict(mat)
         self.Gaussian_labels = cluster_labels
@@ -152,6 +259,7 @@ class Clustering:
         for i, cluster_num in enumerate(cluster_labels):
             clusters[cluster_num].append(self.PCA_Data.index[i])
 
+        # Outliers
         probabilities = dpgmm.predict_proba(mat)
 
         cluster_prob_mean = np.mean(probabilities, axis=0)
@@ -159,6 +267,7 @@ class Clustering:
         threshold = threshold
         outliers = []
 
+        # if the probabilities that tht firm is in that cluster are lower than threshold, that firm is outlier.
         for i, prob_mean in enumerate(cluster_prob_mean):
             if prob_mean < threshold:
                 outliers.append(clusters[i])
@@ -176,65 +285,10 @@ class Clustering:
 
         return self.Gaussian
 
-    def HG(self, threshold: float):
-        mat = self.PCA_Data.values[:, 1:].astype(float)
-
-        # 1. Hierachical Agglomerative
-        # 거리 행렬 계산
-        dist_matrix = pdist(mat, metric='euclidean')  # data point pair 간의 euclidean distance/firm수 combination 2
-        distance_matrix = squareform(dist_matrix)
-
-        # 연결 매트릭스 계산
-        Z = linkage(dist_matrix, method='ward')  # ward method는 cluster 간의 variance를 minimize
-        '''we adopt the average linkage, which is defined as the average distance between
-        the data points in one cluster and the data points in another cluster
-        논문과는 다른 부분. average method대신 ward method 사용.
-        '''
-
-        # copheric distance 계산
-        copheric_dis = cophenet(Z)
-        copheric_dis_matrix = squareform(copheric_dis)
-        # cophenet: dendrogram과 original data 사이 similarity을 나타내는 correlation coefficient
-        # 숫자가 클 수록 원본데이터와 유사도가 떨어짐. dendrogram에서 distance의미.
-
-        # Cluster k개 생성
-        k = 10
-        clusters = fcluster(Z, k, criterion='maxclust')
-        self.Agglomerative_labels = clusters
-
-        # 2. Outlier
-
-        cluster_distances = []
-        for i in range(0, len(clusters)):
-            avg_cpr_distance = sum(copheric_dis_matrix[i]) / len(clusters)
-            # 각 회사별로 cophenet distance의 average distance를 구함.
-            cluster_distances.append(avg_cpr_distance)
-
-        # 클러스터링 결과 중 평균 거리 이상의 데이터 포인트를 outlier로 식별
-        outliers = np.where(np.array(cluster_distances) > max(copheric_dis) * threshold)[0]
-        # avg_cpr_distance가 max_cophenet distance의 alpha percentile보다 크면 outlier
-        '''In our empirical study, we specify the maximum distance rather than the number of clusters K, 
-        using a method similar to the method adopted for k-means clustering: 
-        e is set as an α percentile of the distances between a pair of nearest data points'''
-
-        for i in range(0, len(outliers)):
-            for j in range(0, len(clusters)):
-                if outliers[i] == j + 1:
-                    clusters[j + 1] = 0
-
-        unique_labels = sorted(list(set(clusters)))
-
-        clust = [[] for _ in unique_labels]
-        for i, cluster_label in enumerate(clusters):
-            clust[unique_labels.index(cluster_label)].append(self.PCA_Data.index[i])
-
-        self.Agglomerative = clust
-        return self.Agglomerative
-
     def OPTICS(self):
         data_array = self.PCA_Data.values[:, 1:].astype(float)
 
-        labels = OPTICS(cluster_method='xi', metric='braycurtis').fit(data_array).labels_
+        labels = OPTICS(cluster_method='xi', metric='l2').fit(data_array).labels_
 
         self.OPTIC_labels = labels
 
@@ -248,34 +302,32 @@ class Clustering:
         self.OPTIC = clust
         return self.OPTIC
 
-    def perform_DBSCAN(self):
-        ms = int(math.log(len(self.PCA_Data)))
+    '''good
+    cityblock
+    euclidean
+    l2
+    braycurtis
 
-        # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
-        nbrs = NearestNeighbors(n_neighbors=ms + 1).fit(self.PCA_Data)
-        distances, indices = nbrs.kneighbors(self.PCA_Data)
-        avg_distances = np.mean(distances[:, 1:], axis=1)
 
-        # Sort the average distances in ascending order
-        sorted_distances = np.sort(avg_distances)
-
-        # Calculate the index for the alpha percentile (alpha)
-        alpha_percentile_index = int(len(sorted_distances) * 0.9)
-
-        eps = sorted_distances[alpha_percentile_index]
-
-        cluster_labels = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(self.PCA_Data).labels_
-        self.DBSCAN_labels = cluster_labels
-
-        # Get the unique cluster labels
-        unique_labels = sorted(list(set(cluster_labels)))
-
-        clust = [[] for _ in unique_labels]
-        for i, cluster_label in enumerate(cluster_labels):
-            clust[unique_labels.index(cluster_label)].append(self.PCA_Data.index[i])
-
-        self.DBSCAN = clust
-        return self.DBSCAN
+    bad
+    cosine
+    l1
+    manhattan
+    correlation
+    dice
+    hamming
+    jaccard
+    kulsinski
+    mahalanobis
+    minkowski
+    rogerstanimoto
+    russellrao
+    seuclidean
+    sokalsneath
+    yule
+    canberra
+    chebyshev
+    sqeuclidean'''
 
 
 class Result_Check_and_Save:
@@ -283,7 +335,7 @@ class Result_Check_and_Save:
     def __init__(self, data: pd.DataFrame):
         self.PCA_Data = data
 
-    def new_table_generate(self, Cluster, output_dir, file):
+    def LS_Table_Save(self, Cluster, output_dir, file):
         # New table with firm name, mom_1, long and short index, cluster index
         LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
 
@@ -316,12 +368,12 @@ class Result_Check_and_Save:
             for i, firm in enumerate(firms_sorted):
                 LS_table.loc[len(LS_table)] = [firm, self.PCA_Data.loc[firm, 0], long_short[i], cluster_num]
 
-        # # Save the output to a CSV file in the output directory
-        # LS_table.to_csv(os.path.join(output_dir, file), index=False)
+        # Save the output to a CSV file in the output directory
+        LS_table.to_csv(os.path.join(output_dir, file), index=False)
         print(output_dir)
         print(file)
 
-    def reversal_table_generate(self, data, output_dir, file):
+    def Reversal_Table_Save(self, data, output_dir, file):
         LS_table_reversal = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short'])
         firm_lists = data.index
         firm_sorted = sorted(firm_lists, key=lambda x: data.loc[x, '1'])
@@ -334,13 +386,12 @@ class Result_Check_and_Save:
         for i, firm in enumerate(firm_sorted):
             LS_table_reversal.loc[len(LS_table_reversal)] = [firm, data.loc[firm, '1'], long_short[i]]
 
-        # # Save the output to a CSV file in the output directory
-        # LS_table_reversal.to_csv(os.path.join(output_dir, file), index=False)
-
+        # Save the output to a CSV file in the output directory
+        LS_table_reversal.to_csv(os.path.join(output_dir, file), index=False)
         print(output_dir)
         print(file)
 
-    def plot_clusters_KMean(self, clusters):
+    def Plot_clusters_Kmean(self, clusters):
         firm_names = self.PCA_Data.index
         data_array = self.PCA_Data.values[:, 1:].astype(float)
 
@@ -373,7 +424,7 @@ class Result_Check_and_Save:
 
                 plt.show()
 
-    def plot_clusters(self, cluster):
+    def Plot_clusters(self, cluster):
         firm_names = self.PCA_Data.index
         data_array = self.PCA_Data.values[:, 1:].astype(float)
 

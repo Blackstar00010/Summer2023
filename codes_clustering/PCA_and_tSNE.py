@@ -7,6 +7,11 @@ from sklearn.decomposition import PCA
 
 
 def read_and_preprocess_data(input_dir, file) -> pd.DataFrame:
+    '''
+    :param input_dir: '../files/momentum_adj'
+    :param file: yyyy-mm.csv
+    :return: DataFrame
+    '''
     data = pd.read_csv(os.path.join(input_dir, file), index_col=0)
 
     # Replace infinities with NaN
@@ -19,7 +24,7 @@ def read_and_preprocess_data(input_dir, file) -> pd.DataFrame:
 
 def generate_PCA_Data(data: pd.DataFrame):
     '''
-    :param data: momentum_adj
+    :param data: momentum_data
     :return: Mom1+PCA_Data
     '''
 
@@ -63,7 +68,7 @@ def generate_PCA_Data(data: pd.DataFrame):
     mat_pd_pca = pd.DataFrame(pca_mat, columns=cols)
     mat_pd_pca_matrix = mat_pd_pca.values
 
-    # Original Mom1 Combining
+    # 3. combined mom1 and PCA data
     first_column_matrix = np.array(mom1).reshape(-1, 1)
     combined_matrix = np.hstack((first_column_matrix, mat_pd_pca_matrix))
     df_combined = pd.DataFrame(combined_matrix)
@@ -77,11 +82,13 @@ def t_SNE(data, cluster_labels):
     :param data: Mom1+PCA_Data
     :param cluster_labels: cluster_labels
     '''
-    perplexities = [5, 30, 50, 100]
+
+    '''이웃 data와 유사성을 얼마나 중요하게 고려할지 정하는 척도.
+    data set이 클수록 큰 perplexities 필요'''
+    perplexities = [5, 15, 20, 25, 35, 40]
 
     # t-SNE를 사용하여 2차원으로 차원 축소
-
-    for i in range(4):
+    for i in range(6):
         perplexity = perplexities[i]
 
         tsne = manifold.TSNE(
@@ -107,7 +114,7 @@ def t_SNE(data, cluster_labels):
         plt.show()
         print()
 
-
+# PCA_Result Check
 if __name__ == "__main__":
     # 파일 불러오기 및 PCA함수
     input_dir = '../files/momentum_adj'
