@@ -11,7 +11,7 @@ from scipy.spatial.distance import pdist, squareform
 
 
 class Clustering:
-    def __init__(self, data):
+    def __init__(self, data: pd.DataFrame):
         self.PCA_Data = data
         self.K_Mean = []
         self.DBSCAN = []
@@ -35,8 +35,8 @@ class Clustering:
         :return: 2D list
         '''
         firm_names = self.PCA_Data.index
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
-
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(
+            float)  # Exclude the first column (firm names) & Exclude MOM_1
 
         kmeans = KMeans(n_clusters=K, init='k-means++', n_init=10, max_iter=500, random_state=13).fit(self.PCA_Data)
         cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
@@ -166,7 +166,10 @@ class Clustering:
         return self.Agglomerative
 
     def perform_DBSCAN(self):
-        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
+        self.PCA_Data=pd.DataFrame(self.PCA_Data)
+        firm_names = self.PCA_Data.index
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(
+            float)  # Exclude the first column (firm names) & Exclude MOM_1
 
         ms = int(math.log(len(self.PCA_Data)))
 
@@ -186,16 +189,15 @@ class Clustering:
         dbscan = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(self.PCA_Data)
         cluster_labels = dbscan.labels_
 
-        self.test=dbscan
+        self.test = dbscan
         self.DBSCAN_labels = cluster_labels
-
 
         # Get the unique cluster labels
         unique_labels = sorted(list(set(cluster_labels)))
 
         clust = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(cluster_labels):
-            clust[unique_labels.index(cluster_label)].append(self.PCA_Data.index[i])
+            clust[unique_labels.index(cluster_label)].append(firm_names[i])
 
         self.DBSCAN = clust
         return self.DBSCAN

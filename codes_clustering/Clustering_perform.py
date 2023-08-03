@@ -1,3 +1,5 @@
+from sklearn import metrics
+
 import Clustering as C
 from PCA_and_tSNE import *
 
@@ -5,7 +7,7 @@ from PCA_and_tSNE import *
 file = '2000-08.csv'
 
 # Plot K_mean cluster about individual csv file
-K_Mean = True
+K_Mean = False
 if K_Mean:
     input_dir = '../files/momentum_adj'
 
@@ -65,11 +67,23 @@ if dbscan:
     # Do clustering and get 2D list of cluster index
     Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN()
 
+    print(Do_Clustering.DBSCAN)
+
     # Plot clustering result
     Do_Result_Plot.Plot_clusters(Do_Clustering.perform_DBSCAN())
 
     # Plot t_SNE result
     t_SNE(df_combined, Do_Clustering.DBSCAN_labels)
+
+    print(f"Homogeneity: {metrics.homogeneity_score(Do_Clustering.DBSCAN_labels_true, Do_Clustering.DBSCAN_labels):.3f}")
+    print(f"Completeness: {metrics.completeness_score(Do_Clustering.DBSCAN_labels_true, Do_Clustering.DBSCAN_labels):.3f}")
+    print(f"V-measure: {metrics.v_measure_score(Do_Clustering.DBSCAN_labels_true, Do_Clustering.DBSCAN_labels):.3f}")
+    print(f"Adjusted Rand Index: {metrics.adjusted_rand_score(Do_Clustering.DBSCAN_labels_true, Do_Clustering.DBSCAN_labels):.3f}")
+    print(
+        "Adjusted Mutual Information:"
+        f" {metrics.adjusted_mutual_info_score(Do_Clustering.DBSCAN_labels_true, Do_Clustering.DBSCAN_labels):.3f}"
+    )
+    print(f"Silhouette Coefficient: {metrics.silhouette_score(Do_Clustering.PCA_Data, Do_Clustering.DBSCAN_labels):.3f}")
 
 # Plot GMM cluster about individual csv file
 GMM = False
@@ -94,7 +108,7 @@ if GMM:
     t_SNE(df_combined, Do_Clustering.Gaussian_labels)
 
 # Plot OPTICS cluster about individual csv file
-optics = False
+optics = True
 if optics:
     input_dir = '../files/momentum_adj'
 

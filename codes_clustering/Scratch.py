@@ -27,7 +27,9 @@ if example:
     plt.figure(figsize=(12,8))
     sns.scatterplot(x='petal_length', y='petal_width', hue='species',style='species', s=100, data=iris_pd)
     #plt.scatter(x_kc, y_kc, s=100, color='r')
-    plt.scatter(iris_pd.iloc[:, 0], iris_pd.iloc[:, 1], c=Do_Clustering.test)
+    #plt.scatter(iris_pd.iloc[:, 0], iris_pd.iloc[:, 1], c=Do_Clustering.test)
+    plt.scatter(iris_pd.loc[:, 'petal_length'], iris_pd.loc[:, 'petal_width'], c=Do_Clustering.test, cmap='viridis',
+                s=100)
     plt.xlabel('petal_length')
     plt.ylabel('petal_width')
     plt.show()
