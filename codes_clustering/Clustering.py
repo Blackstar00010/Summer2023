@@ -99,7 +99,7 @@ class Clustering:
         self.K_Mean = clusters_k
         return self.K_Mean
 
-    def HG(self, threshold: float):
+    def perform_HG(self, threshold: float):
         mat = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Hierachical Agglomerative
@@ -192,7 +192,7 @@ class Clustering:
         self.DBSCAN = clust
         return self.DBSCAN
 
-    def GMM(self, threshold):
+    def perform_GMM(self, threshold):
 
         mat = self.PCA_Data.values[:, 1:].astype(float)
 
@@ -252,7 +252,7 @@ class Clustering:
 
         return self.Gaussian
 
-    def OPTICS(self):
+    def perform_OPTICS(self):
         data_array = self.PCA_Data.values[:, 1:].astype(float)
 
         labels = OPTICS(cluster_method='xi', metric='l2').fit(data_array).labels_

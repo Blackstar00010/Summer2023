@@ -2,10 +2,10 @@ import Clustering as C
 from PCA_and_tSNE import *
 
 # file to check
-file = '1992-01.csv'
+file = '2000-08.csv'
 
 # Plot K_mean cluster about individual csv file
-K_Mean = False
+K_Mean = True
 if K_Mean:
     input_dir = '../files/momentum_adj'
 
@@ -41,7 +41,7 @@ if Hierachical:
     Do_Result_Plot = C.Result_Check_and_Save(df_combined)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.Agglomerative = Do_Clustering.HG(0.6)
+    Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.6)
 
     # Plot clustering result
     Do_Result_Plot.Plot_clusters(Do_Clustering.Agglomerative)
@@ -66,13 +66,13 @@ if dbscan:
     Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN()
 
     # Plot clustering result
-    Do_Result_Plot.Plot_clusters(Do_Clustering.DBSCAN)
+    Do_Result_Plot.Plot_clusters(Do_Clustering.perform_DBSCAN())
 
     # Plot t_SNE result
     t_SNE(df_combined, Do_Clustering.DBSCAN_labels)
 
 # Plot GMM cluster about individual csv file
-GMM = True
+GMM = False
 if GMM:
     input_dir = '../files/momentum_adj'
 
@@ -85,7 +85,7 @@ if GMM:
     Do_Result_Plot = C.Result_Check_and_Save(df_combined)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.Gaussian = Do_Clustering.GMM(0.1)
+    Do_Clustering.Gaussian = Do_Clustering.perform_GMM(0.1)
 
     # Plot clustering result
     Do_Result_Plot.Plot_clusters(Do_Clustering.Gaussian)
@@ -107,7 +107,7 @@ if optics:
     Do_Result_Plot = C.Result_Check_and_Save(df_combined)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.OPTIC = Do_Clustering.OPTICS()
+    Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS()
 
     # Plot clustering result
     Do_Result_Plot.Plot_clusters(Do_Clustering.OPTIC)
@@ -132,9 +132,9 @@ if total:
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([10])
-        Do_Clustering.Gaussian = Do_Clustering.GMM(0.1)
-        Do_Clustering.Agglomerative = Do_Clustering.HG(0.5)
-        Do_Clustering.OPTIC = Do_Clustering.OPTICS()
+        Do_Clustering.Gaussian = Do_Clustering.perform_GMM(0.1)
+        Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.5)
+        Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS()
         Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN()
 
         # Save LS_Table CSV File

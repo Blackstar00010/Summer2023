@@ -85,10 +85,10 @@ def t_SNE(data, cluster_labels):
 
     '''이웃 data와 유사성을 얼마나 중요하게 고려할지 정하는 척도.
     data set이 클수록 큰 perplexities 필요'''
-    perplexities = [5, 15, 20, 25, 35, 40]
+    perplexities = [5, 15, 20, 25]
 
     # t-SNE를 사용하여 2차원으로 차원 축소
-    for i in range(6):
+    for i in range(4):
         perplexity = perplexities[i]
 
         tsne = manifold.TSNE(
