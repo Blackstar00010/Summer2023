@@ -27,19 +27,24 @@ class Clustering:
         self.OPTIC_labels = []
         self.HDBSCAN_labels = []
 
+        self.test = []
+
     def outliers(self, K: int):
         '''
         :param K: int
         :return: 2D list
         '''
-        data_array = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
         firm_names = self.PCA_Data.index
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
 
-        kmeans = KMeans(n_clusters=K, n_init=10, random_state=0)
-        kmeans.fit(data_array)
+
+        kmeans = KMeans(n_clusters=K, init='k-means++', n_init=10, max_iter=500, random_state=13).fit(self.PCA_Data)
         cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
+
+        self.test = kmeans
         self.K_Mean_labels = cluster_labels
-        distance = kmeans.fit_transform(data_array)  # Distance btw K central points and each point
+
+        distance = kmeans.fit_transform(self.PCA_Data)  # Distance btw K central points and each point
         cluster_distance_min = np.min(distance, axis=1)  # Distance between the point and the central point
 
         clusters = [[] for _ in range(K)]  # Cluster별 distance 분류
@@ -103,7 +108,6 @@ class Clustering:
         # 1. Hierachical Agglomerative
         # 거리 행렬 계산
         dist_matrix = pdist(mat, metric='euclidean')  # data point pair 간의 euclidean distance/firm수 combination 2
-        distance_matrix = squareform(dist_matrix)
 
         # 연결 매트릭스 계산
         Z = linkage(dist_matrix, method='ward')  # ward method는 cluster 간의 variance를 minimize
@@ -162,6 +166,8 @@ class Clustering:
         return self.Agglomerative
 
     def perform_DBSCAN(self):
+        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
+
         ms = int(math.log(len(self.PCA_Data)))
 
         # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
@@ -177,8 +183,12 @@ class Clustering:
 
         eps = sorted_distances[alpha_percentile_index]
 
-        cluster_labels = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(self.PCA_Data).labels_
+        dbscan = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(self.PCA_Data)
+        cluster_labels = dbscan.labels_
+
+        self.test=dbscan
         self.DBSCAN_labels = cluster_labels
+
 
         # Get the unique cluster labels
         unique_labels = sorted(list(set(cluster_labels)))
