@@ -4,15 +4,18 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans, OPTICS, DBSCAN, HDBSCAN
+from sklearn.metrics import silhouette_score
 from sklearn.neighbors import NearestNeighbors
 from sklearn.mixture import BayesianGaussianMixture
 from scipy.cluster.hierarchy import *
 from scipy.spatial.distance import pdist, squareform
 
-
 class Clustering:
     def __init__(self, data: pd.DataFrame):
         self.PCA_Data = data
+        self.index = data.index
+        self.test = []
+
         self.K_Mean = []
         self.DBSCAN = []
         self.Agglomerative = []
@@ -27,16 +30,13 @@ class Clustering:
         self.OPTIC_labels = []
         self.HDBSCAN_labels = []
 
-        self.test = []
-
     def outliers(self, K: int):
         '''
         :param K: int
         :return: 2D list
         '''
         firm_names = self.PCA_Data.index
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(
-            float)  # Exclude the first column (firm names) & Exclude MOM_1
+        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
 
         kmeans = KMeans(n_clusters=K, init='k-means++', n_init=10, max_iter=500, random_state=13).fit(self.PCA_Data)
         cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
@@ -102,6 +102,84 @@ class Clustering:
         self.K_Mean = clusters_k
         return self.K_Mean
 
+    def perform_DBSCAN(self):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
+
+        ms = int(math.log(len(self.PCA_Data)))
+
+        # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
+        nbrs = NearestNeighbors(n_neighbors=ms + 1).fit(self.PCA_Data)
+        distances, indices = nbrs.kneighbors(self.PCA_Data)
+        avg_distances = np.mean(distances[:, 1:], axis=1)
+
+        # Sort the average distances in ascending order
+        sorted_distances = np.sort(avg_distances)
+
+        # Calculate the index for the alpha percentile (alpha)
+        alpha_percentile_index = int(len(sorted_distances) * 0.90)
+
+        eps = sorted_distances[alpha_percentile_index]
+        print(eps)
+
+        dbscan = DBSCAN(min_samples=ms, eps=eps, metric='euclidean').fit(self.PCA_Data)
+        cluster_labels = dbscan.labels_
+
+        self.test = dbscan
+        self.DBSCAN_labels = cluster_labels
+
+        # Get the unique cluster labels
+        unique_labels = sorted(list(set(cluster_labels)))
+
+        clust = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(cluster_labels):
+            clust[unique_labels.index(cluster_label)].append(self.index[i])
+
+        self.DBSCAN = clust
+        return self.DBSCAN
+
+    def perform_DBSCAN2(self):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
+
+        output = []
+        eps_values = np.linspace(0.01, 5., 300)
+        min_samples_values = range(2,6)
+
+        for i, ms in enumerate(min_samples_values):
+            for j, eps in enumerate(eps_values):
+                dbscan = DBSCAN(min_samples=ms, eps=eps, metric='euclidean').fit(self.PCA_Data)
+                cluster_labels=dbscan.labels_
+
+                if len(list(set(cluster_labels)))==1:
+                    continue
+
+                # silhouette score 높을 수록 클러스터링 잘 된것. from -1 to 1
+                score = silhouette_score(self.PCA_Data, cluster_labels)
+                output.append([ms, eps, score])
+
+        min_samples, eps, score = sorted(output, key=lambda x: x[-1])[-1]
+        print(min_samples)
+        print(eps)
+        print(score)
+
+        dbscan = DBSCAN(min_samples=ms, eps=eps, metric='euclidean').fit(self.PCA_Data)
+        cluster_labels=dbscan.labels_
+
+        self.test=dbscan
+        self.DBSCAN_labels=cluster_labels
+
+        # Get the unique cluster labels
+        unique_labels = sorted(list(set(cluster_labels)))
+
+        cluster = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(cluster_labels):
+            cluster[unique_labels.index(cluster_label)].append(self.index[i])
+
+        self.DBSCAN = cluster
+        return self.DBSCAN
+
+
     def perform_HG(self, threshold: float):
         mat = self.PCA_Data.values[:, 1:].astype(float)
 
@@ -165,44 +243,7 @@ class Clustering:
         self.Agglomerative = clust
         return self.Agglomerative
 
-    def perform_DBSCAN(self):
-        self.PCA_Data=pd.DataFrame(self.PCA_Data)
-        firm_names = self.PCA_Data.index
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(
-            float)  # Exclude the first column (firm names) & Exclude MOM_1
-
-        ms = int(math.log(len(self.PCA_Data)))
-
-        # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
-        nbrs = NearestNeighbors(n_neighbors=ms + 1).fit(self.PCA_Data)
-        distances, indices = nbrs.kneighbors(self.PCA_Data)
-        avg_distances = np.mean(distances[:, 1:], axis=1)
-
-        # Sort the average distances in ascending order
-        sorted_distances = np.sort(avg_distances)
-
-        # Calculate the index for the alpha percentile (alpha)
-        alpha_percentile_index = int(len(sorted_distances) * 0.92)
-
-        eps = sorted_distances[alpha_percentile_index]
-
-        dbscan = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(self.PCA_Data)
-        cluster_labels = dbscan.labels_
-
-        self.test = dbscan
-        self.DBSCAN_labels = cluster_labels
-
-        # Get the unique cluster labels
-        unique_labels = sorted(list(set(cluster_labels)))
-
-        clust = [[] for _ in unique_labels]
-        for i, cluster_label in enumerate(cluster_labels):
-            clust[unique_labels.index(cluster_label)].append(firm_names[i])
-
-        self.DBSCAN = clust
-        return self.DBSCAN
-
-    def perform_GMM(self, threshold):
+    def perform_GMM(self, threshold: float):
 
         mat = self.PCA_Data.values[:, 1:].astype(float)
 

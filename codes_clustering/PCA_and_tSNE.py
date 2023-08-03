@@ -73,6 +73,7 @@ def generate_PCA_Data(data: pd.DataFrame):
     combined_matrix = np.hstack((first_column_matrix, mat_pd_pca_matrix))
     df_combined = pd.DataFrame(combined_matrix)
     df_combined.index = data.index
+    df_combined=pd.DataFrame(df_combined)
 
     return df_combined
 
@@ -118,7 +119,7 @@ def t_SNE(data, cluster_labels):
 if __name__ == "__main__":
     # 파일 불러오기 및 PCA함수
     input_dir = '../files/momentum_adj'
-    file = '1992-04.csv'
+    file = '2022-06.csv'
     data = read_and_preprocess_data(input_dir, file)
 
     mom1 = data.values.astype(float)[:, 0]
