@@ -12,7 +12,7 @@ iris = load_iris()
 iris_pd = pd.DataFrame(iris.data[:, 2:], columns=['petal_length', 'petal_width'])
 
 # Plot K_mean cluster about individual csv file
-example1 = False
+example1 = True
 if example1:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
@@ -87,7 +87,7 @@ if example3:
     Do_Clustering = C.Clustering(iris_pd)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS()
+    Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.6)
 
 
-    t_SNE(Do_Clustering.PCA_Data, Do_Clustering.OPTIC_labels)
+    t_SNE(Do_Clustering.PCA_Data, Do_Clustering.Agglomerative_labels)

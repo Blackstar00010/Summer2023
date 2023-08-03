@@ -30,7 +30,7 @@ if K_Mean:
         t_SNE(df_combined, Do_Clustering.K_Mean_labels)
 
 # Plot DBSCAN cluster about individual csv file
-dbscan = True
+dbscan = False
 if dbscan:
     input_dir = '../files/momentum_adj'
 
@@ -100,7 +100,7 @@ if dbscan2:
         f"Silhouette Coefficient: {metrics.silhouette_score(Do_Clustering.PCA_Data, Do_Clustering.DBSCAN_labels):.3f}")
 
 # Plot Agglomerative cluster about individual csv file
-Hierachical = False
+Hierachical = True
 if Hierachical:
     input_dir = '../files/momentum_adj'
 
