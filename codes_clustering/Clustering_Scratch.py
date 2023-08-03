@@ -5,7 +5,7 @@ from PCA_and_tSNE import *
 file = '2000-08.csv'
 
 # Plot K_mean cluster about individual csv file
-K_Mean = True
+K_Mean = False
 if K_Mean:
     input_dir = '../files/momentum_adj'
 
@@ -94,7 +94,7 @@ if GMM:
     t_SNE(df_combined, Do_Clustering.Gaussian_labels)
 
 # Plot OPTICS cluster about individual csv file
-optics = False
+optics = True
 if optics:
     input_dir = '../files/momentum_adj'
 

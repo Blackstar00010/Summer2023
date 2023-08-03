@@ -5,9 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans, OPTICS, DBSCAN, HDBSCAN
 from sklearn.neighbors import NearestNeighbors
-from sklearn import mixture
 from sklearn.mixture import BayesianGaussianMixture
-from sklearn.model_selection import GridSearchCV
 from scipy.cluster.hierarchy import *
 from scipy.spatial.distance import pdist, squareform
 
@@ -206,7 +204,7 @@ class Clustering:
 
         # Optimal Cluster
 
-        dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type="spherical").fit(mat)
+        dpgmm = BayesianGaussianMixture(n_components=n_components, covariance_type="spherical").fit(mat)
         cluster_labels = dpgmm.predict(mat)
 
         for i, cluster_num in enumerate(cluster_labels):
@@ -217,7 +215,7 @@ class Clustering:
         n_components = n_components - len(empty_cluster_indices)
 
         # Clustering
-        dpgmm = mixture.BayesianGaussianMixture(n_components=n_components, covariance_type="spherical").fit(mat)
+        dpgmm = BayesianGaussianMixture(n_components=n_components, covariance_type="spherical").fit(mat)
         cluster_labels = dpgmm.predict(mat)
         self.Gaussian_labels = cluster_labels
 
