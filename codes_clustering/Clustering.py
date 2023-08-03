@@ -140,7 +140,7 @@ class Clustering:
 
     def perform_DBSCAN2(self):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
+        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
 
         output = []
         eps_values = np.linspace(0.01, 5., 300)
@@ -245,20 +245,20 @@ class Clustering:
 
     def perform_GMM(self, threshold: float):
 
-        mat = self.PCA_Data.values[:, 1:].astype(float)
+        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Gaussian Mixture Model
 
         n_components = 40
         clusters = [[] for _ in range(40)]
-        if len(mat) < 40:
-            n_components = len(mat)
-            clusters = [[] for _ in range(len(mat))]
+        if len(self.PCA_Data) < 40:
+            n_components = len(self.PCA_Data)
+            clusters = [[] for _ in range(len(self.PCA_Data))]
 
         # Optimal Cluster
 
-        dpgmm = BayesianGaussianMixture(n_components=n_components, covariance_type="spherical").fit(mat)
-        cluster_labels = dpgmm.predict(mat)
+        dpgmm = BayesianGaussianMixture(n_components=n_components, covariance_type="diag").fit(self.PCA_Data)
+        cluster_labels = dpgmm.predict(self.PCA_Data)
 
         for i, cluster_num in enumerate(cluster_labels):
             clusters[cluster_num].append(i)
@@ -268,17 +268,19 @@ class Clustering:
         n_components = n_components - len(empty_cluster_indices)
 
         # Clustering
-        dpgmm = BayesianGaussianMixture(n_components=n_components, covariance_type="spherical").fit(mat)
-        cluster_labels = dpgmm.predict(mat)
+        dpgmm = BayesianGaussianMixture(n_components=n_components, covariance_type="diag").fit(self.PCA_Data)
+        cluster_labels = dpgmm.predict(self.PCA_Data)
+
+        self.test=dpgmm
         self.Gaussian_labels = cluster_labels
 
         clusters = [[] for _ in range(n_components)]
 
         for i, cluster_num in enumerate(cluster_labels):
-            clusters[cluster_num].append(self.PCA_Data.index[i])
+            clusters[cluster_num].append(self.index[i])
 
         # Outliers
-        probabilities = dpgmm.predict_proba(mat)
+        probabilities = dpgmm.predict_proba(self.PCA_Data)
 
         cluster_prob_mean = np.mean(probabilities, axis=0)
 
@@ -306,7 +308,7 @@ class Clustering:
     def perform_OPTICS(self):
         data_array = self.PCA_Data.values[:, 1:].astype(float)
 
-        labels = OPTICS(cluster_method='xi', metric='l2').fit(data_array).labels_
+        labels = OPTICS(min_samples=5, xi=0.02, min_cluster_size=0.1).fit(data_array).labels_
 
         self.OPTIC_labels = labels
 

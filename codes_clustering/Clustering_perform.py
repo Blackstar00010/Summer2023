@@ -4,7 +4,7 @@ import Clustering as C
 from PCA_and_tSNE import *
 
 # file to check
-file = '2000-08.csv'
+file = '1993-04.csv'
 
 # Plot K_mean cluster about individual csv file
 K_Mean = False
@@ -30,7 +30,7 @@ if K_Mean:
         t_SNE(df_combined, Do_Clustering.K_Mean_labels)
 
 # Plot DBSCAN cluster about individual csv file
-dbscan = False
+dbscan = True
 if dbscan:
     input_dir = '../files/momentum_adj'
 
@@ -48,6 +48,41 @@ if dbscan:
 
     # Plot clustering result
     Do_Result_Plot.Plot_clusters(Do_Clustering.perform_DBSCAN())
+
+    # Plot t_SNE result
+    t_SNE(df_combined, Do_Clustering.DBSCAN_labels)
+
+    print(f"Homogeneity: {metrics.homogeneity_score(Do_Clustering.K_Mean_labels, Do_Clustering.DBSCAN_labels):.3f}")
+    print(f"Completeness: {metrics.completeness_score(Do_Clustering.K_Mean_labels, Do_Clustering.DBSCAN_labels):.3f}")
+    print(f"V-measure: {metrics.v_measure_score(Do_Clustering.K_Mean_labels, Do_Clustering.DBSCAN_labels):.3f}")
+    print(
+        f"Adjusted Rand Index: {metrics.adjusted_rand_score(Do_Clustering.K_Mean_labels, Do_Clustering.DBSCAN_labels):.3f}")
+    print(
+        "Adjusted Mutual Information:"
+        f" {metrics.adjusted_mutual_info_score(Do_Clustering.K_Mean_labels, Do_Clustering.DBSCAN_labels):.3f}"
+    )
+    print(
+        f"Silhouette Coefficient: {metrics.silhouette_score(Do_Clustering.PCA_Data, Do_Clustering.DBSCAN_labels):.3f}")
+
+# Plot DBSCAN cluster about individual csv file
+dbscan2 = False
+if dbscan2:
+    input_dir = '../files/momentum_adj'
+
+    # convert mom_data into PCA_data
+    data = read_and_preprocess_data(input_dir, file)
+    df_combined = generate_PCA_Data(data)
+
+    # Call initial method
+    Do_Clustering = C.Clustering(df_combined)
+    Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+
+    # Do clustering and get 2D list of cluster index
+    Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([10])
+    Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN2()
+
+    # Plot clustering result
+    Do_Result_Plot.Plot_clusters(Do_Clustering.perform_DBSCAN2())
 
     # Plot t_SNE result
     t_SNE(df_combined, Do_Clustering.DBSCAN_labels)
@@ -87,7 +122,7 @@ if Hierachical:
     t_SNE(df_combined, Do_Clustering.Agglomerative_labels)
 
 # Plot GMM cluster about individual csv file
-GMM = False
+GMM = True
 if GMM:
     input_dir = '../files/momentum_adj'
 
@@ -129,41 +164,6 @@ if optics:
 
     # Plot t_SNE result
     t_SNE(df_combined, Do_Clustering.OPTIC_labels)
-
-# Plot DBSCAN cluster about individual csv file
-dbscan2 = True
-if dbscan2:
-    input_dir = '../files/momentum_adj'
-
-    # convert mom_data into PCA_data
-    data = read_and_preprocess_data(input_dir, file)
-    df_combined = generate_PCA_Data(data)
-
-    # Call initial method
-    Do_Clustering = C.Clustering(df_combined)
-    Do_Result_Plot = C.Result_Check_and_Save(df_combined)
-
-    # Do clustering and get 2D list of cluster index
-    Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([10])
-    Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN2()
-
-    # Plot clustering result
-    Do_Result_Plot.Plot_clusters(Do_Clustering.perform_DBSCAN2())
-
-    # Plot t_SNE result
-    t_SNE(df_combined, Do_Clustering.DBSCAN_labels)
-
-    print(f"Homogeneity: {metrics.homogeneity_score(Do_Clustering.K_Mean_labels, Do_Clustering.DBSCAN_labels):.3f}")
-    print(f"Completeness: {metrics.completeness_score(Do_Clustering.K_Mean_labels, Do_Clustering.DBSCAN_labels):.3f}")
-    print(f"V-measure: {metrics.v_measure_score(Do_Clustering.K_Mean_labels, Do_Clustering.DBSCAN_labels):.3f}")
-    print(
-        f"Adjusted Rand Index: {metrics.adjusted_rand_score(Do_Clustering.K_Mean_labels, Do_Clustering.DBSCAN_labels):.3f}")
-    print(
-        "Adjusted Mutual Information:"
-        f" {metrics.adjusted_mutual_info_score(Do_Clustering.K_Mean_labels, Do_Clustering.DBSCAN_labels):.3f}"
-    )
-    print(
-        f"Silhouette Coefficient: {metrics.silhouette_score(Do_Clustering.PCA_Data, Do_Clustering.DBSCAN_labels):.3f}")
 
 # Save all clutering method LS_Tables
 total = False
