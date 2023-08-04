@@ -141,5 +141,5 @@ if lab:
         t = find_optimal_GMM_hyperparameter(Do_Clustering.PCA_Data)
     print(abnormal_file)
 
-#ToDo: HDBSCAN, Affinity Propagation, BIRCH, MiniBatch K-means, CLARANS, CLARA
+#ToDo: HDBSCAN, CLARA, BIRCH, Affinity Propagation
 
