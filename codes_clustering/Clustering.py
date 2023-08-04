@@ -58,7 +58,7 @@ class Clustering:
         :return: 2D list
         '''
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
         kmeans = KMeans(n_clusters=K, init='k-means++', n_init=10, max_iter=500, random_state=13).fit(self.PCA_Data)
@@ -127,7 +127,7 @@ class Clustering:
 
     def perform_DBSCAN(self, threshold: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
         ms = int(math.log(len(self.PCA_Data)))
@@ -163,7 +163,7 @@ class Clustering:
 
     def perform_HG(self, threshold: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Hierachical Agglomerative
         # 거리 행렬 계산
@@ -227,7 +227,7 @@ class Clustering:
 
     def perform_GMM(self, probability: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Gaussian Mixture Model
 
@@ -290,7 +290,7 @@ class Clustering:
 
     def perform_OPTICS(self, size):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         ms = int(math.log(len(self.PCA_Data)))
 
@@ -312,7 +312,7 @@ class Clustering:
 
     def perform_meanshift(self, quantile):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # The following bandwidth can be automatically detected using
         bandwidth = estimate_bandwidth(self.PCA_Data, quantile=quantile)
@@ -366,28 +366,7 @@ class Clustering:
     cityblock
     euclidean
     l2
-    braycurtis
-
-
-    bad
-    cosine
-    l1
-    manhattan
-    correlation
-    dice
-    hamming
-    jaccard
-    kulsinski
-    mahalanobis
-    minkowski
-    rogerstanimoto
-    russellrao
-    seuclidean
-    sokalsneath
-    yule
-    canberra
-    chebyshev
-    sqeuclidean'''
+    braycurtis'''
 
 
 class Result_Check_and_Save:

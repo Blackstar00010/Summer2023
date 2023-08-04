@@ -1,6 +1,5 @@
 import warnings
 import seaborn as sns
-
 import Clustering as C
 from Clustering import *
 from PCA_and_ETC import *
@@ -14,7 +13,7 @@ iris = load_iris()
 iris_pd = pd.DataFrame(iris.data[:, 2:], columns=['petal_length', 'petal_width'])
 
 # Plot K_mean cluster about individual csv file
-example1 = False
+example1 = True
 if example1:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
@@ -35,7 +34,7 @@ if example1:
 
     t_SNE('K_mean', Do_Clustering.PCA_Data, Do_Clustering.K_Mean_labels)
 
-example2 = False
+example2 = True
 if example2:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
@@ -83,7 +82,7 @@ if example2:
 
     t_SNE('DBSCAN', Do_Clustering.PCA_Data, Do_Clustering.DBSCAN_labels)
 
-example3 = False
+example3 = True
 if example3:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
@@ -93,7 +92,7 @@ if example3:
 
     t_SNE('Hirarchical Agglormerative', Do_Clustering.PCA_Data, Do_Clustering.Agglomerative_labels)
 
-example4 = False
+example4 = True
 if example4:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
@@ -103,7 +102,7 @@ if example4:
 
     t_SNE('GMM', Do_Clustering.PCA_Data, Do_Clustering.Gaussian_labels)
 
-example5 = False
+example5 = True
 if example5:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
@@ -113,7 +112,7 @@ if example5:
 
     t_SNE('OPTICS', Do_Clustering.PCA_Data, Do_Clustering.OPTIC_labels)
 
-example6 = False
+example6 = True
 if example6:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
@@ -123,7 +122,7 @@ if example6:
 
     t_SNE('meanshift', Do_Clustering.PCA_Data, Do_Clustering.menshift_labels)
 
-lab = True
+lab = False
 if lab:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -142,4 +141,5 @@ if lab:
         t = find_optimal_GMM_hyperparameter(Do_Clustering.PCA_Data)
     print(abnormal_file)
 
-'''['1992-04.csv', '1993-01.csv', '1993-02.csv', '1993-03.csv', '1993-04.csv', '1993-05.csv', '1993-06.csv', '1993-07.csv', '1993-09.csv', '1994-03.csv']'''
+#ToDo: HDBSCAN, Affinity Propagation, BIRCH, MiniBatch K-means, CLARANS, CLARA
+
