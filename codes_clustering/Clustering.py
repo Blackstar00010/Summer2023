@@ -177,12 +177,12 @@ class Clustering:
         논문과는 다른 부분. average method대신 ward method 사용.
         '''
 
-        # 덴드로그램 시각화
-        dendrogram(Z)
-        plt.title('Dendrogram')
-        plt.xlabel('Samples')
-        plt.ylabel('Distance')
-        plt.show()
+        # # 덴드로그램 시각화
+        # dendrogram(Z)
+        # plt.title('Dendrogram')
+        # plt.xlabel('Samples')
+        # plt.ylabel('Distance')
+        # plt.show()
 
         # copheric distance 계산
         copheric_dis = cophenet(Z)
@@ -226,7 +226,7 @@ class Clustering:
         return self.Agglomerative
 
     def perform_GMM(self, probability: float):
-
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Gaussian Mixture Model
@@ -289,9 +289,13 @@ class Clustering:
         return self.Gaussian
 
     def perform_OPTICS(self, size):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         ms = int(math.log(len(self.PCA_Data)))
+
+        if ms < 2:
+            ms = 2
 
         labels = OPTICS(min_samples=ms, min_cluster_size=size).fit(self.PCA_Data).labels_
 
@@ -303,7 +307,6 @@ class Clustering:
         clust = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(labels):
             clust[unique_labels.index(cluster_label)].append(self.index[i])
-
         self.OPTIC = clust
         return self.OPTIC
 
@@ -314,7 +317,11 @@ class Clustering:
         # The following bandwidth can be automatically detected using
         bandwidth = estimate_bandwidth(self.PCA_Data, quantile=quantile)
 
+        if bandwidth == 0.0:
+            bandwidth = 0.1
+
         ms = MeanShift(bandwidth=bandwidth, bin_seeding=True).fit(self.PCA_Data)
+
         cluster_labels = ms.labels_
         self.test = ms
         self.menshift_labels = cluster_labels
@@ -340,12 +347,11 @@ class Clustering:
                 outliers.append(self.index[i])
 
         # Get the unique cluster labels
-        unique_labels = sorted(list(set(self.lab_labels)))
+        unique_labels = sorted(list(set(self.menshift_labels)))
 
         clusters = [[] for _ in unique_labels]
-        for i, cluster_label in enumerate(self.lab_labels):
+        for i, cluster_label in enumerate(self.menshift_labels):
             clusters[unique_labels.index(cluster_label)].append(self.index[i])
-
         # 원본에서 outlier제거.
         clusters = [x for x in clusters if x not in outliers]
         # 빈리스트도 Outlier로 간주되기 때문에 가끔 생기는 결측값 제거.
@@ -425,7 +431,6 @@ class Result_Check_and_Save:
         # Save the output to a CSV file in the output directory
         LS_table.to_csv(os.path.join(output_dir, file), index=False)
         print(output_dir)
-        print(file)
 
     def Reversal_Table_Save(self, data, output_dir, file):
         LS_table_reversal = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short'])
@@ -443,7 +448,6 @@ class Result_Check_and_Save:
         # Save the output to a CSV file in the output directory
         LS_table_reversal.to_csv(os.path.join(output_dir, file), index=False)
         print(output_dir)
-        print(file)
 
     def Plot_clusters_Kmean(self, clusters):
         firm_names = self.PCA_Data.index

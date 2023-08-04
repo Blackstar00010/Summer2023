@@ -113,7 +113,7 @@ if example5:
 
     t_SNE('OPTICS', Do_Clustering.PCA_Data, Do_Clustering.OPTIC_labels)
 
-example6 = True
+example6 = False
 if example6:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
@@ -123,10 +123,11 @@ if example6:
 
     t_SNE('meanshift', Do_Clustering.PCA_Data, Do_Clustering.menshift_labels)
 
-lab = False
+lab = True
 if lab:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
+    abnormal_file = []
     for file in files:
         # convert mom_data into PCA_data
         data = read_and_preprocess_data(input_dir, file)
@@ -135,5 +136,10 @@ if lab:
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
 
+        if Do_Clustering.PCA_Data.shape[1] < 7:
+            abnormal_file.append(file)
+
         t = find_optimal_GMM_hyperparameter(Do_Clustering.PCA_Data)
-        print(t)
+    print(abnormal_file)
+
+'''['1992-04.csv', '1993-01.csv', '1993-02.csv', '1993-03.csv', '1993-04.csv', '1993-05.csv', '1993-06.csv', '1993-07.csv', '1993-09.csv', '1994-03.csv']'''
