@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans, OPTICS, DBSCAN, HDBSCAN
+from sklearn.cluster import KMeans, OPTICS, DBSCAN, HDBSCAN, estimate_bandwidth, MeanShift
 from sklearn.neighbors import NearestNeighbors
 from sklearn.mixture import BayesianGaussianMixture
 from scipy.cluster.hierarchy import *
@@ -39,6 +39,7 @@ class Clustering:
         self.Gaussian = []
         self.OPTIC = []
         self.HDBSCAN = []
+        self.menshift = []
 
         self.K_Mean_labels = []
         self.DBSCAN_labels = []
@@ -46,6 +47,10 @@ class Clustering:
         self.Gaussian_labels = []
         self.OPTIC_labels = []
         self.HDBSCAN_labels = []
+        self.menshift_labels = []
+
+        self.lab = []
+        self.lab_labels = []
 
     def outliers(self, K: int):
         '''
@@ -301,6 +306,55 @@ class Clustering:
 
         self.OPTIC = clust
         return self.OPTIC
+
+    def perform_meanshift(self, quantile):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
+        # The following bandwidth can be automatically detected using
+        bandwidth = estimate_bandwidth(self.PCA_Data, quantile=quantile)
+
+        ms = MeanShift(bandwidth=bandwidth, bin_seeding=True).fit(self.PCA_Data)
+        cluster_labels = ms.labels_
+        self.test = ms
+        self.menshift_labels = cluster_labels
+
+        # Nearest Neighbors
+        neigh = NearestNeighbors(n_neighbors=2)
+        neigh.fit(self.PCA_Data)
+        distances, indices = neigh.kneighbors(self.PCA_Data)
+
+        # Outliers with low density (low number of neighbors)
+        densities = 1 / distances[:, 1]
+
+        mean = sum(densities) / len(densities)
+        variance = sum((x - mean) ** 2 for x in densities) / len(densities)
+        std_dev = variance ** 0.5
+        normalized_lst = [(x - mean) / std_dev for x in densities]
+
+        densities = normalized_lst
+
+        outliers = []
+        for i, density in enumerate(densities):
+            if density > 3 * np.std(densities):
+                outliers.append(self.index[i])
+
+        # Get the unique cluster labels
+        unique_labels = sorted(list(set(self.lab_labels)))
+
+        clusters = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(self.lab_labels):
+            clusters[unique_labels.index(cluster_label)].append(self.index[i])
+
+        # 원본에서 outlier제거.
+        clusters = [x for x in clusters if x not in outliers]
+        # 빈리스트도 Outlier로 간주되기 때문에 가끔 생기는 결측값 제거.
+        outliers = [sublist for sublist in outliers if sublist]
+        # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
+        clusters.insert(0, outliers)
+
+        self.menshift = clusters
+        return self.menshift
 
     '''good
     cityblock

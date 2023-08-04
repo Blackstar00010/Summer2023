@@ -83,13 +83,13 @@ if example2:
 
     t_SNE('DBSCAN', Do_Clustering.PCA_Data, Do_Clustering.DBSCAN_labels)
 
-example3 = True
+example3 = False
 if example3:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.7)
+    Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.8)
 
     t_SNE('Hirarchical Agglormerative', Do_Clustering.PCA_Data, Do_Clustering.Agglomerative_labels)
 
@@ -112,6 +112,16 @@ if example5:
     Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.2)
 
     t_SNE('OPTICS', Do_Clustering.PCA_Data, Do_Clustering.OPTIC_labels)
+
+example6 = True
+if example6:
+    # Call initial method
+    Do_Clustering = C.Clustering(iris_pd)
+
+    # Do clustering and get 2D list of cluster index
+    Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.3)
+
+    t_SNE('meanshift', Do_Clustering.PCA_Data, Do_Clustering.menshift_labels)
 
 lab = False
 if lab:

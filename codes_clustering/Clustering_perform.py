@@ -3,8 +3,8 @@ import Clustering as C
 from PCA_and_ETC import *
 
 # file to check
-# file = '1991-12.csv'
-file = '2020-02.csv'
+file = '1991-12.csv'
+# file = '2020-02.csv'
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -75,7 +75,7 @@ if Hierachical:
 
     # Do clustering and get 2D list of cluster index
     Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([4])
-    Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.7)
+    Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.6)
 
     # # Plot clustering result
     # Do_Result_Plot.Plot_clusters(Do_Clustering.Agglomerative)
@@ -112,7 +112,7 @@ if GMM:
 
     # compare cluster result
     analysis_clustering_result(Do_Clustering.PCA_Data, Do_Clustering.Gaussian_labels, Do_Clustering.K_Mean_labels)
-# hyper parameter outlier probability range(0.05, 0.15, 0.01) should be tested manually.(paper follow)
+# hyper parameter outlier probability range(0.05, 0.15, 0.01) should be tested manually.
 
 # Plot OPTICS cluster about individual csv file
 optics = False
@@ -135,7 +135,30 @@ if optics:
 
     # Plot t_SNE result
     t_SNE('OPTICS', df_combined, Do_Clustering.OPTIC_labels)
-# hyper parameter percentile of min_sample[0.01, 0.05, range(0.1, 0.9, 0.1)] should be tested manually.(paper follow)
+# hyper parameter percentile of min_sample[0.01, 0.05, range(0.1, 0.9, 0.1)] should be tested manually.
+
+# Plot meanshift cluster about individual csv file
+meanshift = True
+if meanshift:
+    input_dir = '../files/momentum_adj'
+
+    # convert mom_data into PCA_data
+    data = read_and_preprocess_data(input_dir, file)
+    df_combined = generate_PCA_Data(data)
+
+    # Call initial method
+    Do_Clustering = C.Clustering(df_combined)
+    Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+
+    # Do clustering and get 2D list of cluster index
+    Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.2)
+
+    # Plot clustering result
+    Do_Result_Plot.Plot_clusters(Do_Clustering.lab)
+
+    # Plot t_SNE result
+    t_SNE('lab', df_combined, Do_Clustering.menshift_labels)
+# hyper parameter quantile (0.1, 0.2, 0.3, 0.4) should be tested manually.(paper follow)
 
 # Save all clutering method LS_Tables
 total = False
