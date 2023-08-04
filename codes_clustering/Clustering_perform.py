@@ -3,7 +3,8 @@ import Clustering as C
 from PCA_and_ETC import *
 
 # file to check
-file = '1991-12.csv'
+# file = '1991-12.csv'
+file = '2020-02.csv'
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -30,7 +31,7 @@ if K_Mean:
     # Plot t_SNE result
     for i, cluster in enumerate(Do_Clustering.K_Mean):
         t_SNE('K-mean', df_combined, Do_Clustering.K_Mean_labels)
-# hyper parameter K(1-100) should be tested manually.(paper follow)
+# hyper parameter K(3,5,10,50,100,500,1000,1500) should be tested manually.(paper follow)
 
 # Plot DBSCAN cluster about individual csv file
 dbscan = False
@@ -57,7 +58,7 @@ if dbscan:
 
     # compare cluster result
     analysis_clustering_result(Do_Clustering.PCA_Data, Do_Clustering.DBSCAN_labels, Do_Clustering.K_Mean_labels)
-# hyper parameter percentile(0.1-0.9) should be tested manually.(paper follow)
+# hyper parameter eps percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
 
 # Plot Agglomerative cluster about individual csv file
 Hierachical = False
@@ -73,17 +74,18 @@ if Hierachical:
     Do_Result_Plot = C.Result_Check_and_Save(df_combined)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.K_Mean=Do_Clustering.perform_kmeans([4])
+    Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([4])
     Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.7)
 
-    # Plot clustering result
-    Do_Result_Plot.Plot_clusters(Do_Clustering.Agglomerative)
+    # # Plot clustering result
+    # Do_Result_Plot.Plot_clusters(Do_Clustering.Agglomerative)
 
     # Plot t_SNE result
     t_SNE('Hirarchical Agglomerative', df_combined, Do_Clustering.Agglomerative_labels)
 
     # compare cluster result
     analysis_clustering_result(Do_Clustering.PCA_Data, Do_Clustering.Agglomerative_labels, Do_Clustering.K_Mean_labels)
+# hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
 
 # Plot GMM cluster about individual csv file
 GMM = False
@@ -110,10 +112,10 @@ if GMM:
 
     # compare cluster result
     analysis_clustering_result(Do_Clustering.PCA_Data, Do_Clustering.Gaussian_labels, Do_Clustering.K_Mean_labels)
-# hyper parameter percentile(0.05(5%)-0.15(15%)) should be tested manually.(paper follow)
+# hyper parameter outlier probability range(0.05, 0.15, 0.01) should be tested manually.(paper follow)
 
 # Plot OPTICS cluster about individual csv file
-optics = True
+optics = False
 if optics:
     input_dir = '../files/momentum_adj'
 
@@ -126,14 +128,14 @@ if optics:
     Do_Result_Plot = C.Result_Check_and_Save(df_combined)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS()
+    Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.9)
 
     # Plot clustering result
     Do_Result_Plot.Plot_clusters(Do_Clustering.OPTIC)
 
     # Plot t_SNE result
     t_SNE('OPTICS', df_combined, Do_Clustering.OPTIC_labels)
-# hyper parameter percentile(0.1-0.9) should be tested manually.(paper follow)
+# hyper parameter percentile of min_sample[0.01, 0.05, range(0.1, 0.9, 0.1)] should be tested manually.(paper follow)
 
 # Save all clutering method LS_Tables
 total = False

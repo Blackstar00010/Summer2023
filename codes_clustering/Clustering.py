@@ -19,7 +19,7 @@ def find_optimal_GMM_hyperparameter(data):
     }
 
     # BIC score를 평가 지표로 하여 GridSearchCV 실행
-    grid_search = GridSearchCV(bgm, param_grid=param_grid, scoring='completeness_score')
+    grid_search = GridSearchCV(bgm, param_grid=param_grid, scoring='neg_negative_likelihood_ratio')
     grid_search.fit(data)
 
     # 최적의 covariance type과 n_components 출력
@@ -53,7 +53,7 @@ class Clustering:
         :return: 2D list
         '''
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
         kmeans = KMeans(n_clusters=K, init='k-means++', n_init=10, max_iter=500, random_state=13).fit(self.PCA_Data)
@@ -122,11 +122,10 @@ class Clustering:
 
     def perform_DBSCAN(self, threshold: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
         ms = int(math.log(len(self.PCA_Data)))
-        print(ms)
 
         # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
         nbrs = NearestNeighbors(n_neighbors=ms + 1).fit(self.PCA_Data)
@@ -140,7 +139,6 @@ class Clustering:
         alpha_percentile_index = int(len(sorted_distances) * threshold)
 
         eps = sorted_distances[alpha_percentile_index]
-        print(eps)
 
         dbscan = DBSCAN(min_samples=ms, eps=eps, metric='euclidean').fit(self.PCA_Data)
         cluster_labels = dbscan.labels_
@@ -159,16 +157,16 @@ class Clustering:
         return self.DBSCAN
 
     def perform_HG(self, threshold: float):
-        self.PCA_Data=pd.DataFrame(self.PCA_Data)
-        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Hierachical Agglomerative
         # 거리 행렬 계산
-        dist_matrix = pdist(self.PCA_Data,metric='euclidean')
+        dist_matrix = pdist(self.PCA_Data, metric='euclidean')
         # data point pair 간의 euclidean distance/firm수 combination 2
 
         # 연결 매트릭스 계산
-        Z = linkage(dist_matrix, method='centroid')  # ward method는 cluster 간의 variance를 minimize
+        Z = linkage(dist_matrix, method='ward')
         '''we adopt the average linkage, which is defined as the average distance between
         the data points in one cluster and the data points in another cluster
         논문과는 다른 부분. average method대신 ward method 사용.
@@ -224,7 +222,7 @@ class Clustering:
 
     def perform_GMM(self, probability: float):
 
-        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Gaussian Mixture Model
 
@@ -285,13 +283,12 @@ class Clustering:
 
         return self.Gaussian
 
-    def perform_OPTICS(self):
+    def perform_OPTICS(self, size):
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         ms = int(math.log(len(self.PCA_Data)))
 
-
-        labels = OPTICS(min_samples=ms, min_cluster_size=0.1).fit(self.PCA_Data).labels_
+        labels = OPTICS(min_samples=ms, min_cluster_size=size).fit(self.PCA_Data).labels_
 
         self.OPTIC_labels = labels
 

@@ -1,5 +1,6 @@
 import warnings
 import seaborn as sns
+
 import Clustering as C
 from Clustering import *
 from PCA_and_ETC import *
@@ -40,7 +41,7 @@ if example2:
     Do_Clustering = C.Clustering(iris_pd)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN(0.90)
+    Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN(0.9)
 
     n_clusters_ = len(set(Do_Clustering.DBSCAN_labels)) - (1 if -1 in Do_Clustering.DBSCAN_labels else 0)
     n_noise_ = list(Do_Clustering.DBSCAN_labels).count(-1)
@@ -82,13 +83,13 @@ if example2:
 
     t_SNE('DBSCAN', Do_Clustering.PCA_Data, Do_Clustering.DBSCAN_labels)
 
-example3 = False
+example3 = True
 if example3:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.6)
+    Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.7)
 
     t_SNE('Hirarchical Agglormerative', Do_Clustering.PCA_Data, Do_Clustering.Agglomerative_labels)
 
@@ -102,14 +103,13 @@ if example4:
 
     t_SNE('GMM', Do_Clustering.PCA_Data, Do_Clustering.Gaussian_labels)
 
-example5 = True
+example5 = False
 if example5:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS()
-
+    Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.2)
 
     t_SNE('OPTICS', Do_Clustering.PCA_Data, Do_Clustering.OPTIC_labels)
 
