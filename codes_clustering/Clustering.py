@@ -4,11 +4,28 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans, OPTICS, DBSCAN, HDBSCAN
-from sklearn.metrics import silhouette_score
 from sklearn.neighbors import NearestNeighbors
 from sklearn.mixture import BayesianGaussianMixture
 from scipy.cluster.hierarchy import *
 from scipy.spatial.distance import pdist, squareform
+from sklearn.model_selection import GridSearchCV
+
+
+def find_optimal_GMM_hyperparameter(data):
+    bgm = BayesianGaussianMixture()
+    # 탐색할 covariance type과 n_components 설정
+    param_grid = {
+        "covariance_type": ["spherical", "tied", "diag", "full"]
+    }
+
+    # BIC score를 평가 지표로 하여 GridSearchCV 실행
+    grid_search = GridSearchCV(bgm, param_grid=param_grid, scoring='completeness_score')
+    grid_search.fit(data)
+
+    # 최적의 covariance type과 n_components 출력
+    best_covariance_type = grid_search.best_params_["covariance_type"]
+    return best_covariance_type
+
 
 class Clustering:
     def __init__(self, data: pd.DataFrame):
@@ -35,8 +52,9 @@ class Clustering:
         :param K: int
         :return: 2D list
         '''
-        firm_names = self.PCA_Data.index
-        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        # Exclude the first column (firm names) & Exclude MOM_1
 
         kmeans = KMeans(n_clusters=K, init='k-means++', n_init=10, max_iter=500, random_state=13).fit(self.PCA_Data)
         cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
@@ -52,7 +70,7 @@ class Clustering:
         clusters_index = [[] for _ in range(K)]  # Cluster별 index 분류
         for i, cluster_num in enumerate(cluster_labels):
             clusters[cluster_num].append(cluster_distance_min[i])
-            clusters_index[cluster_num].append(firm_names[i])
+            clusters_index[cluster_num].append(self.index[i])
 
         outliers = [[] for _ in range(K)]  # Cluster별 outliers' distance 분류
         for i, cluster in enumerate(clusters):
@@ -102,11 +120,13 @@ class Clustering:
         self.K_Mean = clusters_k
         return self.K_Mean
 
-    def perform_DBSCAN(self):
+    def perform_DBSCAN(self, threshold: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
+        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        # Exclude the first column (firm names) & Exclude MOM_1
 
         ms = int(math.log(len(self.PCA_Data)))
+        print(ms)
 
         # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
         nbrs = NearestNeighbors(n_neighbors=ms + 1).fit(self.PCA_Data)
@@ -117,7 +137,7 @@ class Clustering:
         sorted_distances = np.sort(avg_distances)
 
         # Calculate the index for the alpha percentile (alpha)
-        alpha_percentile_index = int(len(sorted_distances) * 0.90)
+        alpha_percentile_index = int(len(sorted_distances) * threshold)
 
         eps = sorted_distances[alpha_percentile_index]
         print(eps)
@@ -138,57 +158,17 @@ class Clustering:
         self.DBSCAN = clust
         return self.DBSCAN
 
-    def perform_DBSCAN2(self):
-        self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)  # Exclude the first column (firm names) & Exclude MOM_1
-
-        output = []
-        eps_values = np.linspace(0.01, 5., 300)
-        min_samples_values = range(2,6)
-
-        for i, ms in enumerate(min_samples_values):
-            for j, eps in enumerate(eps_values):
-                dbscan = DBSCAN(min_samples=ms, eps=eps, metric='euclidean').fit(self.PCA_Data)
-                cluster_labels=dbscan.labels_
-
-                if len(list(set(cluster_labels)))==1:
-                    continue
-
-                # silhouette score 높을 수록 클러스터링 잘 된것. from -1 to 1
-                score = silhouette_score(self.PCA_Data, cluster_labels)
-                output.append([ms, eps, score])
-
-        min_samples, eps, score = sorted(output, key=lambda x: x[-1])[-1]
-        print(min_samples)
-        print(eps)
-        print(score)
-
-        dbscan = DBSCAN(min_samples=ms, eps=eps, metric='euclidean').fit(self.PCA_Data)
-        cluster_labels=dbscan.labels_
-
-        self.test=dbscan
-        self.DBSCAN_labels=cluster_labels
-
-        # Get the unique cluster labels
-        unique_labels = sorted(list(set(cluster_labels)))
-
-        cluster = [[] for _ in unique_labels]
-        for i, cluster_label in enumerate(cluster_labels):
-            cluster[unique_labels.index(cluster_label)].append(self.index[i])
-
-        self.DBSCAN = cluster
-        return self.DBSCAN
-
-
     def perform_HG(self, threshold: float):
-        mat = self.PCA_Data.values[:, 1:].astype(float)
+        self.PCA_Data=pd.DataFrame(self.PCA_Data)
+        #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Hierachical Agglomerative
         # 거리 행렬 계산
-        dist_matrix = pdist(mat, metric='euclidean')  # data point pair 간의 euclidean distance/firm수 combination 2
+        dist_matrix = pdist(self.PCA_Data,metric='euclidean')
+        # data point pair 간의 euclidean distance/firm수 combination 2
 
         # 연결 매트릭스 계산
-        Z = linkage(dist_matrix, method='ward')  # ward method는 cluster 간의 variance를 minimize
+        Z = linkage(dist_matrix, method='centroid')  # ward method는 cluster 간의 variance를 minimize
         '''we adopt the average linkage, which is defined as the average distance between
         the data points in one cluster and the data points in another cluster
         논문과는 다른 부분. average method대신 ward method 사용.
@@ -204,10 +184,9 @@ class Clustering:
         # copheric distance 계산
         copheric_dis = cophenet(Z)
         copheric_dis_matrix = squareform(copheric_dis)
+
         # cophenet: dendrogram과 original data 사이 similarity을 나타내는 correlation coefficient
         # 숫자가 클 수록 원본데이터와 유사도가 떨어짐. dendrogram에서 distance의미.
-
-        print(max(copheric_dis))
 
         # Cluster k개 생성
         k = 10
@@ -238,12 +217,12 @@ class Clustering:
 
         clust = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(clusters):
-            clust[unique_labels.index(cluster_label)].append(self.PCA_Data.index[i])
+            clust[unique_labels.index(cluster_label)].append(self.index[i])
 
         self.Agglomerative = clust
         return self.Agglomerative
 
-    def perform_GMM(self, threshold: float):
+    def perform_GMM(self, probability: float):
 
         #self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
@@ -257,7 +236,9 @@ class Clustering:
 
         # Optimal Cluster
 
-        dpgmm = BayesianGaussianMixture(n_components=n_components, covariance_type="diag").fit(self.PCA_Data)
+        type = find_optimal_GMM_hyperparameter(self.PCA_Data)
+
+        dpgmm = BayesianGaussianMixture(n_components=n_components, covariance_type=type).fit(self.PCA_Data)
         cluster_labels = dpgmm.predict(self.PCA_Data)
 
         for i, cluster_num in enumerate(cluster_labels):
@@ -268,10 +249,10 @@ class Clustering:
         n_components = n_components - len(empty_cluster_indices)
 
         # Clustering
-        dpgmm = BayesianGaussianMixture(n_components=n_components, covariance_type="diag").fit(self.PCA_Data)
+        dpgmm = BayesianGaussianMixture(n_components=n_components, covariance_type=type).fit(self.PCA_Data)
         cluster_labels = dpgmm.predict(self.PCA_Data)
 
-        self.test=dpgmm
+        self.test = dpgmm
         self.Gaussian_labels = cluster_labels
 
         clusters = [[] for _ in range(n_components)]
@@ -284,12 +265,11 @@ class Clustering:
 
         cluster_prob_mean = np.mean(probabilities, axis=0)
 
-        threshold = threshold
         outliers = []
 
-        # if the probabilities that tht firm is in that cluster are lower than threshold, that firm is outlier.
+        # if the probabilities that tht firm is in that cluster are lower than probability, that firm is outlier.
         for i, prob_mean in enumerate(cluster_prob_mean):
-            if prob_mean < threshold:
+            if prob_mean < probability:
                 outliers.append(clusters[i])
 
         # 원본에서 outlier제거.
@@ -306,9 +286,12 @@ class Clustering:
         return self.Gaussian
 
     def perform_OPTICS(self):
-        data_array = self.PCA_Data.values[:, 1:].astype(float)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
-        labels = OPTICS(min_samples=5, xi=0.02, min_cluster_size=0.1).fit(data_array).labels_
+        ms = int(math.log(len(self.PCA_Data)))
+
+
+        labels = OPTICS(min_samples=ms, min_cluster_size=0.1).fit(self.PCA_Data).labels_
 
         self.OPTIC_labels = labels
 
@@ -317,7 +300,7 @@ class Clustering:
 
         clust = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(labels):
-            clust[unique_labels.index(cluster_label)].append(self.PCA_Data.index[i])
+            clust[unique_labels.index(cluster_label)].append(self.index[i])
 
         self.OPTIC = clust
         return self.OPTIC

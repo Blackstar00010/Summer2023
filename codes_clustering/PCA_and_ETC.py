@@ -2,24 +2,9 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn import metrics
 from sklearn import manifold
 from sklearn.decomposition import PCA
-
-
-def read_and_preprocess_data(input_dir, file) -> pd.DataFrame:
-    '''
-    :param input_dir: '../files/momentum_adj'
-    :param file: yyyy-mm.csv
-    :return: DataFrame
-    '''
-    data = pd.read_csv(os.path.join(input_dir, file), index_col=0)
-
-    # Replace infinities with NaN
-    data.replace([np.inf, -np.inf], np.nan, inplace=True)
-    # Drop rows with NaN values
-    data.dropna(inplace=True)
-
-    return data
 
 
 def generate_PCA_Data(data: pd.DataFrame):
@@ -73,12 +58,28 @@ def generate_PCA_Data(data: pd.DataFrame):
     combined_matrix = np.hstack((first_column_matrix, mat_pd_pca_matrix))
     df_combined = pd.DataFrame(combined_matrix)
     df_combined.index = data.index
-    df_combined=pd.DataFrame(df_combined)
+    df_combined = pd.DataFrame(df_combined)
 
     return df_combined
 
 
-def t_SNE(data, cluster_labels):
+def read_and_preprocess_data(input_dir, file) -> pd.DataFrame:
+    '''
+    :param input_dir: '../files/momentum_adj'
+    :param file: yyyy-mm.csv
+    :return: DataFrame
+    '''
+    data = pd.read_csv(os.path.join(input_dir, file), index_col=0)
+
+    # Replace infinities with NaN
+    data.replace([np.inf, -np.inf], np.nan, inplace=True)
+    # Drop rows with NaN values
+    data.dropna(inplace=True)
+
+    return data
+
+
+def t_SNE(title, data, cluster_labels):
     '''
     :param data: Mom1+PCA_Data
     :param cluster_labels: cluster_labels
@@ -105,7 +106,7 @@ def t_SNE(data, cluster_labels):
         plt.suptitle("Perplexity=%d" % perplexity)
         sc = plt.scatter(X_tsne[:, 0], X_tsne[:, 1], c=cluster_labels, cmap='plasma')
 
-        plt.title('t-SNE Visualization')
+        plt.title('t-SNE Visualization' + title)
         plt.xlabel('t-SNE Dimension 1')
         plt.ylabel('t-SNE Dimension 2')
 
@@ -115,11 +116,32 @@ def t_SNE(data, cluster_labels):
         plt.show()
         print()
 
+
+def analysis_clustering_result(data, compartive_label, control_label):
+    '''
+    :param data: ground data
+    :param compartive_label: cluster label to know about
+    :param control_label: cluster label to be compared
+    :return: etc
+    '''
+    print(f"Homogeneity: {metrics.homogeneity_score(compartive_label, control_label):.3f}")
+    print(f"Completeness: {metrics.completeness_score(compartive_label, control_label):.3f}")
+    print(f"V-measure: {metrics.v_measure_score(compartive_label, control_label):.3f}")
+    print(
+        f"Adjusted Rand Index: {metrics.adjusted_rand_score(compartive_label, control_label):.3f}")
+    print(
+        "Adjusted Mutual Information:"
+        f" {metrics.adjusted_mutual_info_score(compartive_label, control_label):.3f}"
+    )
+    print(
+        f"Silhouette Coefficient: {metrics.silhouette_score(data, compartive_label):.3f}")
+
+
 # PCA_Result Check
 if __name__ == "__main__":
     # 파일 불러오기 및 PCA함수
     input_dir = '../files/momentum_adj'
-    file = '2022-06.csv'
+    file = '1992-06.csv'
     data = read_and_preprocess_data(input_dir, file)
 
     mom1 = data.values.astype(float)[:, 0]

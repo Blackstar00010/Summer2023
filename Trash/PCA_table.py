@@ -1,4 +1,4 @@
-from codes_clustering.PCA_and_tSNE import *
+from codes_clustering.PCA_and_ETC import *
 
 # 파일 불러오기
 input_dir = '../files/momentum_adj'
