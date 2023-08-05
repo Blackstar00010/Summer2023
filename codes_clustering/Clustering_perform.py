@@ -3,7 +3,7 @@ import Clustering as C
 from PCA_and_ETC import *
 
 # file to check
-file = '1990-06.csv'
+file = '1992-06.csv'
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -54,13 +54,38 @@ if dbscan_Plot:
     Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN(0.8)
 
     # Plot clustering result
-    Do_Result_Plot.Plot_clusters(Do_Clustering.perform_DBSCAN(0.8))
+    Do_Result_Plot.Plot_clusters(Do_Clustering.DBSCAN)
 
     # Plot t_SNE result
     t_SNE('DBSCAN', df_combined, Do_Clustering.DBSCAN_labels)
 
     # compare cluster result
     analysis_clustering_result(Do_Clustering.PCA_Data, Do_Clustering.DBSCAN_labels, Do_Clustering.K_Mean_labels)
+
+    # Do_Result_Plot.LS_Table_Save(Do_Clustering.DBSCAN, '../files/Clustering_adj/DBSCAN', file)
+# hyper parameter eps percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
+
+# Plot HDBSCAN cluster about individual csv file
+hdbscan_Plot = False
+if hdbscan_Plot:
+    input_dir = '../files/momentum_adj'
+
+    # convert mom_data into PCA_data
+    data = read_and_preprocess_data(input_dir, file)
+    df_combined = generate_PCA_Data(data)
+
+    # Call initial method
+    Do_Clustering = C.Clustering(df_combined)
+    Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+
+    # Do clustering and get 2D list of cluster index
+    Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.2)
+
+    # Plot clustering result
+    Do_Result_Plot.Plot_clusters(Do_Clustering.HDBSCAN)
+
+    # Plot t_SNE result
+    t_SNE('HDBSCAN', df_combined, Do_Clustering.HDBSCAN_labels)
 
     # Do_Result_Plot.LS_Table_Save(Do_Clustering.DBSCAN, '../files/Clustering_adj/DBSCAN', file)
 # hyper parameter eps percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
@@ -220,6 +245,29 @@ if dbscan_Save:
         # Save LS_Table CSV File
         Do_Result_Save.LS_Table_Save(Do_Clustering.DBSCAN, '../files/Clustering_adj/DBSCAN', file)
 
+# Save DBSCAN clutering method LS_Tables
+hdbscan_Save = False
+if hdbscan_Save:
+    input_dir = '../files/momentum_adj'
+    files = sorted(filename for filename in os.listdir(input_dir))
+
+    for file in files:
+        print(file)
+
+        # convert mom_data into PCA_data
+        data = read_and_preprocess_data(input_dir, file)
+        df_combined = generate_PCA_Data(data)
+
+        # Call initial method
+        Do_Clustering = C.Clustering(df_combined)
+        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+
+        # Do clustering and get 2D list of cluster index
+        Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.8)
+
+        # Save LS_Table CSV File
+        Do_Result_Save.LS_Table_Save(Do_Clustering.HDBSCAN, '../files/Clustering_adj/HDBSCAN', file)
+
 # Save Hirarchical Agglomerative clutering method LS_Tables
 Agglormerative_Save = False
 if Agglormerative_Save:
@@ -241,7 +289,8 @@ if Agglormerative_Save:
         Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.6)
 
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative, '../files/Clustering_adj/Hierarchical_Agglomerative', file)
+        Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative, '../files/Clustering_adj/Hierarchical_Agglomerative',
+                                     file)
 
 # Save BayesianGaussianMixture clutering method LS_Tables
 BGM_Save = False

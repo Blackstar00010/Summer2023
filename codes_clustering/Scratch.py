@@ -13,7 +13,7 @@ iris = load_iris()
 iris_pd = pd.DataFrame(iris.data[:, 2:], columns=['petal_length', 'petal_width'])
 
 # Plot K_mean cluster about individual csv file
-example1 = True
+example1 = False
 if example1:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
@@ -34,7 +34,7 @@ if example1:
 
     t_SNE('K_mean', Do_Clustering.PCA_Data, Do_Clustering.K_Mean_labels)
 
-example2 = True
+example2 = False
 if example2:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
@@ -82,7 +82,7 @@ if example2:
 
     t_SNE('DBSCAN', Do_Clustering.PCA_Data, Do_Clustering.DBSCAN_labels)
 
-example3 = True
+example3 = False
 if example3:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
@@ -92,7 +92,7 @@ if example3:
 
     t_SNE('Hirarchical Agglormerative', Do_Clustering.PCA_Data, Do_Clustering.Agglomerative_labels)
 
-example4 = True
+example4 = False
 if example4:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
@@ -102,7 +102,7 @@ if example4:
 
     t_SNE('GMM', Do_Clustering.PCA_Data, Do_Clustering.Gaussian_labels)
 
-example5 = True
+example5 = False
 if example5:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
@@ -112,7 +112,7 @@ if example5:
 
     t_SNE('OPTICS', Do_Clustering.PCA_Data, Do_Clustering.OPTIC_labels)
 
-example6 = True
+example6 = False
 if example6:
     # Call initial method
     Do_Clustering = C.Clustering(iris_pd)
@@ -121,6 +121,16 @@ if example6:
     Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.3)
 
     t_SNE('meanshift', Do_Clustering.PCA_Data, Do_Clustering.menshift_labels)
+
+example7 = True
+if example7:
+    # Call initial method
+    Do_Clustering = C.Clustering(iris_pd)
+
+    # Do clustering and get 2D list of cluster index
+    Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBCAN(0.2)
+
+    t_SNE('meanshift', Do_Clustering.PCA_Data, Do_Clustering.HDBSCAN_labels)
 
 lab = False
 if lab:
@@ -141,5 +151,4 @@ if lab:
         t = find_optimal_GMM_hyperparameter(Do_Clustering.PCA_Data)
     print(abnormal_file)
 
-#ToDo: HDBSCAN, CLARA, BIRCH, Affinity Propagation
-
+# ToDo: BIRCH, Affinity Propagation

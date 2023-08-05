@@ -161,6 +161,29 @@ class Clustering:
         self.DBSCAN = clust
         return self.DBSCAN
 
+    def perform_HDBSCAN(self, threshold):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        # Exclude the first column (firm names) & Exclude MOM_1
+
+        ms = int(math.log(len(self.PCA_Data)))
+
+        Hdbscan = HDBSCAN(min_samples=ms, cluster_selection_epsilon=threshold).fit(self.PCA_Data)
+        cluster_labels = Hdbscan.labels_
+
+        self.test = Hdbscan
+        self.HDBSCAN_labels = cluster_labels
+
+        # Get the unique cluster labels
+        unique_labels = sorted(list(set(cluster_labels)))
+
+        clust = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(cluster_labels):
+            clust[unique_labels.index(cluster_label)].append(self.index[i])
+
+        self.HDBSCAN = clust
+        return self.HDBSCAN
+
     def perform_HG(self, threshold: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
@@ -402,6 +425,11 @@ class Result_Check_and_Save:
                     long_short[i] = 1  # 1 to the low ones
                     long_short[-i - 1] = -1  # -1 to the high ones
                     # 0 to middle point when there are odd numbers in a cluster
+
+            lab = False
+            if lab:
+                if cluster_num == 0:
+                    long_short = [0] * len(firms_sorted)
 
             # Add the data to the new table
             for i, firm in enumerate(firms_sorted):
