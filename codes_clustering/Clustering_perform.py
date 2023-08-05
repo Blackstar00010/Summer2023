@@ -3,7 +3,7 @@ import Clustering as C
 from PCA_and_ETC import *
 
 # file to check
-file = '1993-11.csv'
+file = '1990-01.csv'
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -199,7 +199,7 @@ if meanshift_Plot:
 # hyper parameter quantile (0.1, 0.2, 0.3, 0.4) should be tested manually.(paper follow)
 
 # Save K_mean clutering method LS_Tables
-K_mean_Save = True
+K_mean_Save = False
 if K_mean_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -338,7 +338,7 @@ if optics_Save:
         Do_Result_Save.LS_Table_Save(Do_Clustering.OPTIC, '../files/Clustering_adj/OPTICS', file)
 
 # Save Mean Shift clutering method LS_Tables
-meanshift_Save = False
+meanshift_Save = True
 if meanshift_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))

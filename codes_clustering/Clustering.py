@@ -58,10 +58,10 @@ class Clustering:
         :return: 2D list
         '''
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
-        kmeans = KMeans(n_clusters=K, init='k-means++', n_init=10, max_iter=500, random_state=13).fit(self.PCA_Data)
+        kmeans = KMeans(n_clusters=K, init='k-means++', n_init=10, max_iter=500, random_state=10).fit(self.PCA_Data)
         cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
 
         self.test = kmeans
@@ -101,17 +101,12 @@ class Clustering:
 
         clusters_index = [sublist for sublist in clusters_index if sublist]  # 빈 리스트 제거
 
-        print(outliers_index)
+        # 빈리스트도 Outlier로 간주되기 때문에 가끔 생기는 결측값 제거.
+        outliers_index = [sublist for sublist in outliers_index if sublist]
+        # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
+        clusters_index.insert(0, outliers_index)
 
-        clust = []
-
-        for i in range(len(clusters_index)):
-            clust.append(clusters_index[i])
-
-        clust.insert(0, outliers_index)
-        print(clust)
-
-        return clust
+        return clusters_index
 
     def perform_kmeans(self, k_values: list):
         '''
@@ -132,7 +127,7 @@ class Clustering:
 
     def perform_DBSCAN(self, threshold: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
         ms = int(math.log(len(self.PCA_Data)))
@@ -172,7 +167,7 @@ class Clustering:
 
     def perform_HDBSCAN(self, threshold):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
         ms = int(math.log(len(self.PCA_Data)))
@@ -199,7 +194,7 @@ class Clustering:
 
     def perform_HG(self, threshold: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Hierachical Agglomerative
         # 거리 행렬 계산
@@ -267,7 +262,7 @@ class Clustering:
 
     def perform_GMM(self, probability: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Gaussian Mixture Model
 
@@ -358,7 +353,7 @@ class Clustering:
 
     def perform_meanshift(self, quantile):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # The following bandwidth can be automatically detected using
         bandwidth = estimate_bandwidth(self.PCA_Data, quantile=quantile)
@@ -389,7 +384,7 @@ class Clustering:
 
         outliers = []
         for i, density in enumerate(densities):
-            if density > 3 * np.std(densities):
+            if density > 2 * np.std(densities):
                 outliers.append(self.index[i])
 
         # Get the unique cluster labels
@@ -398,8 +393,15 @@ class Clustering:
         clusters = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(self.menshift_labels):
             clusters[unique_labels.index(cluster_label)].append(self.index[i])
-        # 원본에서 outlier제거.
-        clusters = [x for x in clusters if x not in outliers]
+
+        # a에 있는 값을 b에서 빼기
+        for value in outliers:
+            for row in clusters:
+                if value in row:
+                    row.remove(value)
+
+        clusters = [sublist for sublist in clusters if sublist]  # 빈 리스트 제거
+
         # 빈리스트도 Outlier로 간주되기 때문에 가끔 생기는 결측값 제거.
         outliers = [sublist for sublist in outliers if sublist]
         # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
