@@ -427,8 +427,8 @@ class Result_Check_and_Save:
         LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
 
         for cluster_num, firms in enumerate(Cluster):
-            # if cluster_num == 0:
-            #     continue
+            if cluster_num == 0:
+                continue
 
             # Sort firms based on momentum_1
             firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, 0])
@@ -451,7 +451,7 @@ class Result_Check_and_Save:
                     long_short[-i - 1] = -1  # -1 to the high ones
                     # 0 to middle point when there are odd numbers in a cluster
 
-            lab = True
+            lab = False
             if lab:
                 if cluster_num == 0:
                     long_short = [0] * len(firms_sorted)
