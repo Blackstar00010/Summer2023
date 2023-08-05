@@ -3,7 +3,7 @@ import Clustering as C
 from PCA_and_ETC import *
 
 # file to check
-file = '1992-06.csv'
+file = '1993-11.csv'
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -162,7 +162,7 @@ if optics_Plot:
     Do_Result_Plot = C.Result_Check_and_Save(df_combined)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.7)
+    Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.5)
 
     # Plot clustering result
     Do_Result_Plot.Plot_clusters(Do_Clustering.OPTIC)
@@ -199,7 +199,7 @@ if meanshift_Plot:
 # hyper parameter quantile (0.1, 0.2, 0.3, 0.4) should be tested manually.(paper follow)
 
 # Save K_mean clutering method LS_Tables
-K_mean_Save = False
+K_mean_Save = True
 if K_mean_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -289,8 +289,7 @@ if Agglormerative_Save:
         Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.6)
 
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative, '../files/Clustering_adj/Hierarchical_Agglomerative',
-                                     file)
+        Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative, '../files/Clustering_adj/Hierarchical_Agglomerative',file)
 
 # Save BayesianGaussianMixture clutering method LS_Tables
 BGM_Save = False
@@ -333,7 +332,7 @@ if optics_Save:
         Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.7)
+        Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.5)
 
         # Save LS_Table CSV File
         Do_Result_Save.LS_Table_Save(Do_Clustering.OPTIC, '../files/Clustering_adj/OPTICS', file)

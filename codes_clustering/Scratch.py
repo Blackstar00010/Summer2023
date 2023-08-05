@@ -151,4 +151,8 @@ if lab:
         t = find_optimal_GMM_hyperparameter(Do_Clustering.PCA_Data)
     print(abnormal_file)
 
+lab2=True
+if lab2:
+    
+
 # ToDo: BIRCH, Affinity Propagation

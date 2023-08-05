@@ -101,10 +101,15 @@ class Clustering:
 
         clusters_index = [sublist for sublist in clusters_index if sublist]  # 빈 리스트 제거
 
+        print(outliers_index)
+
         clust = []
-        clust.append(outliers_index)
+
         for i in range(len(clusters_index)):
             clust.append(clusters_index[i])
+
+        clust.insert(0, outliers_index)
+        print(clust)
 
         return clust
 
@@ -158,6 +163,10 @@ class Clustering:
         for i, cluster_label in enumerate(cluster_labels):
             clust[unique_labels.index(cluster_label)].append(self.index[i])
 
+        # outlier가 없으면 빈리스트 추가
+        if -1 not in unique_labels:
+            clust.insert(0, [])
+
         self.DBSCAN = clust
         return self.DBSCAN
 
@@ -180,6 +189,10 @@ class Clustering:
         clust = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(cluster_labels):
             clust[unique_labels.index(cluster_label)].append(self.index[i])
+
+        # outlier가 없으면 빈리스트 추가
+        if -1 not in unique_labels:
+            clust.insert(0, [])
 
         self.HDBSCAN = clust
         return self.HDBSCAN
@@ -237,13 +250,17 @@ class Clustering:
         for i in range(0, len(outliers)):
             for j in range(0, len(clusters)):
                 if outliers[i] == j + 1:
-                    clusters[j + 1] = 0
+                    clusters[j + 1] = -1
 
         unique_labels = sorted(list(set(clusters)))
 
         clust = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(clusters):
             clust[unique_labels.index(cluster_label)].append(self.index[i])
+
+        # outlier가 없으면 빈리스트 추가
+        if -1 not in unique_labels:
+            clust.insert(0, [])
 
         self.Agglomerative = clust
         return self.Agglomerative
@@ -313,7 +330,7 @@ class Clustering:
 
     def perform_OPTICS(self, size):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         ms = int(math.log(len(self.PCA_Data)))
 
@@ -330,7 +347,13 @@ class Clustering:
         clust = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(labels):
             clust[unique_labels.index(cluster_label)].append(self.index[i])
+
+        # outlier가 없으면 빈리스트 추가
+        if -1 not in unique_labels:
+            clust.insert(0, [])
+
         self.OPTIC = clust
+
         return self.OPTIC
 
     def perform_meanshift(self, quantile):
@@ -402,8 +425,8 @@ class Result_Check_and_Save:
         LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
 
         for cluster_num, firms in enumerate(Cluster):
-            if cluster_num == 0:
-                continue
+            # if cluster_num == 0:
+            #     continue
 
             # Sort firms based on momentum_1
             firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, 0])
@@ -426,7 +449,7 @@ class Result_Check_and_Save:
                     long_short[-i - 1] = -1  # -1 to the high ones
                     # 0 to middle point when there are odd numbers in a cluster
 
-            lab = False
+            lab = True
             if lab:
                 if cluster_num == 0:
                     long_short = [0] * len(firms_sorted)
