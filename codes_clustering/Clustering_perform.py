@@ -22,7 +22,7 @@ if K_mean_Plot:
     Do_Result_Plot = C.Result_Check_and_Save(df_combined)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([4])
+    Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([10])
 
     # Plot clustering result
     Do_Result_Plot.Plot_clusters_Kmean(Do_Clustering.K_Mean)
@@ -79,7 +79,7 @@ if hdbscan_Plot:
     Do_Result_Plot = C.Result_Check_and_Save(df_combined)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.2)
+    Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.9)
 
     # Plot clustering result
     Do_Result_Plot.Plot_clusters(Do_Clustering.HDBSCAN)
@@ -104,8 +104,8 @@ if Agglormerative_Plot:
     Do_Result_Plot = C.Result_Check_and_Save(df_combined)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([4])
-    Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.6)
+    # Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([4])
+    Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.4)
 
     # Plot clustering result
     Do_Result_Plot.Plot_clusters(Do_Clustering.Agglomerative)
@@ -114,7 +114,7 @@ if Agglormerative_Plot:
     t_SNE('Hirarchical Agglomerative', df_combined, Do_Clustering.Agglomerative_labels)
 
     # compare cluster result
-    analysis_clustering_result(Do_Clustering.PCA_Data, Do_Clustering.Agglomerative_labels, Do_Clustering.K_Mean_labels)
+    # analysis_clustering_result(Do_Clustering.PCA_Data, Do_Clustering.Agglomerative_labels, Do_Clustering.K_Mean_labels)
 
     # Do_Result_Plot.LS_Table_Save(Do_Clustering.Agglomerative, '../files/Clustering_adj/Hierarchical_Agglomerative',file)
 # hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
@@ -216,14 +216,14 @@ if K_mean_Save:
         Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([1500])
+        Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([10])
 
         # Save LS_Table CSV File
         for i, cluster in enumerate(Do_Clustering.K_Mean):
             Do_Result_Save.LS_Table_Save(cluster, '../files/Clustering_adj/K_Means_outlier', file)
 
 # Save DBSCAN clutering method LS_Tables
-dbscan_Save = True
+dbscan_Save = False
 if dbscan_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -263,7 +263,7 @@ if hdbscan_Save:
         Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.3)
+        Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.9)
 
         # Save LS_Table CSV File
         Do_Result_Save.LS_Table_Save(Do_Clustering.HDBSCAN, '../files/Clustering_adj/HDBSCAN', file)
@@ -286,13 +286,13 @@ if Agglormerative_Save:
         Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.2)
+        Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.4)
 
         # Save LS_Table CSV File
         Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative, '../files/Clustering_adj/Hierarchical_Agglomerative',file)
 
 # Save BayesianGaussianMixture clutering method LS_Tables
-BGM_Save = True
+BGM_Save = False
 if BGM_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -315,7 +315,7 @@ if BGM_Save:
         Do_Result_Save.LS_Table_Save(Do_Clustering.Gaussian, '../files/Clustering_adj/Gaussian_Mixture_Model', file)
 
 # Save OPTICS clutering method LS_Tables
-optics_Save = True
+optics_Save = False
 if optics_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -338,7 +338,7 @@ if optics_Save:
         Do_Result_Save.LS_Table_Save(Do_Clustering.OPTIC, '../files/Clustering_adj/OPTICS', file)
 
 # Save Mean Shift clutering method LS_Tables
-meanshift_Save = True
+meanshift_Save = False
 if meanshift_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
