@@ -61,11 +61,13 @@ class Clustering:
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
-        kmeans = KMeans(n_clusters=K, init='k-means++', n_init=10, max_iter=500, random_state=10).fit(self.PCA_Data)
+        kmeans = KMeans(n_clusters=K, init='k-means++', n_init=1, max_iter=500, random_state=0).fit(self.PCA_Data)
         cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
+
 
         self.test = kmeans
         self.K_Mean_labels = cluster_labels
+
 
         distance = kmeans.fit_transform(self.PCA_Data)  # Distance btw K central points and each point
         cluster_distance_min = np.min(distance, axis=1)  # Distance between the point and the central point
@@ -265,7 +267,6 @@ class Clustering:
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Gaussian Mixture Model
-
         n_components = 40
         clusters = [[] for _ in range(40)]
         if len(self.PCA_Data) < 40:
@@ -422,7 +423,7 @@ class Result_Check_and_Save:
     def __init__(self, data: pd.DataFrame):
         self.PCA_Data = data
 
-    def LS_Table_Save(self, Cluster, output_dir, file):
+    def LS_Table_Save(self, Cluster:list, output_dir, file):
         # New table with firm name, mom_1, long and short index, cluster index
         LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
 
@@ -451,6 +452,7 @@ class Result_Check_and_Save:
                     long_short[-i - 1] = -1  # -1 to the high ones
                     # 0 to middle point when there are odd numbers in a cluster
 
+            # Outlier cluster를 빼지 않는 대신 LS_Value를 0으로
             lab = True
             if lab:
                 if cluster_num == 0:
@@ -464,7 +466,7 @@ class Result_Check_and_Save:
         LS_table.to_csv(os.path.join(output_dir, file), index=False)
         print(output_dir)
 
-    def Reversal_Table_Save(self, data, output_dir, file):
+    def Reversal_Table_Save(self, data:pd.DataFrame, output_dir, file):
         LS_table_reversal = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short'])
         firm_lists = data.index
         firm_sorted = sorted(firm_lists, key=lambda x: data.loc[x, '1'])
@@ -481,7 +483,7 @@ class Result_Check_and_Save:
         LS_table_reversal.to_csv(os.path.join(output_dir, file), index=False)
         print(output_dir)
 
-    def Plot_clusters_Kmean(self, clusters):
+    def Plot_clusters_Kmean(self, clusters:list):
         firm_names = self.PCA_Data.index
         data_array = self.PCA_Data.values[:, 1:].astype(float)
 
@@ -514,7 +516,7 @@ class Result_Check_and_Save:
 
                 plt.show()
 
-    def Plot_clusters(self, cluster):
+    def Plot_clusters(self, cluster:list):
         firm_names = self.PCA_Data.index
         data_array = self.PCA_Data.values[:, 1:].astype(float)
 
@@ -545,3 +547,12 @@ class Result_Check_and_Save:
                 plt.legend(loc='center right', title=f'Total Firms: {len(firms)}', labels=firms[:10] + ['...'])
 
             plt.show()
+
+    def count_outlier(self, cluster:list):
+        if not cluster:
+            return 0
+
+        elif not cluster[0]:
+            return 0
+        else:
+            return len(cluster[0])

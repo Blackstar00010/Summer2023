@@ -5,10 +5,6 @@ from Clustering import *
 from PCA_and_ETC import *
 from sklearn.datasets import load_iris
 
-import os
-import pandas as pd
-import matplotlib.pyplot as plt
-
 # turn off warning
 warnings.filterwarnings("ignore")
 
@@ -155,8 +151,8 @@ if lab:
         t = find_optimal_GMM_hyperparameter(Do_Clustering.PCA_Data)
     print(abnormal_file)
 
-lab2 = True
-if lab2:
+calculate_and_plot_Return = False
+if calculate_and_plot_Return:
     base_directory = '../files/Clustering_adj/'
 
     # Get all subdirectories in the base directory
@@ -164,6 +160,8 @@ if lab2:
 
     file_names = []
     result_df = pd.DataFrame()
+
+    # Save subdir name in file_names at the begining.
     for subdir in subdirectories:
         file_names.append(subdir)
 
@@ -173,6 +171,7 @@ if lab2:
 
         df2 = pd.DataFrame()
 
+        # LS_Value 일단 이어 붙이기.
         for file in long_short:
             data = pd.read_csv(os.path.join(directory, file))
 
@@ -188,41 +187,70 @@ if lab2:
             else:
                 df2 = pd.merge(df2, data, on='Firm Name', how='outer')
 
+        # Sort LS_Value according to Firm Name
         df2 = df2.sort_values('Firm Name')
-        # Firm Name이 중복되면 하나 버림.(K_mean_Outlier에 같은 row중복되는 것 있었음)
+
+        '''ToDo: Firm Name이 중복되면 하나 drop. (K_mean_Outlier에 row 중복되는 것 있어서 오류 발생하여 추가)
+        I don't know the reason why'''
         df2 = df2.drop_duplicates(subset=df2.columns[0], keep='first')
+
+        # Set Firm Name column into index
         df2.set_index('Firm Name', inplace=True)
+
+        # 마지막 row 버리면 한칸씩 밀어버리는 것과 동치
         df2 = df2.drop(df2.columns[-1], axis=1)
+
+        # read mom1_merge file
         df1 = pd.read_csv('../files/mom1_data_combined_adj.csv')
+
+        # Set Firm Name column into index
         df1.set_index('Firm Name', inplace=True)
+
+        # First row 버리고 df2와 product
+        # t-1 LS_Value와 t mom1 product
         df1.drop(df1.columns[0], axis=1, inplace=True)
+
+        # ToDo: 혹시 몰라서 일단 NaN 0으로 대체. 없어도 될지도
         df1 = df1.fillna(0)
         df2 = df2.fillna(0)
 
         # Multiply only the numeric columns
         prod = df1.values * df2.values
         prod = pd.DataFrame(prod)
+
+        # prod index set to df1.index
         prod.set_index(df1.index, inplace=True)
+        # cumulative return은 1990-02부터 2022-12이기 때문에 prod.columns=df1.columns
         prod.columns = df1.columns
 
-        # df1.to_csv('Scratch_Files/mom1.csv', index=True)
-        # df2.to_csv('Scratch_Files/' + f'{subdir}_LS.csv', index=True)
-        # prod.to_csv('Scratch_Files/' + f'{subdir}_prod.csv', index=True)
+        # 제대로 됐나 확인하기 위해 csv saved.
+        # df1.to_csv('mom1.csv', index=True)
+        # df2.to_csv(f'{subdir}_LS.csv', index=True)
+        # prod.to_csv(f'{subdir}_prod.csv', index=True)
 
-        # Count the non-zero LS
+        '''mom1과 LS_Value 곱한것 평균구하는 부분.
+        Clustering/Result_Cheak_and_Save/LS_Table_Save 함수에서
+        outlier cluster도 버리지 않는 대신 LS_Value=0으로 저장했기 때문에
+        prod.mean 사용하면 안됨. prod에 모든 회사 row가 있기 때문에
+        sum/(투자한 회사+투자안한 회사)로 계산되기 때문.'''
+        # Count the non-zero LS that is the number of total firm invested(395 by 1 matrix/index=Date)
         non_zero_count = df2.astype(bool).sum()
-        # Calculate the average of non-NaN values in each column (excluding the 'Firm Name' column)
+
+        # sum about all rows(395 by 1 matrix/index=Date)
         column_sums = prod.sum()
+
+        # calculate mean and make into DataFrame
         column_means = column_sums.values / non_zero_count.values
         column_means = pd.DataFrame(column_means)
         column_means.index = column_sums.index
 
-        # Concat the means DataFrame to the result DataFrame
+        # Concat the means DataFrame to the result DataFrame(395 by 1 matrix->1 by 395 matrix)
         result_df = pd.concat([result_df, column_means.T], ignore_index=True)
 
     # Add a new column to the result DataFrame with the file names
     result_df.insert(0, 'Clustering Method', file_names)
 
+    # ToDo: 254부터 260 뭔지 모르지만 일단 나둠.
     # Separate the 'Clustering Method' column from the date columns
     clustering_method = result_df['Clustering Method']
     date_columns_df = result_df.drop('Clustering Method', axis=1)
@@ -236,6 +264,7 @@ if lab2:
     result_df.set_index('Clustering Method', inplace=True)
     file_names.append('Benchmark')
 
+    # benchmark return merge with result_df
     file = '../files/month_return.csv'
     df = pd.read_csv(file)
     df = df.iloc[1:]  # Jan data eliminate
@@ -244,9 +273,9 @@ if lab2:
     result_df = pd.concat([result_df, df], axis=0)  # add monthly_return right below result_df
     result_df.index = file_names
     result_df = result_df.astype(float)  # set data type as float(df.value was str actually.)
+    result_df = result_df.fillna(0) # 혹시 몰라서
 
-    # # Save a new CSV file
-    result_df = result_df.fillna(0)
+    # Save a new CSV file
     # result_df.to_csv('Scratch_Files/result.csv', index=True)
 
     # Add 1 to all data values

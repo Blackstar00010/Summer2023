@@ -50,7 +50,6 @@ if dbscan_Plot:
     Do_Result_Plot = C.Result_Check_and_Save(df_combined)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([4])
     Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN(0.8)
 
     # Plot clustering result
@@ -58,9 +57,6 @@ if dbscan_Plot:
 
     # Plot t_SNE result
     t_SNE('DBSCAN', df_combined, Do_Clustering.DBSCAN_labels)
-
-    # compare cluster result
-    analysis_clustering_result(Do_Clustering.PCA_Data, Do_Clustering.DBSCAN_labels, Do_Clustering.K_Mean_labels)
 
     # Do_Result_Plot.LS_Table_Save(Do_Clustering.DBSCAN, '../files/Clustering_adj/DBSCAN', file)
 # hyper parameter eps percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
@@ -134,16 +130,12 @@ if BGM_Plot:
 
     # Do clustering and get 2D list of cluster index
     Do_Clustering.Gaussian = Do_Clustering.perform_GMM(0.15)
-    Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([4])
 
     # Plot clustering result
     Do_Result_Plot.Plot_clusters(Do_Clustering.Gaussian)
 
     # Plot t_SNE result
     t_SNE('GMM', df_combined, Do_Clustering.Gaussian_labels)
-
-    # compare cluster result
-    analysis_clustering_result(Do_Clustering.PCA_Data, Do_Clustering.Gaussian_labels, Do_Clustering.K_Mean_labels)
 
     # Do_Result_Plot.LS_Table_Save(Do_Clustering.Gaussian, '../files/Clustering_adj/Gaussian_Mixture_Model',file)
 # hyper parameter outlier probability range(0.05, 0.15, 0.01) should be tested manually.
@@ -189,11 +181,11 @@ if meanshift_Plot:
     # Do clustering and get 2D list of cluster index
     Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.3)
 
-    # Plot clustering result
-    Do_Result_Plot.Plot_clusters(Do_Clustering.lab)
-
-    # Plot t_SNE result
-    t_SNE('meanshift', df_combined, Do_Clustering.menshift_labels)
+    # # Plot clustering result
+    # Do_Result_Plot.Plot_clusters(Do_Clustering.lab)
+    #
+    # # Plot t_SNE result
+    # t_SNE('meanshift', df_combined, Do_Clustering.menshift_labels)
 
     # Do_Result_Plot.LS_Table_Save(Do_Clustering.menshift, '../files/Clustering_adj/Meanshift', file)
 # hyper parameter quantile (0.1, 0.2, 0.3, 0.4) should be tested manually.(paper follow)
@@ -203,7 +195,7 @@ K_mean_Save = True
 if K_mean_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
-
+    sum = 0
     for file in files:
         print(file)
 
@@ -218,16 +210,20 @@ if K_mean_Save:
         # Do clustering and get 2D list of cluster index
         Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([10])
 
+        sum += Do_Result_Save.count_outlier(Do_Clustering.K_Mean)
+
         # Save LS_Table CSV File
-        for i, cluster in enumerate(Do_Clustering.K_Mean):
-            Do_Result_Save.LS_Table_Save(cluster, '../files/Clustering_adj/K_Means_outlier', file)
+        # for i, cluster in enumerate(Do_Clustering.K_Mean):
+        #     Do_Result_Save.LS_Table_Save(cluster, '../files/Clustering_adj/K_Means_outlier', file)
+
+    print(f'total outliers: {sum}')
 
 # Save DBSCAN clutering method LS_Tables
-dbscan_Save = False
+dbscan_Save = True
 if dbscan_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
-
+    sum = 0
     for file in files:
         print(file)
 
@@ -242,15 +238,19 @@ if dbscan_Save:
         # Do clustering and get 2D list of cluster index
         Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN(0.8)
 
+        sum += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
+
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.DBSCAN, '../files/Clustering_adj/DBSCAN', file)
+        # Do_Result_Save.LS_Table_Save(Do_Clustering.DBSCAN, '../files/Clustering_adj/DBSCAN', file)
+
+    print(f'total outliers: {sum}')
 
 # Save DBSCAN clutering method LS_Tables
 hdbscan_Save = True
 if hdbscan_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
-
+    sum = 0
     for file in files:
         print(file)
 
@@ -265,15 +265,19 @@ if hdbscan_Save:
         # Do clustering and get 2D list of cluster index
         Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.9)
 
+        sum += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
+
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.HDBSCAN, '../files/Clustering_adj/HDBSCAN', file)
+        # Do_Result_Save.LS_Table_Save(Do_Clustering.HDBSCAN, '../files/Clustering_adj/HDBSCAN', file)
+
+    print(f'total outliers: {sum}')
 
 # Save Hirarchical Agglomerative clutering method LS_Tables
 Agglormerative_Save = True
 if Agglormerative_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
-
+    sum = 0
     for file in files:
         print(file)
 
@@ -288,15 +292,19 @@ if Agglormerative_Save:
         # Do clustering and get 2D list of cluster index
         Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.4)
 
+        sum += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
+
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative, '../files/Clustering_adj/Hierarchical_Agglomerative',file)
+        # Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative, '../files/Clustering_adj/Hierarchical_Agglomerative',file)
+
+    print(f'total outliers: {sum}')
 
 # Save BayesianGaussianMixture clutering method LS_Tables
-BGM_Save = False
+BGM_Save = True
 if BGM_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
-
+    sum = 0
     for file in files:
         print(file)
 
@@ -311,15 +319,19 @@ if BGM_Save:
         # Do clustering and get 2D list of cluster index
         Do_Clustering.Gaussian = Do_Clustering.perform_GMM(0.1)
 
+        sum += Do_Result_Save.count_outlier(Do_Clustering.Gaussian)
+
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.Gaussian, '../files/Clustering_adj/Gaussian_Mixture_Model', file)
+        # Do_Result_Save.LS_Table_Save(Do_Clustering.Gaussian, '../files/Clustering_adj/Gaussian_Mixture_Model', file)
+
+    print(f'total outliers: {sum}')
 
 # Save OPTICS clutering method LS_Tables
-optics_Save = False
+optics_Save = True
 if optics_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
-
+    sum = 0
     for file in files:
         print(file)
 
@@ -334,15 +346,19 @@ if optics_Save:
         # Do clustering and get 2D list of cluster index
         Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.5)
 
+        sum += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
+
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.OPTIC, '../files/Clustering_adj/OPTICS', file)
+        # Do_Result_Save.LS_Table_Save(Do_Clustering.OPTIC, '../files/Clustering_adj/OPTICS', file)
+
+    print(f'total outliers: {sum}')
 
 # Save Mean Shift clutering method LS_Tables
-meanshift_Save = False
+meanshift_Save = True
 if meanshift_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
-
+    sum = 0
     for file in files:
         print(file)
 
@@ -357,5 +373,25 @@ if meanshift_Save:
         # Do clustering and get 2D list of cluster index
         Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.3)
 
+        sum += Do_Result_Save.count_outlier(Do_Clustering.menshift)
+
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.menshift, '../files/Clustering_adj/Meanshift', file)
+        # Do_Result_Save.LS_Table_Save(Do_Clustering.menshift, '../files/Clustering_adj/Meanshift', file)
+
+    print(f'total outliers: {sum}')
+
+# Save Reversal method LS_Tables
+Reversal_Save = False
+if Reversal_Save:
+    input_dir = '../files/momentum_adj'
+    files = sorted(filename for filename in os.listdir(input_dir))
+
+    for file in files:
+        print(file)
+
+        # convert mom_data into PCA_data
+        data = read_and_preprocess_data(input_dir, file)
+        Do_Result_Save = C.Result_Check_and_Save(data)
+
+        # Save LS_Table CSV File
+        Do_Result_Save.Reversal_Table_Save(data, '../files/Clustering_adj/Reversal', file)
