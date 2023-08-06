@@ -199,7 +199,7 @@ if meanshift_Plot:
 # hyper parameter quantile (0.1, 0.2, 0.3, 0.4) should be tested manually.(paper follow)
 
 # Save K_mean clutering method LS_Tables
-K_mean_Save = False
+K_mean_Save = True
 if K_mean_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -216,14 +216,14 @@ if K_mean_Save:
         Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([3])
+        Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([1500])
 
         # Save LS_Table CSV File
         for i, cluster in enumerate(Do_Clustering.K_Mean):
             Do_Result_Save.LS_Table_Save(cluster, '../files/Clustering_adj/K_Means_outlier', file)
 
 # Save DBSCAN clutering method LS_Tables
-dbscan_Save = False
+dbscan_Save = True
 if dbscan_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -246,7 +246,7 @@ if dbscan_Save:
         Do_Result_Save.LS_Table_Save(Do_Clustering.DBSCAN, '../files/Clustering_adj/DBSCAN', file)
 
 # Save DBSCAN clutering method LS_Tables
-hdbscan_Save = False
+hdbscan_Save = True
 if hdbscan_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -263,13 +263,13 @@ if hdbscan_Save:
         Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.8)
+        Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.3)
 
         # Save LS_Table CSV File
         Do_Result_Save.LS_Table_Save(Do_Clustering.HDBSCAN, '../files/Clustering_adj/HDBSCAN', file)
 
 # Save Hirarchical Agglomerative clutering method LS_Tables
-Agglormerative_Save = False
+Agglormerative_Save = True
 if Agglormerative_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -286,13 +286,13 @@ if Agglormerative_Save:
         Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.6)
+        Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.2)
 
         # Save LS_Table CSV File
         Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative, '../files/Clustering_adj/Hierarchical_Agglomerative',file)
 
 # Save BayesianGaussianMixture clutering method LS_Tables
-BGM_Save = False
+BGM_Save = True
 if BGM_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -309,13 +309,13 @@ if BGM_Save:
         Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.Gaussian = Do_Clustering.perform_GMM(0.15)
+        Do_Clustering.Gaussian = Do_Clustering.perform_GMM(0.1)
 
         # Save LS_Table CSV File
         Do_Result_Save.LS_Table_Save(Do_Clustering.Gaussian, '../files/Clustering_adj/Gaussian_Mixture_Model', file)
 
 # Save OPTICS clutering method LS_Tables
-optics_Save = False
+optics_Save = True
 if optics_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
