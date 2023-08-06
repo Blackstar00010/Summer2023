@@ -155,7 +155,7 @@ if lab:
         t = find_optimal_GMM_hyperparameter(Do_Clustering.PCA_Data)
     print(abnormal_file)
 
-'''lab2 = True
+lab2 = True
 if lab2:
     base_directory = '../files/Clustering_adj/'
 
@@ -188,69 +188,37 @@ if lab2:
             else:
                 df2 = pd.merge(df2, data, on='Firm Name', how='outer')
 
-        df2.drop_duplicates(subset=df2.columns[0], keep='first', inplace=True)
         df2 = df2.sort_values('Firm Name')
-
+        # Firm Name이 중복되면 하나 버림.(K_mean_Outlier에 같은 row중복되는 것 있었음)
+        df2 = df2.drop_duplicates(subset=df2.columns[0], keep='first')
+        df2.set_index('Firm Name', inplace=True)
+        df2 = df2.drop(df2.columns[-1], axis=1)
         df1 = pd.read_csv('../files/mom1_data_combined_adj.csv')
-
-        # Save the first column (index column)
-        first_column = df2.iloc[:, 0]
-
-        # 두 번째 열부터 마지막에서 두 번째 열까지 한 칸씩 오른쪽으로 영구적으로 이동시킵니다.
-        for i in range(len(df2.columns) - 2, 0, -1):
-            df2[df2.columns[i]] = df2[df2.columns[i - 1]]
-
-        # 두 번째 열은 세 번째 열로 옮기고, 첫 번째 열은 그대로 둡니다.
-        df2[df2.columns[1]] = df2[df2.columns[2]]
-
-        # 마지막 열을 삭제합니다.
-        df2.drop(df2.columns[-1], axis=1, inplace=True)
-
-        df1.drop(df2.columns[1], axis=1, inplace=True)
-
+        df1.set_index('Firm Name', inplace=True)
+        df1.drop(df1.columns[0], axis=1, inplace=True)
         df1 = df1.fillna(0)
         df2 = df2.fillna(0)
-        df2.columns = df1.columns
-
-        # 각 열별로 0이 아닌 값들의 개수를 세어 저장할 딕셔너리를 생성합니다.
-        non_zero_counts = {}
-
-        # DataFrame의 열을 반복하면서 0이 아닌 값들의 개수를 세어 딕셔너리에 저장합니다.
-        for column in df2.columns:
-            non_zero_counts[column] = df2[column].astype(bool).sum()
-
-        non_zero_counts.pop('Firm Name')
-        # 딕셔너리를 DataFrame으로 변환합니다.
-        non_zero_counts = pd.DataFrame(list(non_zero_counts.items()), columns=['Date', 'Value'])
-
-        non_zero_counts.index=non_zero_counts.iloc[:,0]
-        non_zero_counts=non_zero_counts.drop(non_zero_counts.columns[0], axis=1)
-        non_zero_counts.reset_index(drop=True)
-
-
 
         # Multiply only the numeric columns
-        prod = df1.iloc[:, 1:] * (df2.iloc[:, 1:])
+        prod = df1.values * df2.values
         prod = pd.DataFrame(prod)
+        prod.set_index(df1.index, inplace=True)
+        prod.columns = df1.columns
 
-        prod.insert(0, 'Firm Name', first_column)
+        # df1.to_csv('Scratch_Files/mom1.csv', index=True)
+        # df2.to_csv('Scratch_Files/' + f'{subdir}_LS.csv', index=True)
+        # prod.to_csv('Scratch_Files/' + f'{subdir}_prod.csv', index=True)
 
-
-
-        df = prod.drop("Firm Name", axis=1)
-
+        # Count the non-zero LS
+        non_zero_count = df2.astype(bool).sum()
         # Calculate the average of non-NaN values in each column (excluding the 'Firm Name' column)
-        column_sums=df.sum()
-        column_sums=pd.DataFrame(column_sums)
-
-        column_means = column_sums.values/non_zero_counts.values
-        column_means=pd.DataFrame(column_means)
-        column_means.index=column_sums.index
-        column_means=column_means.T
-
+        column_sums = prod.sum()
+        column_means = column_sums.values / non_zero_count.values
+        column_means = pd.DataFrame(column_means)
+        column_means.index = column_sums.index
 
         # Concat the means DataFrame to the result DataFrame
-        result_df = pd.concat([result_df, column_means], ignore_index=True)
+        result_df = pd.concat([result_df, column_means.T], ignore_index=True)
 
     # Add a new column to the result DataFrame with the file names
     result_df.insert(0, 'Clustering Method', file_names)
@@ -268,7 +236,6 @@ if lab2:
     result_df.set_index('Clustering Method', inplace=True)
     file_names.append('Benchmark')
 
-
     file = '../files/month_return.csv'
     df = pd.read_csv(file)
     df = df.iloc[1:]  # Jan data eliminate
@@ -280,7 +247,7 @@ if lab2:
 
     # # Save a new CSV file
     result_df = result_df.fillna(0)
-    result_df.to_csv('../files/position_LS/result_ad.csv', index=True)
+    # result_df.to_csv('Scratch_Files/result.csv', index=True)
 
     # Add 1 to all data values
     result_df.iloc[:, 0:] = result_df.iloc[:, 0:] + 1
@@ -291,28 +258,30 @@ if lab2:
     # Subtract 1 to get back to the original scale
     result_df.iloc[:, 0:] = result_df.iloc[:, 0:] - 1
 
-    plt.figure(figsize=(10, 6))
-
-    for i in range(len(result_df)):
-        plt.plot(result_df.columns[1:], result_df.iloc[i, 1:], label=result_df.iloc[i, 0])
-
-    plt.title('Average Values Over Time')
-    plt.xlabel('Date')
-    plt.ylabel('cumulative Value')
-    plt.xticks(rotation=45)
-    plt.legend(result_df.index)  # Add a legend to distinguish different lines
-    plt.tight_layout()
-    plt.show()
-
-    # Plot a graph for each row
-    for i in range(len(result_df)):
+    Plot = True
+    if Plot:
         plt.figure(figsize=(10, 6))
-        plt.plot(result_df.columns[1:], result_df.iloc[i, 1:])
-        plt.title(result_df.index[i])
+
+        for i in range(len(result_df)):
+            plt.plot(result_df.columns[1:], result_df.iloc[i, 1:], label=result_df.iloc[i, 0])
+
+        plt.title('Average Values Over Time')
         plt.xlabel('Date')
-        plt.ylabel('Average Value')
+        plt.ylabel('cumulative Value')
         plt.xticks(rotation=45)
+        plt.legend(result_df.index)  # Add a legend to distinguish different lines
         plt.tight_layout()
-        plt.show()'''
+        plt.show()
+
+        # Plot a graph for each row
+        for i in range(len(result_df)):
+            plt.figure(figsize=(10, 6))
+            plt.plot(result_df.columns[1:], result_df.iloc[i, 1:])
+            plt.title(result_df.index[i])
+            plt.xlabel('Date')
+            plt.ylabel('Average Value')
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            plt.show()
 
 # ToDo: BIRCH, Affinity Propagation
