@@ -1,6 +1,34 @@
 import os
 import pandas as pd
 
+directory = '../files/position_LS/equal_weight_adj/'
+files = [f for f in os.listdir(directory) if f.endswith('.csv')]
+
+for file in files:
+    df1 = pd.read_csv('../files/mom1_data_combined_adj.csv')
+    df2 = pd.read_csv(os.path.join(directory, file))
+
+    # Shift the values in df2 by one column to the right
+    df2.iloc[:, 1:] = df2.iloc[:, 1:].shift(periods=1, axis="columns")
+    # Perform element-wise multiplication for matching rows
+    performance = df1.iloc[1:,1:] * df2.iloc[1:,1:]
+
+    # Drop any columns or rows that are completely filled with NaN values
+    performance = performance.dropna(axis=1, how='all')
+    performance = performance.dropna(how='all')
+
+    # Output the result DataFrame
+    print(file)
+    print(performance)
+
+    # Write the result to a new CSV file
+    performance.to_csv(os.path.join('../files/position_LS/equal_weight_performance_adj/', 'performance_' + file), index=False)
+
+'''
+
+import os
+import pandas as pd
+
 # Read the data from the CSV files
 # df1 = pd.read_csv('../files/mom1_data_combined.csv')
 
@@ -12,11 +40,16 @@ for file in files:
     df2 = pd.read_csv(os.path.join(directory, file))
 
     # Find the common columns between df1 and df2
-    common_columns = df1.columns.intersection(df2.columns)
+    common_columns = df1.T.columns.intersection(df2.T.columns)
 
     # Keep only the common columns in both dataframes
-    df1 = df1[common_columns]
-    df2 = df2[common_columns]
+    df1 = df1.T[common_columns]
+    df2 = df2.T[common_columns]
+
+    print(df2)
+
+    df1 = df1.T
+    df2 = df2.T
 
     merged_df = pd.merge(df1, df2[['Firm Name']], on='Firm Name')
     df1 = merged_df
@@ -41,3 +74,4 @@ for file in files:
 
     # Write the result to a new CSV file
     performance.to_csv(os.path.join('../files/position_LS/equal_weight_performance_adj/', 'performance_' + file), index=False)
+'''

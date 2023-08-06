@@ -161,17 +161,18 @@ if calculate_and_plot_Return:
     file_names = []
     result_df = pd.DataFrame()
 
-    # Save subdir name in file_names at the begining.
+    # Save subdir name in file_names at the beginning.
     for subdir in subdirectories:
+        # DBSCAN / Gaussian_Mixture_Model / HDBSCAN / Hierarchical_Agglomerative / ...
         file_names.append(subdir)
 
     for subdir in subdirectories:
+        # Long_Short_Merge.py
         directory = os.path.join(base_directory, subdir)
         long_short = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
 
-        df2 = pd.DataFrame()
+        LS_merged_df = pd.DataFrame()
 
-        # LS_Value 일단 이어 붙이기.
         for file in long_short:
             data = pd.read_csv(os.path.join(directory, file))
 
@@ -182,59 +183,61 @@ if calculate_and_plot_Return:
             file_column_name = os.path.splitext(file)[0]
             data = data.rename(columns={'Long Short': file_column_name})
 
-            if df2.empty:
-                df2 = data
+            if LS_merged_df.empty:
+                LS_merged_df = data
             else:
-                df2 = pd.merge(df2, data, on='Firm Name', how='outer')
+                LS_merged_df = pd.merge(LS_merged_df, data, on='Firm Name', how='outer')
 
         # Sort LS_Value according to Firm Name
-        df2 = df2.sort_values('Firm Name')
+        LS_merged_df = LS_merged_df.sort_values('Firm Name')
 
         '''ToDo: Firm Name이 중복되면 하나 drop. (K_mean_Outlier에 row 중복되는 것 있어서 오류 발생하여 추가)
         I don't know the reason why'''
-        df2 = df2.drop_duplicates(subset=df2.columns[0], keep='first')
+        LS_merged_df = LS_merged_df.drop_duplicates(subset=LS_merged_df.columns[0], keep='first')
 
         # Set Firm Name column into index
-        df2.set_index('Firm Name', inplace=True)
+        LS_merged_df.set_index('Firm Name', inplace=True)
 
         # 마지막 row 버리면 한칸씩 밀어버리는 것과 동치
-        df2 = df2.drop(df2.columns[-1], axis=1)
+        LS_merged_df = LS_merged_df.drop(LS_merged_df.columns[-1], axis=1)
 
-        # read mom1_merge file
-        df1 = pd.read_csv('../files/mom1_data_combined_adj.csv')
+        ###############################
+        MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj.csv')
 
         # Set Firm Name column into index
-        df1.set_index('Firm Name', inplace=True)
+        MOM_merged_df.set_index('Firm Name', inplace=True)
 
-        # First row 버리고 df2와 product
+        # First row 버리고 LS_merged_df와 product
         # t-1 LS_Value와 t mom1 product
-        df1.drop(df1.columns[0], axis=1, inplace=True)
+        MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
 
         # ToDo: 혹시 몰라서 일단 NaN 0으로 대체. 없어도 될지도
-        df1 = df1.fillna(0)
-        df2 = df2.fillna(0)
+        MOM_merged_df = MOM_merged_df.fillna(0)
+        MOM_merged_df = MOM_merged_df.fillna(0)
 
         # Multiply only the numeric columns
-        prod = df1.values * df2.values
+        prod = MOM_merged_df.values * LS_merged_df.values
         prod = pd.DataFrame(prod)
 
         # prod index set to df1.index
-        prod.set_index(df1.index, inplace=True)
+        prod.set_index(MOM_merged_df.index, inplace=True)
         # cumulative return은 1990-02부터 2022-12이기 때문에 prod.columns=df1.columns
-        prod.columns = df1.columns
+        prod.columns = MOM_merged_df.columns
 
         # 제대로 됐나 확인하기 위해 csv saved.
         # df1.to_csv('mom1.csv', index=True)
         # df2.to_csv(f'{subdir}_LS.csv', index=True)
         # prod.to_csv(f'{subdir}_prod.csv', index=True)
 
+        # Return_Check_Merge.py
         '''mom1과 LS_Value 곱한것 평균구하는 부분.
         Clustering/Result_Cheak_and_Save/LS_Table_Save 함수에서
         outlier cluster도 버리지 않는 대신 LS_Value=0으로 저장했기 때문에
         prod.mean 사용하면 안됨. prod에 모든 회사 row가 있기 때문에
         sum/(투자한 회사+투자안한 회사)로 계산되기 때문.'''
         # Count the non-zero LS that is the number of total firm invested(395 by 1 matrix/index=Date)
-        non_zero_count = df2.astype(bool).sum()
+        # TODO: mom이 없는 경우도 있을 수 있으니 이건 다시 체크해야할듯...?
+        non_zero_count = LS_merged_df.astype(bool).sum()
 
         # sum about all rows(395 by 1 matrix/index=Date)
         column_sums = prod.sum()
@@ -273,7 +276,7 @@ if calculate_and_plot_Return:
     result_df = pd.concat([result_df, df], axis=0)  # add monthly_return right below result_df
     result_df.index = file_names
     result_df = result_df.astype(float)  # set data type as float(df.value was str actually.)
-    result_df = result_df.fillna(0) # 혹시 몰라서
+    result_df = result_df.fillna(0)  # 혹시 몰라서 - 없어도 될듯... 가서 실험
 
     # Save a new CSV file
     # result_df.to_csv('Scratch_Files/result.csv', index=True)

@@ -31,7 +31,7 @@ for subdir in subdirectories:
         else:
             merged_df = pd.merge(merged_df, data, on='Firm Name', how='outer')
 
-    # merged_df = merged_df.sort_values('Firm Name')
+    merged_df = merged_df.sort_values('Firm Name')
 
     # Save the merged DataFrame to a CSV file in the output directory
     merged_df.to_csv(os.path.join(output_directory, f'{subdir}_combined_LS.csv'), index=False)
