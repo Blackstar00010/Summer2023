@@ -1,5 +1,6 @@
 import os
 import math
+import hdbscan
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -166,14 +167,17 @@ class Clustering:
         self.DBSCAN = clust
         return self.DBSCAN
 
-    def perform_HDBSCAN(self, threshold: float):
+    def perform_HDBSCAN(self):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
         ms = int(math.log(len(self.PCA_Data)))
 
-        Hdbscan = HDBSCAN(min_samples=ms, cluster_selection_epsilon=threshold).fit(self.PCA_Data)
+        if ms < 2:
+            ms = 2
+
+        Hdbscan = HDBSCAN(min_cluster_size=ms, min_samples=3, allow_single_cluster=True).fit(self.PCA_Data)
         cluster_labels = Hdbscan.labels_
 
         self.test = Hdbscan
@@ -415,7 +419,6 @@ class Clustering:
     euclidean
     l2
     braycurtis'''
-
 
 class Result_Check_and_Save:
 

@@ -3,7 +3,7 @@ import seaborn as sns
 import Clustering as C
 from Clustering import *
 from PCA_and_ETC import *
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_iris, make_blobs
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -132,23 +132,23 @@ if example7:
 
     t_SNE('meanshift', Do_Clustering.PCA_Data, Do_Clustering.HDBSCAN_labels)
 
-lab = False
+lab = True
 if lab:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
     abnormal_file = []
-    for file in files:
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        df_combined = generate_PCA_Data(data)
-
-        # Call initial method
-        Do_Clustering = C.Clustering(df_combined)
-
-        if Do_Clustering.PCA_Data.shape[1] < 7:
-            abnormal_file.append(file)
-
-        t = find_optimal_GMM_hyperparameter(Do_Clustering.PCA_Data)
+    # for file in files:
+    #     # convert mom_data into PCA_data
+    #     data = read_and_preprocess_data(input_dir, file)
+    #     df_combined = generate_PCA_Data(data)
+    #
+    #     # Call initial method
+    #     Do_Clustering = C.Clustering(df_combined)
+    #
+    #     if Do_Clustering.PCA_Data.shape[1] < 7:
+    #         abnormal_file.append(file)
+    #
+    #     t = find_optimal_GMM_hyperparameter(Do_Clustering.PCA_Data)
     print(abnormal_file)
 
 import warnings
@@ -156,7 +156,8 @@ import Clustering as C
 from PCA_and_ETC import *
 
 # file to check
-file = '1990-01.csv'
+# file = '1990-01.csv'
+file='2022-05.csv'
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -228,7 +229,7 @@ if hdbscan_Plot:
     Do_Result_Plot = C.Result_Check_and_Save(df_combined)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.9)
+    Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN()
 
     # Plot clustering result
     Do_Result_Plot.Plot_clusters(Do_Clustering.HDBSCAN)
@@ -344,7 +345,7 @@ if meanshift_Plot:
 # hyper parameter quantile (0.1, 0.2, 0.3, 0.4) should be tested manually.(paper follow)
 
 # Save K_mean clutering method LS_Tables
-K_mean_Save = True
+K_mean_Save = False
 if K_mean_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -399,7 +400,7 @@ if dbscan_Save:
     print(f'total outliers: {sum}')
 
 # Save DBSCAN clutering method LS_Tables
-hdbscan_Save = False
+hdbscan_Save = True
 if hdbscan_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -416,12 +417,12 @@ if hdbscan_Save:
         Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.9)
+        Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN()
 
         sum += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
 
         # Save LS_Table CSV File
-        # Do_Result_Save.LS_Table_Save(Do_Clustering.HDBSCAN, '../files/Clustering_adj/HDBSCAN', file)
+        Do_Result_Save.LS_Table_Save(Do_Clustering.HDBSCAN, '../files/Clustering_adj/HDBSCAN', file)
 
     print(f'total outliers: {sum}')
 
