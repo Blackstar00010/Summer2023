@@ -129,7 +129,7 @@ class Clustering:
     def perform_DBSCAN(self, threshold: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
-        # Exclude the first column (firm names) & Exclude MOM_1  dfdd
+        # Exclude the first column (firm names) & Exclude MOM_1
 
         ms = int(math.log(len(self.PCA_Data)))
 
