@@ -151,7 +151,7 @@ if lab:
         t = find_optimal_GMM_hyperparameter(Do_Clustering.PCA_Data)
     print(abnormal_file)
 
-calculate_and_plot_Return = False
+calculate_and_plot_Return = True
 if calculate_and_plot_Return:
     base_directory = '../files/Clustering_adj/'
 
@@ -212,8 +212,8 @@ if calculate_and_plot_Return:
         MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
 
         # ToDo: 혹시 몰라서 일단 NaN 0으로 대체. 없어도 될지도
-        MOM_merged_df = MOM_merged_df.fillna(0)
-        MOM_merged_df = MOM_merged_df.fillna(0)
+        # MOM_merged_df = MOM_merged_df.fillna(0)
+        LS_merged_df = LS_merged_df.fillna(0)
 
         # Multiply only the numeric columns
         prod = MOM_merged_df.values * LS_merged_df.values
@@ -225,9 +225,9 @@ if calculate_and_plot_Return:
         prod.columns = MOM_merged_df.columns
 
         # 제대로 됐나 확인하기 위해 csv saved.
-        # df1.to_csv('mom1.csv', index=True)
-        # df2.to_csv(f'{subdir}_LS.csv', index=True)
-        # prod.to_csv(f'{subdir}_prod.csv', index=True)
+        MOM_merged_df.to_csv('mom1.csv', index=True)
+        LS_merged_df.to_csv(f'{subdir}_LS.csv', index=True)
+        prod.to_csv(f'{subdir}_prod.csv', index=True)
 
         # Return_Check_Merge.py
         '''mom1과 LS_Value 곱한것 평균구하는 부분.
@@ -236,7 +236,6 @@ if calculate_and_plot_Return:
         prod.mean 사용하면 안됨. prod에 모든 회사 row가 있기 때문에
         sum/(투자한 회사+투자안한 회사)로 계산되기 때문.'''
         # Count the non-zero LS that is the number of total firm invested(395 by 1 matrix/index=Date)
-        # TODO: mom이 없는 경우도 있을 수 있으니 이건 다시 체크해야할듯...?
         non_zero_count = LS_merged_df.astype(bool).sum()
 
         # sum about all rows(395 by 1 matrix/index=Date)
@@ -253,7 +252,6 @@ if calculate_and_plot_Return:
     # Add a new column to the result DataFrame with the file names
     result_df.insert(0, 'Clustering Method', file_names)
 
-    # ToDo: 254부터 260 뭔지 모르지만 일단 나둠.
     # Separate the 'Clustering Method' column from the date columns
     clustering_method = result_df['Clustering Method']
     date_columns_df = result_df.drop('Clustering Method', axis=1)
@@ -265,7 +263,7 @@ if calculate_and_plot_Return:
     # Concat the 'Clustering Method' column back with the sorted date columns
     result_df = pd.concat([clustering_method, date_columns_df], axis=1)
     result_df.set_index('Clustering Method', inplace=True)
-    file_names.append('Benchmark')
+    file_names.append('FTSE 100')
 
     # benchmark return merge with result_df
     file = '../files/month_return.csv'
@@ -276,7 +274,7 @@ if calculate_and_plot_Return:
     result_df = pd.concat([result_df, df], axis=0)  # add monthly_return right below result_df
     result_df.index = file_names
     result_df = result_df.astype(float)  # set data type as float(df.value was str actually.)
-    result_df = result_df.fillna(0)  # 혹시 몰라서 - 없어도 될듯... 가서 실험
+    result_df = result_df.fillna(0)
 
     # Save a new CSV file
     # result_df.to_csv('Scratch_Files/result.csv', index=True)
@@ -297,7 +295,7 @@ if calculate_and_plot_Return:
         for i in range(len(result_df)):
             plt.plot(result_df.columns[1:], result_df.iloc[i, 1:], label=result_df.iloc[i, 0])
 
-        plt.title('Average Values Over Time')
+        plt.title('RETURN')
         plt.xlabel('Date')
         plt.ylabel('cumulative Value')
         plt.xticks(rotation=45)
