@@ -57,7 +57,7 @@ class Clustering:
         :param K: int
         :return: 2D list
         '''
-        # dsklfjsdlfkjsdlkfklsa
+        # dsklfjsdlfkjsdlkfklsaghd
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
