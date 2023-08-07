@@ -243,8 +243,8 @@ class Clustering:
         # 클러스터링 결과 중 평균 거리 이상의 데이터 포인트를 outlier로 식별
         outliers = np.where(np.array(cluster_distances) > max(copheric_dis) * threshold)[0]
         # avg_cpr_distance가 max_cophenet distance의 alpha percentile보다 크면 outlier
-        '''In our empirical study, we specify the maximum distance rather than the number of clusters K, 
-        using a method similar to the method adopted for k-means clustering: 
+        '''In our empirical study, we specify the maximum distance rather than the number of clusters K,
+        using a method similar to the method adopted for k-means clustering:
         e is set as an α percentile of the distances between a pair of nearest data points'''
 
         for i in range(0, len(outliers)):
@@ -280,8 +280,8 @@ class Clustering:
 
         type = find_optimal_GMM_hyperparameter(self.PCA_Data)
 
-        dpgmm = BayesianGaussianMixture(n_components=n_components, covariance_type=type).fit(self.PCA_Data)
-        cluster_labels = dpgmm.predict(self.PCA_Data)
+        bgm = BayesianGaussianMixture(n_components=n_components, covariance_type=type).fit(self.PCA_Data)
+        cluster_labels = bgm.predict(self.PCA_Data)
 
         for i, cluster_num in enumerate(cluster_labels):
             clusters[cluster_num].append(i)
@@ -291,37 +291,98 @@ class Clustering:
         n_components = n_components - len(empty_cluster_indices)
 
         # Clustering
-        dpgmm = BayesianGaussianMixture(n_components=n_components, covariance_type=type).fit(self.PCA_Data)
-        cluster_labels = dpgmm.predict(self.PCA_Data)
+        bgm = BayesianGaussianMixture(n_components=n_components, covariance_type=type).fit(self.PCA_Data)
+        cluster_labels = bgm.predict(self.PCA_Data)
 
-        self.test = dpgmm
+        self.test = bgm
         self.Gaussian_labels = cluster_labels
 
         clusters = [[] for _ in range(n_components)]
 
         for i, cluster_num in enumerate(cluster_labels):
-            clusters[cluster_num].append(self.index[i])
+            clusters[cluster_num].append(i)
+
+        clusters = [sublist for sublist in clusters if sublist]
+
+        # print(len(clusters))
+        # print(clusters)
+        # clusters = [item for sublist in clusters for item in sublist]
+        # print(len(clusters))
 
         # Outliers
-        probabilities = dpgmm.predict_proba(self.PCA_Data)
 
-        cluster_prob_mean = np.mean(probabilities, axis=0)
+        out1 = True
+        if out1:
+            # 각 데이터 포인트의 확률 값 계산
+            probabilities = bgm.score_samples(self.PCA_Data)
 
-        outliers = []
+            # 확률 값의 percentiles 계산 (예시로 하위 5% 이하를 outlier로 판단)
+            threshold = np.percentile(probabilities, 20)
 
-        # if the probabilities that tht firm is in that cluster are lower than probability, that firm is outlier.
-        for i, prob_mean in enumerate(cluster_prob_mean):
-            if prob_mean < probability:
-                outliers.append(clusters[i])
+            outliers = []
+            for i, probability in enumerate(probabilities):
+                if probability < threshold:
+                    outliers.append(i)
 
-        # 원본에서 outlier제거.
-        clusters = [x for x in clusters if x not in outliers]
-        # 빈리스트도 Outlier로 간주되기 때문에 가끔 생기는 결측값 제거.
-        outliers = [sublist for sublist in outliers if sublist]
-        # 2차원 리스트를 1차원 리스트로 전환.
-        outliers = [item for sublist in outliers for item in sublist]
-        # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
-        clusters.insert(0, outliers)
+            print(len(outliers))
+            # print(outliers)
+
+            # a에 있는 값을 b에서 빼기
+            for value in outliers:
+                for i, row in enumerate(clusters):
+                    if value in row:
+                        clusters[i].remove(value)
+
+            # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
+            clusters.insert(0, outliers)
+
+            # print(len(clusters))
+            # print(clusters)
+
+            for i, cluster in enumerate(clusters):
+                for t, num in enumerate(cluster):
+                    cluster[t]=self.index[num]
+
+            # print(len(clusters))
+            # print(clusters)
+
+            # clusters = [item for sublist in clusters for item in sublist]
+            #
+            # print(len(clusters))
+
+            # for i, prob in enumerate(probabilities):
+            #     if prob < threshold:
+            #         outliers.append(clusters[i])
+            #
+            # outliers = self.PCA_Data[probabilities < threshold]
+            #
+            # print(outliers)
+
+        out2 = False
+        if out2:
+            probabilities = bgm.predict_proba(self.PCA_Data)
+            print(len(probabilities))
+
+            cluster_prob_mean = np.mean(probabilities, axis=0)
+
+            outliers = []
+            # if the probabilities that tht firm is in that cluster are lower than probability, that firm is outlier.
+            for i, prob_mean in enumerate(cluster_prob_mean):
+                if prob_mean < probability:
+                    outliers.append(clusters[i])
+
+            print(len(outliers))
+
+            # 원본에서 outlier제거.
+            clusters = [x for x in clusters if x not in outliers]
+            # 빈리스트도 Outlier로 간주되기 때문에 가끔 생기는 결측값 제거.
+            outliers = [sublist for sublist in outliers if sublist]
+            # 2차원 리스트를 1차원 리스트로 전환.
+            outliers = [item for sublist in outliers for item in sublist]
+            # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
+            clusters.insert(0, outliers)
+
+            print(len(clusters))
 
         self.Gaussian = clusters
 
@@ -419,6 +480,7 @@ class Clustering:
     euclidean
     l2
     braycurtis'''
+
 
 class Result_Check_and_Save:
 

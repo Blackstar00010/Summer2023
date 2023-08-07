@@ -132,7 +132,7 @@ if example7:
 
     t_SNE('meanshift', Do_Clustering.PCA_Data, Do_Clustering.HDBSCAN_labels)
 
-lab = True
+lab = False
 if lab:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -400,7 +400,7 @@ if dbscan_Save:
     print(f'total outliers: {sum}')
 
 # Save DBSCAN clutering method LS_Tables
-hdbscan_Save = True
+hdbscan_Save = False
 if hdbscan_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -454,7 +454,7 @@ if Agglormerative_Save:
     print(f'total outliers: {sum}')
 
 # Save BayesianGaussianMixture clutering method LS_Tables
-BGM_Save = False
+BGM_Save = True
 if BGM_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -476,7 +476,7 @@ if BGM_Save:
         sum += Do_Result_Save.count_outlier(Do_Clustering.Gaussian)
 
         # Save LS_Table CSV File
-        # Do_Result_Save.LS_Table_Save(Do_Clustering.Gaussian, '../files/Clustering_adj/Gaussian_Mixture_Model', file)
+        Do_Result_Save.LS_Table_Save(Do_Clustering.Gaussian, '../files/Clustering_adj/Gaussian_Mixture_Model', file)
 
     print(f'total outliers: {sum}')
 
