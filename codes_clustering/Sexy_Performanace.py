@@ -89,6 +89,7 @@ for subdir in subdirectories:
         trade_firm_sum+=non_zero_count[i]
     trade_firm_avg=trade_firm_sum/395
     trade_firm_per=trade_firm_avg/811
+    print(subdir)
     print(trade_firm_per)
 
 
