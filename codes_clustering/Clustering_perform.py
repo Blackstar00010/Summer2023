@@ -191,9 +191,9 @@ if meanshift_Plot:
 # hyper parameter quantile (0.1, 0.2, 0.3, 0.4) should be tested manually.(paper follow)
 
 # Save K_mean clutering method LS_Tables
-K_mean_Save = True
+K_mean_Save = False
 if K_mean_Save:
-    input_dir = '../files/momentum_adj'
+    input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
     sum = 0
     for file in files:
@@ -213,15 +213,15 @@ if K_mean_Save:
         sum += Do_Result_Save.count_outlier(Do_Clustering.K_Mean)
 
         # Save LS_Table CSV File
-        # for i, cluster in enumerate(Do_Clustering.K_Mean):
-        #     Do_Result_Save.LS_Table_Save(cluster, '../files/Clustering_adj/K_Means_outlier', file)
+        for i, cluster in enumerate(Do_Clustering.K_Mean):
+            Do_Result_Save.LS_Table_Save(cluster, '../files/Clustering_adj_close/K_Means_outlier', file)
 
     print(f'total outliers: {sum}')
 
 # Save DBSCAN clutering method LS_Tables
 dbscan_Save = False
 if dbscan_Save:
-    input_dir = '../files/momentum_adj'
+    input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
     sum = 0
     for file in files:
@@ -241,14 +241,14 @@ if dbscan_Save:
         sum += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
 
         # Save LS_Table CSV File
-        # Do_Result_Save.LS_Table_Save(Do_Clustering.DBSCAN, '../files/Clustering_adj/DBSCAN', file)
+        Do_Result_Save.LS_Table_Save(Do_Clustering.DBSCAN, '../files/Clustering_adj_close/DBSCAN', file)
 
     print(f'total outliers: {sum}')
 
 # Save DBSCAN clutering method LS_Tables
-hdbscan_Save = False
+hdbscan_Save = True
 if hdbscan_Save:
-    input_dir = '../files/momentum_adj'
+    input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
     sum = 0
     for file in files:
@@ -263,19 +263,19 @@ if hdbscan_Save:
         Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.9)
+        Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN()
 
         sum += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
 
         # Save LS_Table CSV File
-        # Do_Result_Save.LS_Table_Save(Do_Clustering.HDBSCAN, '../files/Clustering_adj/HDBSCAN', file)
+        Do_Result_Save.LS_Table_Save(Do_Clustering.HDBSCAN, '../files/Clustering_adj_close/HDBSCAN', file)
 
     print(f'total outliers: {sum}')
 
 # Save Hirarchical Agglomerative clutering method LS_Tables
 Agglormerative_Save = False
 if Agglormerative_Save:
-    input_dir = '../files/momentum_adj'
+    input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
     sum = 0
     for file in files:
@@ -295,14 +295,14 @@ if Agglormerative_Save:
         sum += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
         # Save LS_Table CSV File
-        # Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative, '../files/Clustering_adj/Hierarchical_Agglomerative',file)
+        Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative, '../files/Clustering_adj_close/Hierarchical_Agglomerative',file)
 
     print(f'total outliers: {sum}')
 
 # Save BayesianGaussianMixture clutering method LS_Tables
 BGM_Save = False
 if BGM_Save:
-    input_dir = '../files/momentum_adj'
+    input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
     sum = 0
     for file in files:
@@ -322,14 +322,14 @@ if BGM_Save:
         sum += Do_Result_Save.count_outlier(Do_Clustering.Gaussian)
 
         # Save LS_Table CSV File
-        # Do_Result_Save.LS_Table_Save(Do_Clustering.Gaussian, '../files/Clustering_adj/Gaussian_Mixture_Model', file)
+        Do_Result_Save.LS_Table_Save(Do_Clustering.Gaussian, '../files/Clustering_adj_close/Gaussian_Mixture_Model', file)
 
     print(f'total outliers: {sum}')
 
 # Save OPTICS clutering method LS_Tables
 optics_Save = False
 if optics_Save:
-    input_dir = '../files/momentum_adj'
+    input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
     sum = 0
     for file in files:
@@ -349,14 +349,14 @@ if optics_Save:
         sum += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
 
         # Save LS_Table CSV File
-        # Do_Result_Save.LS_Table_Save(Do_Clustering.OPTIC, '../files/Clustering_adj/OPTICS', file)
+        Do_Result_Save.LS_Table_Save(Do_Clustering.OPTIC, '../files/Clustering_adj_close/OPTICS', file)
 
     print(f'total outliers: {sum}')
 
 # Save Mean Shift clutering method LS_Tables
 meanshift_Save = False
 if meanshift_Save:
-    input_dir = '../files/momentum_adj'
+    input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
     sum = 0
     for file in files:
@@ -376,14 +376,14 @@ if meanshift_Save:
         sum += Do_Result_Save.count_outlier(Do_Clustering.menshift)
 
         # Save LS_Table CSV File
-        # Do_Result_Save.LS_Table_Save(Do_Clustering.menshift, '../files/Clustering_adj/Meanshift', file)
+        Do_Result_Save.LS_Table_Save(Do_Clustering.menshift, '../files/Clustering_adj_close/Meanshift', file)
 
     print(f'total outliers: {sum}')
 
 # Save Reversal method LS_Tables
 Reversal_Save = False
 if Reversal_Save:
-    input_dir = '../files/momentum_adj'
+    input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
 
     for file in files:
@@ -394,4 +394,4 @@ if Reversal_Save:
         Do_Result_Save = C.Result_Check_and_Save(data)
 
         # Save LS_Table CSV File
-        Do_Result_Save.Reversal_Table_Save(data, '../files/Clustering_adj/Reversal', file)
+        Do_Result_Save.Reversal_Table_Save(data, '../files/Clustering_adj_close/Reversal', file)
