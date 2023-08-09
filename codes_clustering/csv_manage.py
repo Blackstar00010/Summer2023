@@ -100,7 +100,7 @@ if weird_value_out_csv:
             company = row[0]
             values = [float(value) for value in row[1:]]
 
-            if any(value > 10 for value in values[:5]):
+            if any(-1 < value < -0.9 for value in values[:5]):
                 companies_with_large_values.append(company)
 
         # If there are companies that meet the criteria, add to the output data
@@ -111,7 +111,7 @@ if weird_value_out_csv:
     output_df = pd.DataFrame(output_data, columns=['Date'] + [f'{i}' for i in range(1, max(len(row) for row in output_data))])
 
     # Write the DataFrame to a CSV file
-    output_df.to_csv('../files/SIBAL_FILES.csv', index=False)
+    output_df.to_csv('../files/SIBAL_FILES_small.csv', index=False)
 
 
 # Won't be using this

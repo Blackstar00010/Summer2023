@@ -9,7 +9,7 @@ file = '1990-01.csv'
 warnings.filterwarnings("ignore")
 
 # Plot K_mean cluster about individual csv file
-K_mean_Plot = False
+K_mean_Plot = True
 if K_mean_Plot:
     input_dir = '../files/momentum_adj_close'
 
@@ -191,7 +191,7 @@ if meanshift_Plot:
 # hyper parameter quantile (0.1, 0.2, 0.3, 0.4) should be tested manually.(paper follow)
 
 # Save K_mean clutering method LS_Tables
-K_mean_Save = True
+K_mean_Save = False
 if K_mean_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
