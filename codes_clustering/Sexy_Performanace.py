@@ -84,22 +84,23 @@ for subdir in subdirectories:
     sum/(투자한 회사+투자안한 회사)로 계산되기 때문.'''
     # Count the non-zero LS that is the number of total firm invested(395 by 1 matrix/index=Date)
     non_zero_count = LS_merged_df.astype(bool).sum()
-    trade_firm_sum=0
+    '''trade_firm_sum=0
     for i in range(395):
         trade_firm_sum+=non_zero_count[i]
     trade_firm_avg=trade_firm_sum/395
     trade_firm_per=trade_firm_avg/811
     print(subdir)
-    print(trade_firm_per)
+    print(trade_firm_per)'''
 
 
     # sum about all rows(395 by 1 matrix/index=Date)
     column_sums = prod.sum()
 
     # calculate mean and make into DataFrame
-    column_means = column_sums.values / non_zero_count.values
-    column_means = pd.DataFrame(column_means)
-    column_means.index = column_sums.index
+    column_means = column_sums / non_zero_count
+    '''column_means = column_sums.values / non_zero_count.values
+    column_means = pd.DataFrame(column_means)'''
+    # column_means.index = column_sums.index
 
     # Concat the means DataFrame to the result DataFrame(395 by 1 matrix->1 by 395 matrix)
     result_df = pd.concat([result_df, column_means.T], ignore_index=True)
