@@ -21,7 +21,7 @@ def generate_PCA_Data(data: pd.DataFrame):
     # mom1을 제외한 mat/PCA(2-49)
     # mat = np.delete(mat, 0, axis=1)
 
-    # # mom49를 제외한 mat/PCA(1-48)
+    # mom49를 제외한 mat/PCA(1-48)
     mat = np.delete(mat, 48, axis=1)
 
     # 1. Searching optimal n_components
