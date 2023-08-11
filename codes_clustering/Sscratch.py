@@ -157,13 +157,13 @@ from PCA_and_ETC import *
 
 # file to check
 # file = '1990-01.csv'
-file='2022-05.csv'
+file='1990-01.csv'
 
 # turn off warning
 warnings.filterwarnings("ignore")
 
 # Plot K_mean cluster about individual csv file
-K_mean_Plot = False
+K_mean_Plot = True
 if K_mean_Plot:
     input_dir = '../files/momentum_adj'
 
@@ -186,7 +186,7 @@ if K_mean_Plot:
         t_SNE('K-mean', df_combined, Do_Clustering.K_Mean_labels)
 
     # for i, cluster in enumerate(Do_Clustering.K_Mean):
-    #     Do_Result_Plot.LS_Table_Save(cluster, '../files/Clustering_adj/K_Means_outlier', file)
+        Do_Result_Plot.LS_Table_Save(cluster, '../files/Clustering_adj/K_Means_outlier', file)
     # Do_Result_Plot.Reversal_Table_Save(data, '../files/Clustering_adj/Reversal', file)
 # hyper parameter K(3,5,10,50,100,500,1000,1500) should be tested manually.(paper follow)
 
@@ -353,6 +353,9 @@ if K_mean_Save:
     for file in files:
         print(file)
 
+        if file=='1992-04.csv':
+            continue
+
         # convert mom_data into PCA_data
         data = read_and_preprocess_data(input_dir, file)
         df_combined = generate_PCA_Data(data)
@@ -364,11 +367,12 @@ if K_mean_Save:
         # Do clustering and get 2D list of cluster index
         Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([10])
 
-        sum += Do_Result_Save.count_outlier(Do_Clustering.K_Mean)
+        sum += Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0])
+        print(Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0]))
 
         # Save LS_Table CSV File
-        # for i, cluster in enumerate(Do_Clustering.K_Mean):
-        #     Do_Result_Save.LS_Table_Save(cluster, '../files/Clustering_adj/K_Means_outlier', file)
+        for i, cluster in enumerate(Do_Clustering.K_Mean):
+            Do_Result_Save.LS_Table_Save(cluster, '../files/Clustering_adj/K_Means_outlier', file)
 
     print(f'total outliers: {sum}')
 
@@ -454,7 +458,7 @@ if Agglormerative_Save:
     print(f'total outliers: {sum}')
 
 # Save BayesianGaussianMixture clutering method LS_Tables
-BGM_Save = True
+BGM_Save = False
 if BGM_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
