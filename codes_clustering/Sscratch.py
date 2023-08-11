@@ -90,7 +90,7 @@ if example3:
     Do_Clustering = C.Clustering(iris_pd)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.8)
+    Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.5)
 
     t_SNE('Hirarchical Agglormerative', Do_Clustering.PCA_Data, Do_Clustering.Agglomerative_labels)
 
@@ -134,7 +134,7 @@ if example7:
 
     t_SNE('meanshift', Do_Clustering.PCA_Data, Do_Clustering.HDBSCAN_labels)
 
-lab = True
+lab = False
 if lab:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -360,7 +360,7 @@ if meanshift_Plot:
 # hyper parameter quantile (0.1, 0.2, 0.3, 0.4) should be tested manually.(paper follow)
 
 # Save K_mean clutering method LS_Tables
-K_mean_Save = False
+K_mean_Save = True
 if K_mean_Save:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -465,7 +465,7 @@ if Agglormerative_Save:
         sum += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
         # Save LS_Table CSV File
-        # Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative, '../files/Clustering_adj/Hierarchical_Agglomerative',file)
+        Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative, '../files/Clustering_adj/Hierarchical_Agglomerative',file)
 
     print(f'total outliers: {sum}')
 
