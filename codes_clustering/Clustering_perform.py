@@ -219,7 +219,7 @@ if K_mean_Save:
     print(f'total outliers: {sum}')
 
 # Save DBSCAN clutering method LS_Tables
-dbscan_Save = True
+dbscan_Save = False
 if dbscan_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -246,7 +246,7 @@ if dbscan_Save:
     print(f'total outliers: {sum}')
 
 # Save DBSCAN clutering method LS_Tables
-hdbscan_Save = True
+hdbscan_Save = False
 if hdbscan_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -273,7 +273,7 @@ if hdbscan_Save:
     print(f'total outliers: {sum}')
 
 # Save Hirarchical Agglomerative clutering method LS_Tables
-Agglomerative_Save = True
+Agglomerative_Save = False
 if Agglomerative_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -300,7 +300,7 @@ if Agglomerative_Save:
     print(f'total outliers: {sum}')
 
 # Save BayesianGaussianMixture clutering method LS_Tables
-BGM_Save = True
+BGM_Save = False
 if BGM_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -327,7 +327,7 @@ if BGM_Save:
     print(f'total outliers: {sum}')
 
 # Save OPTICS clutering method LS_Tables
-optics_Save = True
+optics_Save = False
 if optics_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -354,7 +354,7 @@ if optics_Save:
     print(f'total outliers: {sum}')
 
 # Save Mean Shift clutering method LS_Tables
-meanshift_Save = True
+meanshift_Save = False
 if meanshift_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -381,7 +381,7 @@ if meanshift_Save:
     print(f'total outliers: {sum}')
 
 # Save Reversal method LS_Tables
-Reversal_Save = True
+Reversal_Save = False
 if Reversal_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))

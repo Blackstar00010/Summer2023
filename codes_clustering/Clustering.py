@@ -9,7 +9,7 @@ from sklearn.mixture import BayesianGaussianMixture
 from scipy.cluster.hierarchy import *
 from scipy.spatial.distance import pdist, squareform
 from sklearn.model_selection import GridSearchCV
-
+from sklearn.cluster import AgglomerativeClustering
 
 def find_optimal_GMM_hyperparameter(data):
     bgm = BayesianGaussianMixture()
@@ -214,6 +214,27 @@ class Clustering:
 
         self.HDBSCAN = clust
         return self.HDBSCAN
+
+    def perform_Agglomerative(self, n_clusters: int):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
+        # Apply Agglomerative Clustering
+        agglomerative = AgglomerativeClustering(n_clusters=n_clusters, affinity='euclidean', linkage='ward')
+        cluster_labels = agglomerative.fit_predict(self.PCA_Data)
+
+        self.Agglomerative_labels = cluster_labels
+
+        # Get the unique cluster labels
+        unique_labels = sorted(list(set(cluster_labels)))
+
+        # Create an empty list for each unique label to store indices belonging to that cluster
+        clust = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(cluster_labels):
+            clust[unique_labels.index(cluster_label)].append(self.index[i])
+
+        self.Agglomerative = clust
+        return self.Agglomerative
 
     def perform_HG(self, threshold: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
