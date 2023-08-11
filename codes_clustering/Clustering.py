@@ -96,7 +96,7 @@ class Clustering:
             if max_main_distance_clustering[i] == 0:
                 continue
             for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
-                if distance / max_main_distance_clustering[i] >= 0.2:
+                if distance / max_main_distance_clustering[i] >= 0.6:
                     # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 50%이상이면 outlier 분류
                     outliers[i].append(distance)
 
@@ -112,7 +112,6 @@ class Clustering:
                         continue
 
         outliers_index = list(set(outliers_index))
-        print(outliers_index)
 
         # a에 있는 값을 b에서 빼기
         for value in outliers_index:
@@ -126,7 +125,6 @@ class Clustering:
         # outliers_index = [sublist for sublist in outliers_index if sublist]
         # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
         clusters_index.insert(0, outliers_index)
-        print(clusters_index)
 
         return clusters_index
 
@@ -266,6 +264,8 @@ class Clustering:
         '''In our empirical study, we specify the maximum distance rather than the number of clusters K,
         using a method similar to the method adopted for k-means clustering:
         e is set as an α percentile of the distances between a pair of nearest data points'''
+
+        print(outliers)
 
         for i in range(0, len(outliers)):
             for j in range(0, len(clusters)):
