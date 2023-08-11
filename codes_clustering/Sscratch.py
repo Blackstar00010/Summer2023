@@ -1,4 +1,6 @@
 import warnings
+
+import pandas as pd
 import seaborn as sns
 import Clustering as C
 from Clustering import *
@@ -132,7 +134,7 @@ if example7:
 
     t_SNE('meanshift', Do_Clustering.PCA_Data, Do_Clustering.HDBSCAN_labels)
 
-lab = False
+lab = True
 if lab:
     input_dir = '../files/momentum_adj'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -149,7 +151,20 @@ if lab:
     #         abnormal_file.append(file)
     #
     #     t = find_optimal_GMM_hyperparameter(Do_Clustering.PCA_Data)
-    print(abnormal_file)
+
+    input_dir = '../files'
+    file = 'mom1_data_combined_adj_close.csv'
+    data = read_and_preprocess_data(input_dir, file)
+
+    max_data = data.max().tolist()
+    min_data = data.min().tolist()
+    min_data = sorted((min_data))
+    max_data = sorted(max_data)
+    print(max_data)
+    print(min_data)
+    max_data = pd.DataFrame(max_data)
+    print(max_data.mean())
+    print(max_data.std())
 
 import warnings
 import Clustering as C
@@ -157,13 +172,13 @@ from PCA_and_ETC import *
 
 # file to check
 # file = '1990-01.csv'
-file='1990-01.csv'
+file = '1990-01.csv'
 
 # turn off warning
 warnings.filterwarnings("ignore")
 
 # Plot K_mean cluster about individual csv file
-K_mean_Plot = True
+K_mean_Plot = False
 if K_mean_Plot:
     input_dir = '../files/momentum_adj'
 
@@ -185,7 +200,7 @@ if K_mean_Plot:
     for i, cluster in enumerate(Do_Clustering.K_Mean):
         t_SNE('K-mean', df_combined, Do_Clustering.K_Mean_labels)
 
-    # for i, cluster in enumerate(Do_Clustering.K_Mean):
+        # for i, cluster in enumerate(Do_Clustering.K_Mean):
         Do_Result_Plot.LS_Table_Save(cluster, '../files/Clustering_adj/K_Means_outlier', file)
     # Do_Result_Plot.Reversal_Table_Save(data, '../files/Clustering_adj/Reversal', file)
 # hyper parameter K(3,5,10,50,100,500,1000,1500) should be tested manually.(paper follow)
@@ -352,9 +367,6 @@ if K_mean_Save:
     sum = 0
     for file in files:
         print(file)
-
-        if file=='1992-04.csv':
-            continue
 
         # convert mom_data into PCA_data
         data = read_and_preprocess_data(input_dir, file)

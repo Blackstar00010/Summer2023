@@ -96,7 +96,7 @@ class Clustering:
             if max_main_distance_clustering[i] == 0:
                 continue
             for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
-                if distance / max_main_distance_clustering[i] >= 0.5:
+                if distance / max_main_distance_clustering[i] >= 0.6:
                     # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 50%이상이면 outlier 분류
                     outliers[i].append(distance)
 
@@ -138,7 +138,7 @@ class Clustering:
             n_sample = self.PCA_Data.shape[0]  # number of values in the file
             # Skip if the number of values are less than k
             if n_sample <= k_values[0]:
-                continue
+                k=n_sample
             clust = self.outliers(k)
             clusters_k.append(clust)
 
@@ -285,6 +285,8 @@ class Clustering:
         '''In our empirical study, we specify the maximum distance rather than the number of clusters K,
         using a method similar to the method adopted for k-means clustering:
         e is set as an α percentile of the distances between a pair of nearest data points'''
+
+        print(outliers)
 
         for i in range(0, len(outliers)):
             for j in range(0, len(clusters)):
