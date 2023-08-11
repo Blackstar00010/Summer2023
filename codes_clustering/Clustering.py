@@ -96,7 +96,7 @@ class Clustering:
             if max_main_distance_clustering[i] == 0:
                 continue
             for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
-                if distance / max_main_distance_clustering[i] >= 0.7:
+                if distance / max_main_distance_clustering[i] >= 0.6:
                     # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 50%이상이면 outlier 분류
                     outliers[i].append(distance)
 
@@ -431,7 +431,7 @@ class Clustering:
 
         return self.Gaussian
 
-    def perform_OPTICS(self, size):
+    def perform_OPTICS(self, xi):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
@@ -440,7 +440,7 @@ class Clustering:
         if ms < 2:
             ms = 2
 
-        labels = OPTICS(min_samples=ms, min_cluster_size=size).fit(self.PCA_Data).labels_
+        labels = OPTICS(xi=xi, min_samples=ms).fit(self.PCA_Data).labels_
 
         self.OPTIC_labels = labels
 
