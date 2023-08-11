@@ -124,7 +124,7 @@ file_names.append('FTSE 100')
 # benchmark return merge with result_df
 file = '../files/month_return.csv'
 df = pd.read_csv(file)
-df = df.iloc[1:]  # Jan data eliminate
+df = df.iloc[85:]  # Jan data eliminate
 df = df.iloc[0:, 1:]  # save only data
 df.columns = result_df.columns  # columns name should be same with result_df
 result_df = pd.concat([result_df, df], axis=0)  # add monthly_return right below result_df

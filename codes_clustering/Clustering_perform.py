@@ -3,7 +3,7 @@ import Clustering as C
 from PCA_and_ETC import *
 
 # file to check
-file = '1990-01.csv'
+file = '1997-01.csv'
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -219,7 +219,7 @@ if K_mean_Save:
     print(f'total outliers: {sum}')
 
 # Save DBSCAN clutering method LS_Tables
-dbscan_Save = False
+dbscan_Save = True
 if dbscan_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -246,7 +246,7 @@ if dbscan_Save:
     print(f'total outliers: {sum}')
 
 # Save DBSCAN clutering method LS_Tables
-hdbscan_Save = False
+hdbscan_Save = True
 if hdbscan_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -273,8 +273,8 @@ if hdbscan_Save:
     print(f'total outliers: {sum}')
 
 # Save Hirarchical Agglomerative clutering method LS_Tables
-Agglormerative_Save = False
-if Agglormerative_Save:
+Agglomerative_Save = True
+if Agglomerative_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
     sum = 0
@@ -300,7 +300,7 @@ if Agglormerative_Save:
     print(f'total outliers: {sum}')
 
 # Save BayesianGaussianMixture clutering method LS_Tables
-BGM_Save = False
+BGM_Save = True
 if BGM_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -327,7 +327,7 @@ if BGM_Save:
     print(f'total outliers: {sum}')
 
 # Save OPTICS clutering method LS_Tables
-optics_Save = False
+optics_Save = True
 if optics_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -354,7 +354,7 @@ if optics_Save:
     print(f'total outliers: {sum}')
 
 # Save Mean Shift clutering method LS_Tables
-meanshift_Save = False
+meanshift_Save = True
 if meanshift_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -381,7 +381,7 @@ if meanshift_Save:
     print(f'total outliers: {sum}')
 
 # Save Reversal method LS_Tables
-Reversal_Save = False
+Reversal_Save = True
 if Reversal_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))

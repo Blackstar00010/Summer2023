@@ -19,7 +19,7 @@ if first_day_of_month:
     df_filtered = df_filtered.drop(columns='Month Start Flag')
     df_filtered.to_csv(dir + "adj_close_first_day_of_month.csv", index=False)
 
-momentum = False
+momentum = True
 if momentum:
     # For each month from 1990-01 to 2022-12, it creates a new table of 48 rows of momentum factor
     # Momentum Factor: ratio of the current month's value to the value from i months ago minus 1
@@ -30,7 +30,7 @@ if momentum:
     df['Date'] = pd.to_datetime(df['Date'])
     df.set_index('Date', inplace=True)
 
-    start_date = pd.to_datetime('1990-01-01')
+    start_date = pd.to_datetime('1993-01-01')
     end_date = pd.to_datetime('2022-12-01')
     months = pd.date_range(start_date, end_date)
 
@@ -62,6 +62,33 @@ if momentum:
     if int(current_date.strftime('%m')) != 12:
         print(f'] {current_date.strftime("%Y-%m")} done!\n[')
 
+MOM_Merge = False
+if MOM_Merge:
+    directory = '../files/momentum_adj_close'
+    long_short = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
+
+    merged_df = pd.DataFrame()
+
+    for file in long_short:
+        data = pd.read_csv(os.path.join(directory, file))
+
+        # Keep only the 'Momentum Index' and '1' columns
+        data = data[['Momentum Index', '1']]
+
+        file_column_name = os.path.splitext(file)[0]
+
+        # Rename the columns
+        data = data.rename(columns={'Momentum Index': 'Firm Name', '1': file_column_name})
+
+        if merged_df.empty:
+            merged_df = data
+        else:
+            merged_df = pd.merge(merged_df, data, on='Firm Name', how='outer')
+
+    merged_df = merged_df.sort_values('Firm Name')
+
+    merged_df.to_csv('../files/mom1_data_combined_adj_close.csv', index=False)
+
 weird_value_out = False
 if weird_value_out:
     directory = '../files/momentum_adj_close'
@@ -85,7 +112,7 @@ if weird_value_out:
             print(len(comp_list))
             print()
 
-weird_value_out_csv = True
+weird_value_out_csv = False
 if weird_value_out_csv:
     directory = '../files/momentum_adj_close'
     monthly_files = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
