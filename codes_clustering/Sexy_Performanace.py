@@ -1,6 +1,6 @@
 from PCA_and_ETC import *
 
-base_directory = '../files/Clustering_adj_close/'
+base_directory = '../files/Clustering_adj/'
 
 # Get all subdirectories in the base directory
 subdirectories = [d for d in os.listdir(base_directory) if os.path.isdir(os.path.join(base_directory, d))]
@@ -49,7 +49,7 @@ for subdir in subdirectories:
     LS_merged_df = LS_merged_df.drop(LS_merged_df.columns[-1], axis=1)
 
     ###############################
-    MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
+    MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj.csv')
 
     # Set Firm Name column into index
     MOM_merged_df.set_index('Firm Name', inplace=True)
@@ -125,7 +125,7 @@ file_names.append('FTSE 100')
 file = '../files/month_return.csv'
 df = pd.read_csv(file)
 df = df.iloc[1:]
-df = df.iloc[0:, 85:]
+df = df.iloc[0:, 1:]
 print(df)
 df.columns = result_df.columns  # columns name should be same with result_df
 result_df = pd.concat([result_df, df], axis=0)  # add monthly_return right below result_df
@@ -134,7 +134,7 @@ result_df = result_df.astype(float)  # set data type as float(df.value was str a
 result_df = result_df.fillna(0)
 
 # Save a new CSV file
-result_df.to_csv('../files/result_adj_close.csv', index=True)
+result_df.to_csv('../files/result_adj.csv', index=True)
 
 # Add 1 to all data values
 result_df.iloc[:, 0:] = result_df.iloc[:, 0:] + 1
