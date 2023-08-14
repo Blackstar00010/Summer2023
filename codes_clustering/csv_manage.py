@@ -19,7 +19,7 @@ if first_day_of_month:
     df_filtered = df_filtered.drop(columns='Month Start Flag')
     df_filtered.to_csv(dir + "adj_close_first_day_of_month.csv", index=False)
 
-momentum = True
+momentum = False
 if momentum:
     # For each month from 1990-01 to 2022-12, it creates a new table of 48 rows of momentum factor
     # Momentum Factor: ratio of the current month's value to the value from i months ago minus 1
@@ -127,7 +127,7 @@ if weird_value_out_csv:
             company = row[0]
             values = [float(value) for value in row[1:]]
 
-            if any(-1 < value < -0.9 for value in values[:5]):
+            if any(value > 10 for value in values[:5]):
                 companies_with_large_values.append(company)
 
         # If there are companies that meet the criteria, add to the output data
@@ -139,6 +139,7 @@ if weird_value_out_csv:
 
     # Write the DataFrame to a CSV file
     output_df.to_csv('../files/SIBAL_FILES_small.csv', index=False)
+
 
 
 # Won't be using this

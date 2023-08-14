@@ -141,7 +141,7 @@ def analysis_clustering_result(data, compartive_label, control_label):
 if __name__ == "__main__":
     # 파일 불러오기 및 PCA함수
     input_dir = '../files/momentum_adj'
-    file = '1992-06.csv'
+    file = '1990-11.csv'
     data = read_and_preprocess_data(input_dir, file)
 
     mom1 = data.values.astype(float)[:, 0]

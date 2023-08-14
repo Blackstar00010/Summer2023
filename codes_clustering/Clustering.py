@@ -9,7 +9,7 @@ from sklearn.mixture import BayesianGaussianMixture
 from scipy.cluster.hierarchy import *
 from scipy.spatial.distance import pdist, squareform
 from sklearn.model_selection import GridSearchCV
-
+from sklearn.cluster import AgglomerativeClustering
 
 def find_optimal_GMM_hyperparameter(data):
     bgm = BayesianGaussianMixture()
@@ -96,7 +96,7 @@ class Clustering:
             if max_main_distance_clustering[i] == 0:
                 continue
             for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
-                if distance / max_main_distance_clustering[i] >= 0.5:
+                if distance / max_main_distance_clustering[i] >= 0.6:
                     # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 50%이상이면 outlier 분류
                     outliers[i].append(distance)
 
@@ -138,7 +138,7 @@ class Clustering:
             n_sample = self.PCA_Data.shape[0]  # number of values in the file
             # Skip if the number of values are less than k
             if n_sample <= k_values[0]:
-                continue
+                k=n_sample
             clust = self.outliers(k)
             clusters_k.append(clust)
 
@@ -215,9 +215,30 @@ class Clustering:
         self.HDBSCAN = clust
         return self.HDBSCAN
 
-    def perform_HG(self, threshold: float):
+    def perform_Agglomerative(self, n_clusters: int):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
+        # Apply Agglomerative Clustering
+        agglomerative = AgglomerativeClustering(n_clusters=n_clusters, affinity='euclidean', linkage='ward')
+        cluster_labels = agglomerative.fit_predict(self.PCA_Data)
+
+        self.Agglomerative_labels = cluster_labels
+
+        # Get the unique cluster labels
+        unique_labels = sorted(list(set(cluster_labels)))
+
+        # Create an empty list for each unique label to store indices belonging to that cluster
+        clust = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(cluster_labels):
+            clust[unique_labels.index(cluster_label)].append(self.index[i])
+
+        self.Agglomerative = clust
+        return self.Agglomerative
+
+    def perform_HG(self, threshold: float):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Hierachical Agglomerative
         # 거리 행렬 계산
@@ -225,7 +246,7 @@ class Clustering:
         # data point pair 간의 euclidean distance/firm수 combination 2
 
         # 연결 매트릭스 계산
-        Z = linkage(dist_matrix, method='ward')
+        Z = linkage(dist_matrix, method='average')
         '''we adopt the average linkage, which is defined as the average distance between
         the data points in one cluster and the data points in another cluster
         논문과는 다른 부분. average method대신 ward method 사용.
@@ -238,39 +259,43 @@ class Clustering:
         # plt.ylabel('Distance')
         # plt.show()
 
-        # copheric distance 계산
-        copheric_dis = cophenet(Z)
-        copheric_dis_matrix = squareform(copheric_dis)
+        # cophenetic distance 계산
+        coph_dists = Z[:, 2]  # Z의 두 번째 열은 cophenetic distance 값
+
+        # 최대 cophenetic distance의 0.4를 곱한 값을 max_d로 사용
+        max_d = np.max(coph_dists) * threshold
 
         # cophenet: dendrogram과 original data 사이 similarity을 나타내는 correlation coefficient
         # 숫자가 클 수록 원본데이터와 유사도가 떨어짐. dendrogram에서 distance의미.
 
         # Cluster k개 생성
-        k = 10
-        clusters = fcluster(Z, k, criterion='maxclust')
+        clusters = fcluster(Z, max_d, criterion='distance')
         self.Agglomerative_labels = clusters
 
         # 2. Outlier
 
-        cluster_distances = []
-        for i in range(0, len(clusters)):
-            avg_cpr_distance = sum(copheric_dis_matrix[i]) / len(clusters)
-            # 각 회사별로 cophenet distance의 average distance를 구함.
-            cluster_distances.append(avg_cpr_distance)
-
-        # 클러스터링 결과 중 평균 거리 이상의 데이터 포인트를 outlier로 식별
-        outliers = np.where(np.array(cluster_distances) > max(copheric_dis) * threshold)[0]
+        # cluster_distances = []
+        # for i in range(0, len(clusters)):
+        #     avg_cpr_distance = sum(copheric_dis_matrix[i]) / len(clusters)
+        #     # 각 회사별로 cophenet distance의 average distance를 구함.
+        #     cluster_distances.append(avg_cpr_distance)
+        #
+        # # 클러스터링 결과 중 평균 거리 이상의 데이터 포인트를 outlier로 식별
+        # outliers = np.where(np.array(cluster_distances) > max(copheric_dis) * threshold)[0]
         # avg_cpr_distance가 max_cophenet distance의 alpha percentile보다 크면 outlier
         '''In our empirical study, we specify the maximum distance rather than the number of clusters K,
         using a method similar to the method adopted for k-means clustering:
         e is set as an α percentile of the distances between a pair of nearest data points'''
 
-        for i in range(0, len(outliers)):
-            for j in range(0, len(clusters)):
-                if outliers[i] == j + 1:
-                    clusters[j + 1] = -1
+        #
+        #
+        # for i in range(0, len(outliers)):
+        #     for j in range(0, len(clusters)):
+        #         if outliers[i] == j + 1:
+        #             clusters[j + 1] = -1
 
         unique_labels = sorted(list(set(clusters)))
+        # print(unique_labels)
 
         clust = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(clusters):
@@ -406,7 +431,7 @@ class Clustering:
 
         return self.Gaussian
 
-    def perform_OPTICS(self, size):
+    def perform_OPTICS(self, xi):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
@@ -415,7 +440,7 @@ class Clustering:
         if ms < 2:
             ms = 2
 
-        labels = OPTICS(min_samples=ms, min_cluster_size=size).fit(self.PCA_Data).labels_
+        labels = OPTICS(xi=xi, min_samples=ms).fit(self.PCA_Data).labels_
 
         self.OPTIC_labels = labels
 
