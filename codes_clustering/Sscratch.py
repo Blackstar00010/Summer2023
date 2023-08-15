@@ -3,6 +3,7 @@ import warnings
 from itertools import combinations
 
 import pandas as pd
+from multitasking import *
 import seaborn as sns
 import Clustering as C
 import statsmodels.api as sm
@@ -28,9 +29,9 @@ if Cointegration:
     files = sorted(filename for filename in os.listdir(input_dir))
     for file in files:
         print(file)
-        year = int(file[:4])
-        if year < 2018:
-            continue
+        # year = int(file[:4])
+        # if year < 2020:
+        #     continue
 
         data = read_and_preprocess_data(input_dir, file)
 
@@ -57,12 +58,32 @@ if Cointegration:
         mom_data = read_mom_data(data)
 
 
+
+
         def find_cointegrated_pairs2(data: pd.DataFrame):
             data = data.iloc[1:, :]
 
-            start_time = time.time()
+            start_time=time.time()
 
             pairs = list(combinations(data.columns, 2))  # 모든 회사 조합
+
+            def cointegrate(pair):
+                x=data[pair[0]].values
+                y=data[pair[1]].values
+                _, p_value, _ = coint(x, y)
+                return pair, p_value
+            print('1')
+            import os
+            max_threads=os.cpu_count()
+            print(max_threads)
+            from concurrent.futures import ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                results=list(executor.map(cointegrate, pairs))
+            print('2')
+            pair_p_values = sorted(results, key=lambda x: x[1])
+
+            print(len(pairs))
+            print(len(pair_p_values))
 
             end_time = time.time()
             execution_time = end_time - start_time
@@ -75,25 +96,23 @@ if Cointegration:
                 # Cointegration 검정
                 score, pvalue, _ = coint(data[pair[0]], data[pair[1]])
 
-
-
                 spread = data[pair[0]] - data[pair[1]]
                 adf_result = sm.tsa.adfuller(spread)
 
                 if adf_result[1] > 0.05:
                     continue
 
-                if pvalue > 0.02:
+                if pvalue > 0.01:
                     continue
 
                 mean_spread = spread.mean()
                 std_spread = spread.std()
                 z_score = (spread - mean_spread) / std_spread
 
-                if float(z_score[0]) < -1.5:
+                if float(z_score[0]) < -2:
                     pair2 = [pair[1], pair[0]]
 
-                elif float(z_score[0]) > 1.5:
+                elif float(z_score[0]) > 2:
                     pair2 = pair
 
                 else:
@@ -629,10 +648,10 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([10])
+            Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([3])
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0])
-            print(Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0]))
+            # print(Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0]))
 
             # Save LS_Table CSV File
             for i, cluster in enumerate(Do_Clustering.K_Mean):
@@ -641,7 +660,7 @@ if Save:
         print(f'total outliers: {sum}')
 
     # Save DBSCAN clutering method LS_Tables
-    dbscan_Save = True
+    dbscan_Save = False
     if dbscan_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/DBSCAN'
@@ -756,7 +775,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.Gaussian = Do_Clustering.perform_GMM(0.1)
+            Do_Clustering.Gaussian = Do_Clustering.perform_GMM(5)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.Gaussian)
 
@@ -787,7 +806,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.04)
+            Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.05)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
 
@@ -797,7 +816,7 @@ if Save:
         print(f'total outliers: {sum}')
 
     # Save Mean Shift clutering method LS_Tables
-    meanshift_Save = False
+    meanshift_Save = True
     if meanshift_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/Meanshift'
@@ -818,10 +837,10 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.3)
+            Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.1)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.menshift)
-
+            print(sum)
             # Save LS_Table CSV File
             Do_Result_Save.LS_Table_Save(Do_Clustering.menshift, output_dir, file)
 
