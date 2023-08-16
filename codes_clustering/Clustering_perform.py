@@ -87,9 +87,9 @@ if hdbscan_Plot:
 # hyper parameter eps percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
 
 # Plot Agglomerative cluster about individual csv file
-Agglormerative_Plot = False
+Agglormerative_Plot = True
 if Agglormerative_Plot:
-    input_dir = '../files/momentum_adj'
+    input_dir = '../files/momentum_adj_close'
 
     # convert mom_data into PCA_data
     data = read_and_preprocess_data(input_dir, file)
@@ -107,7 +107,7 @@ if Agglormerative_Plot:
     Do_Result_Plot.Plot_clusters(Do_Clustering.Agglomerative)
 
     # Plot t_SNE result
-    t_SNE('Hirarchical Agglomerative', df_combined, Do_Clustering.Agglomerative_labels)
+    # t_SNE('Hirarchical Agglomerative', df_combined, Do_Clustering.Agglomerative_labels)
 
     # compare cluster result
     # analysis_clustering_result(Do_Clustering.PCA_Data, Do_Clustering.Agglomerative_labels, Do_Clustering.K_Mean_labels)
@@ -191,7 +191,7 @@ if meanshift_Plot:
 # hyper parameter quantile (0.1, 0.2, 0.3, 0.4) should be tested manually.(paper follow)
 
 # Save K_mean clutering method LS_Tables
-K_mean_Save = True
+K_mean_Save = False
 if K_mean_Save:
     input_dir = '../files/momentum_adj_close'
     files = sorted(filename for filename in os.listdir(input_dir))

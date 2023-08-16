@@ -28,9 +28,9 @@ if Cointegration:
     files = sorted(filename for filename in os.listdir(input_dir))
     for file in files:
         print(file)
-        year = int(file[:4])
-        if year < 2018:
-            continue
+        # year = int(file[:4])
+        # if year < 2018:
+        #     continue
 
         data = read_and_preprocess_data(input_dir, file)
 
@@ -74,8 +74,6 @@ if Cointegration:
 
                 # Cointegration 검정
                 score, pvalue, _ = coint(data[pair[0]], data[pair[1]])
-
-
 
                 spread = data[pair[0]] - data[pair[1]]
                 adf_result = sm.tsa.adfuller(spread)
