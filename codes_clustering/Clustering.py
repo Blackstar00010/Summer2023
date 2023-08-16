@@ -19,8 +19,8 @@ class Clustering:
         self.OPTIC = []
         self.HDBSCAN = []
         self.menshift = []
-        self.BIRCH=[]
-        self.Affinity=[]
+        self.BIRCH = []
+        self.Affinity = []
 
         self.K_Mean_labels = []
         self.DBSCAN_labels = []
@@ -29,8 +29,8 @@ class Clustering:
         self.OPTIC_labels = []
         self.HDBSCAN_labels = []
         self.menshift_labels = []
-        self.BIRCH_labels=[]
-        self.Affinity_labels=[]
+        self.BIRCH_labels = []
+        self.Affinity_labels = []
 
         self.lab = []
         self.lab_labels = []
@@ -44,7 +44,7 @@ class Clustering:
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
-        kmeans = KMeans(n_clusters=K, init='k-means++', n_init=5, max_iter=500, random_state=0).fit(self.PCA_Data)
+        kmeans = BisectingKMeans(n_clusters=K, init='k-means++', n_init=10, max_iter=500, random_state=5, bisecting_strategy='largest_cluster').fit(self.PCA_Data)
         cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
 
         self.test = kmeans
@@ -121,7 +121,7 @@ class Clustering:
             n_sample = self.PCA_Data.shape[0]  # number of values in the file
             # Skip if the number of values are less than k
             if n_sample <= k_values[0]:
-                k=n_sample
+                k = n_sample
             clust = self.outliers(k)
             clusters_k.append(clust)
 
@@ -291,6 +291,10 @@ class Clustering:
         # cophenetic distance 계산
         coph_dists = Z[:, 2]  # Z의 두 번째 열은 cophenetic distance 값
 
+        # 2. Outlier
+        '''In our empirical study, we specify the maximum distance rather than the number of clusters K,
+        using a method similar to the method adopted for k-means clustering:
+        e is set as an α percentile of the distances between a pair of nearest data points'''
         # 최대 cophenetic distance의 0.4를 곱한 값을 max_d로 사용
         max_d = np.max(coph_dists) * threshold
 
@@ -301,30 +305,9 @@ class Clustering:
         clusters = fcluster(Z, max_d, criterion='distance')
         self.Agglomerative_labels = clusters
 
-        # 2. Outlier
 
-        # cluster_distances = []
-        # for i in range(0, len(clusters)):
-        #     avg_cpr_distance = sum(copheric_dis_matrix[i]) / len(clusters)
-        #     # 각 회사별로 cophenet distance의 average distance를 구함.
-        #     cluster_distances.append(avg_cpr_distance)
-        #
-        # # 클러스터링 결과 중 평균 거리 이상의 데이터 포인트를 outlier로 식별
-        # outliers = np.where(np.array(cluster_distances) > max(copheric_dis) * threshold)[0]
-        # avg_cpr_distance가 max_cophenet distance의 alpha percentile보다 크면 outlier
-        '''In our empirical study, we specify the maximum distance rather than the number of clusters K,
-        using a method similar to the method adopted for k-means clustering:
-        e is set as an α percentile of the distances between a pair of nearest data points'''
-
-        #
-        #
-        # for i in range(0, len(outliers)):
-        #     for j in range(0, len(clusters)):
-        #         if outliers[i] == j + 1:
-        #             clusters[j + 1] = -1
 
         unique_labels = sorted(list(set(clusters)))
-        # print(unique_labels)
 
         clust = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(clusters):
@@ -376,87 +359,29 @@ class Clustering:
 
         clusters = [sublist for sublist in clusters if sublist]
 
-        # print(len(clusters))
-        # print(clusters)
-        # clusters = [item for sublist in clusters for item in sublist]
-        # print(len(clusters))
-
         # Outliers
+        # 각 데이터 포인트의 확률 값 계산
+        probabilities = bgm.score_samples(self.PCA_Data)
+        # 확률 값의 percentiles 계산 (예시로 하위 5% 이하를 outlier로 판단)
+        threshold = np.percentile(probabilities, alpha)
 
-        out1 = True
-        if out1:
-            # 각 데이터 포인트의 확률 값 계산
-            probabilities = bgm.score_samples(self.PCA_Data)
-            # print(pd.DataFrame(probabilities).to_string())
-            # 확률 값의 percentiles 계산 (예시로 하위 5% 이하를 outlier로 판단)
-            threshold = np.percentile(probabilities, alpha)
-            # print(threshold)
-            outliers = []
-            for i, probability in enumerate(probabilities):
-                if probability < threshold:
-                    outliers.append(i)
+        outliers = []
+        for i, probability in enumerate(probabilities):
+            if probability < threshold:
+                outliers.append(i)
 
+        # a에 있는 값을 b에서 빼기
+        for value in outliers:
+            for i, row in enumerate(clusters):
+                if value in row:
+                    clusters[i].remove(value)
 
-            # print(len(outliers))
+        # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
+        clusters.insert(0, outliers)
 
-            # a에 있는 값을 b에서 빼기
-            for value in outliers:
-                for i, row in enumerate(clusters):
-                    if value in row:
-                        clusters[i].remove(value)
-
-            # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
-            clusters.insert(0, outliers)
-
-            # print(len(clusters))
-            # print(clusters)
-
-            for i, cluster in enumerate(clusters):
-                for t, num in enumerate(cluster):
-                    cluster[t] = self.index[num]
-
-            # print(clusters)
-
-            # print(len(clusters))
-            # print(clusters)
-
-            # clusters = [item for sublist in clusters for item in sublist]
-            #
-            # print(len(clusters))
-
-            # for i, prob in enumerate(probabilities):
-            #     if prob < threshold:
-            #         outliers.append(clusters[i])
-            #
-            # outliers = self.PCA_Data[probabilities < threshold]
-            #
-            # print(outliers)
-
-        out2 = False
-        if out2:
-            probabilities = bgm.predict_proba(self.PCA_Data)
-            print(len(probabilities))
-
-            cluster_prob_mean = np.mean(probabilities, axis=0)
-
-            outliers = []
-            # if the probabilities that tht firm is in that cluster are lower than probability, that firm is outlier.
-            for i, prob_mean in enumerate(cluster_prob_mean):
-                if prob_mean < probability:
-                    outliers.append(clusters[i])
-
-            print(len(outliers))
-
-            # 원본에서 outlier제거.
-            clusters = [x for x in clusters if x not in outliers]
-            # 빈리스트도 Outlier로 간주되기 때문에 가끔 생기는 결측값 제거.
-            outliers = [sublist for sublist in outliers if sublist]
-            # 2차원 리스트를 1차원 리스트로 전환.
-            outliers = [item for sublist in outliers for item in sublist]
-            # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
-            clusters.insert(0, outliers)
-
-            print(len(clusters))
+        for i, cluster in enumerate(clusters):
+            for t, num in enumerate(cluster):
+                cluster[t] = self.index[num]
 
         self.Gaussian = clusters
 
@@ -545,7 +470,7 @@ class Clustering:
         outliers = [sublist for sublist in outliers if sublist]
         # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
         clusters.insert(0, outliers)
- 
+
         self.menshift = clusters
         return self.menshift
 
@@ -553,11 +478,11 @@ class Clustering:
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
-        birch= Birch(threshold=percentile, branching_factor=50).fit(self.PCA_Data)
-        cluster_labels=birch.labels_
+        birch = Birch(threshold=percentile, branching_factor=50).fit(self.PCA_Data)
+        cluster_labels = birch.labels_
 
-        self.test=birch
-        self.BIRCH_labels=cluster_labels
+        self.test = birch
+        self.BIRCH_labels = cluster_labels
 
         # Get the unique cluster labels
         unique_labels = sorted(list(set(cluster_labels)))
@@ -577,11 +502,11 @@ class Clustering:
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
-        affinity= AffinityPropagation(damping=damping).fit(self.PCA_Data)
-        cluster_labels=affinity.labels_
+        affinity = AffinityPropagation(damping=damping).fit(self.PCA_Data)
+        cluster_labels = affinity.labels_
 
-        self.test=affinity
-        self.Affinity_labels=cluster_labels
+        self.test = affinity
+        self.Affinity_labels = cluster_labels
 
         # Get the unique cluster labels
         unique_labels = sorted(list(set(cluster_labels)))

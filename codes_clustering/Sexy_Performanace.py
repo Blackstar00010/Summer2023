@@ -1,5 +1,6 @@
-from PCA_and_ETC import *
 import warnings
+from PCA_and_ETC import *
+
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -173,14 +174,14 @@ if Plot:
     plt.tight_layout()
     plt.show()
 
-    # Plot a graph for each row
-    for i in range(len(result_df)):
-        plt.figure(figsize=(10, 6))
-        plt.plot(result_df.columns[1:], result_df.iloc[i, 1:])
-        plt.title(result_df.index[i])
-        plt.xlabel('Date')
-        plt.ylabel('Average Value')
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-
-        plt.show()
+    # # Plot a graph for each row
+    # for i in range(len(result_df)):
+    #     plt.figure(figsize=(10, 6))
+    #     plt.plot(result_df.columns[1:], result_df.iloc[i, 1:])
+    #     plt.title(result_df.index[i])
+    #     plt.xlabel('Date')
+    #     plt.ylabel('Average Value')
+    #     plt.xticks(rotation=45)
+    #     plt.tight_layout()
+    #
+    #     plt.show()

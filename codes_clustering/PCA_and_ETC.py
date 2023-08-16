@@ -240,7 +240,6 @@ if coin:
         pairs = pairs.drop(pairs[pairs['spread'].abs() <= 2].index)
         pairs['pair1'] = pairs[0] * (pairs['spread'] > 0) + pairs[1] * (pairs['spread'] <= 0)
         pairs['pair2'] = pairs[0] * (pairs['spread'] <= 0) + pairs[1] * (pairs['spread'] > 0)
-
         print(len(pairs))
 
         invest_list = pairs[['pair1', 'pair2']].values.tolist()

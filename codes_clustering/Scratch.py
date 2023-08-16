@@ -1,4 +1,3 @@
-import time
 import warnings
 import seaborn as sns
 import Clustering as C
@@ -18,25 +17,21 @@ if Cointegration:
     files = sorted(filename for filename in os.listdir(input_dir))
     for file in files:
         print(file)
-        # year = int(file[:4])
-        # if year < 2020:
-        #     continue
+
 
         data = read_and_preprocess_data(input_dir, file)
 
         mom_data = read_mom_data(data)
 
-        start_time = time.time()
 
-        inv_list = find_cointegrated_pairs_deprecated(mom_data)
 
-        LS_Table = True
+        # inv_list = find_cointegrated_pairs_deprecated(mom_data)
+        inv_list = find_cointegrated_pairs(mom_data)
+
+        print(inv_list)
+        LS_Table = False
         if LS_Table:
             save_cointegrated_LS(output_dir, file, mom_data, inv_list)
-
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        print(f"경과 시간: {elapsed_time:.2f} 초")
 
 example = False
 if example:
@@ -378,7 +373,7 @@ if Save:
 
     # Save K_mean clutering method LS_Tables
     # hyper parameter K(3,5,10,50,100,500,1000,1500) should be tested manually.(paper follow)
-    K_mean_Save = False
+    K_mean_Save = True
     if K_mean_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/K_Means_outlier'
@@ -637,7 +632,7 @@ if Save:
 
     # Save Affinity Propagation clutering method LS_Tables
     # hyper parameter percentile range(0,1, 0.9, 0.1) should be tested manually.(paper follow)
-    affinity_Save = True
+    affinity_Save = False
     if affinity_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/HDBSCAN'
@@ -658,7 +653,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.BIRCH = Do_Clustering.perform_Affinity(0.9)
+            Do_Clustering.BIRCH = Do_Clustering.perform_Affinity(0.2)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.Affinity)
 
