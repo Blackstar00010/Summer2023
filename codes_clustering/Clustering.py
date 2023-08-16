@@ -152,9 +152,12 @@ class Clustering:
 
         ms = int(math.log(len(self.PCA_Data)))
 
+        if ms < 2:
+            ms = 2
+
         # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
-        nbrs = NearestNeighbors(n_neighbors=ms + 1).fit(self.PCA_Data)
-        distances, indices = nbrs.kneighbors(self.PCA_Data)
+        nbrs = NearestNeighbors(n_neighbors=ms).fit(self.PCA_Data)
+        distances, indices = nbrs.kneighbors(self.PCA_Data)  # nearest neighbors of the sample
         avg_distances = np.mean(distances[:, 1:], axis=1)
 
         # Sort the average distances in ascending order
