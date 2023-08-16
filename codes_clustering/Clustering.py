@@ -1,32 +1,9 @@
-import os
 import math
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+from PCA_and_ETC import *
 from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
-from sklearn.mixture import BayesianGaussianMixture
 from scipy.cluster.hierarchy import *
 from scipy.spatial.distance import pdist
-from sklearn.model_selection import GridSearchCV
-# from sklearn.cluster import AgglomerativeClustering
-# from sklearn.metrics import silhouette_score
-
-
-def find_optimal_GMM_hyperparameter(data):
-    bgm = BayesianGaussianMixture()
-    # 탐색할 covariance type과 n_components 설정
-    param_grid = {
-        "covariance_type": ["spherical", "tied", "diag", "full"]
-    }
-
-    # BIC score를 평가 지표로 하여 GridSearchCV 실행
-    grid_search = GridSearchCV(bgm, param_grid=param_grid, scoring='neg_negative_likelihood_ratio')
-    grid_search.fit(data)
-
-    # 최적의 covariance type과 n_components 출력
-    best_covariance_type = grid_search.best_params_["covariance_type"]
-    return best_covariance_type
 
 
 class Clustering:
@@ -102,7 +79,7 @@ class Clustering:
             if max_main_distance_clustering[i] == 0:
                 continue
             for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
-                if distance / max_main_distance_clustering[i] >= 0.6:
+                if distance / max_main_distance_clustering[i] >= 0.5:
                     # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 50%이상이면 outlier 분류
                     outliers[i].append(distance)
 
@@ -288,7 +265,7 @@ class Clustering:
     #     self.Agglomerative = clust
     #     return self.Agglomerative
 
-    def perform_HG(self, threshold: float):
+    def perform_HA(self, threshold: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
