@@ -7,7 +7,7 @@ from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
 from sklearn.mixture import BayesianGaussianMixture
 from scipy.cluster.hierarchy import *
-from scipy.spatial.distance import pdist, squareform
+from scipy.spatial.distance import pdist
 from sklearn.model_selection import GridSearchCV
 # from sklearn.cluster import AgglomerativeClustering
 # from sklearn.metrics import silhouette_score
@@ -572,11 +572,11 @@ class Clustering:
         self.menshift = clusters
         return self.menshift
 
-    def perform_BIRCH(self):
+    def perform_BIRCH(self, percentile):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
-        birch= Birch(threshold=0.5, branching_factor=50).fit(self.PCA_Data)
+        birch= Birch(threshold=percentile, branching_factor=50).fit(self.PCA_Data)
         cluster_labels=birch.labels_
 
         self.test=birch

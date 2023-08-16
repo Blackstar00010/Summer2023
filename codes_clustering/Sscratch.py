@@ -111,64 +111,54 @@ def find_cointegrated_pairs_deprecated(data: pd.DataFrame):
     invest_list = []
 
     pairs = list(combinations(data.columns, 2))  # 모든 회사 조합
-    pairs = [list(t) for t in pairs]
     pairs_len = 1
 
     while len(pairs) != pairs_len:
         pairs_len = len(pairs)
+        found_break=False
+        for i, pair in enumerate(pairs):
+            pvalue = cointegrate(data, pair[0], pair[1])
 
-        pairs['pvalue'] = pairs.apply(lambda x: cointegrate(data, x[0], x[1]), axis=1)
-        pairs = pairs.drop(pairs[pairs['pvalue'] > 0.01].index)
+            if pvalue > 0.01:
+                continue
 
-        # nC2 rows, 48 cols
-        spread_df = pairs.apply(lambda x: data[x[0]] - data[x[1]], axis=1)
-        spread_df['spread'] = pairs.apply(lambda x: data[x[0]] - data[x[1]], axis=1)
-        pairs['adf_result'] = pairs.apply(lambda x: pd.Series(sm.tsa.adfuller(x['spread'])[1]), axis=1)
-        pairs = pairs.drop(pairs[pairs['adf_result'] > 0.05].index)
-        pairs['kpss_result'] = pairs.apply(lambda x: pd.Series(kpss(x['spread'])), axis=1)
-        pairs = pairs.drop(pairs[pairs['kpss_result'] < 0.05].index)
+            else:
+                spread = data[pair[0]] - data[pair[1]]
+                adf_result = sm.tsa.adfuller(spread)
+                kpss_result = kpss(spread)
 
-        mean_spread = pairs['spread'].mean()
-        std_spread = pairs['spread'].std()
-        pairs['spread'] = pairs.apply(lambda x: (data[x['spread']] - mean_spread) / std_spread, axis=1)
+                if adf_result[1] > 0.05 and kpss_result[1] < 0.05:
+                    continue
 
-        # for i, pair in enumerate(pairs):
-        #
-        #     pvalue = cointegrate(data, pair[0], pair[1])
-        #
-        #     if pvalue > 0.01:
-        #         continue
-        #
-        #     spread = data[pair[0]] - data[pair[1]]
-        #     adf_result = sm.tsa.adfuller(spread)
-        #     kpss_result = kpss(spread)
-        #
-        #     if adf_result[1] > 0.05 and kpss_result[1] < 0.05:
-        #         continue
-        #
-        #     mean_spread = spread.mean()
-        #     std_spread = spread.std()
-        #     z_score = (spread - mean_spread) / std_spread
-        #     spread_value = float(z_score[0])
-        #
-        #     if abs(spread_value) <= 2:
-        #         continue
-        #
-        #     elif spread_value > 2:
-        #         invest_list.append(pair)
-        #         pairs = [p for p in pairs if all(item not in pair for item in p)]
-        #         break
-        #
-        #     else:
-        #         pair = [pair[1], pair[0]]
-        #         invest_list.append(pair)
-        #         pairs = [p for p in pairs if all(item not in pair for item in p)]
-        #         break
+                else:
+                    mean_spread = spread.mean()
+                    std_spread = spread.std()
+                    z_score = (spread - mean_spread) / std_spread
+                    spread_value = float(z_score[0])
 
-        # print(len(pairs))
-        # print(len(invest_list))
+                    if abs(spread_value) <= 2:
+                        continue
 
-        return invest_list
+
+                    elif spread_value < -2:
+                        pair = (pair[1], pair[0])
+                        invest_list.append(pair)
+                        pairs = [p for p in pairs if all(item not in pair for item in p)]
+                        break
+
+                    elif spread_value > 2:
+                        pair = (pair[0], pair[1])
+                        invest_list.append(pair)
+                        pairs = [p for p in pairs if all(item not in pair for item in p)]
+                        break
+
+        print(len(pairs))
+        print(len(invest_list))
+
+        if found_break:
+            break
+
+    return invest_list
 
 
 def some_other_shit(invest_list):
