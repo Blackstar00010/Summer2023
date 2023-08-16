@@ -72,33 +72,31 @@ class Clustering:
         distance = kmeans.fit_transform(self.PCA_Data)  # Distance btw K centroid about all each points
         main_distance = np.min(distance, axis=1)  # Distance btw own K centroid about all each points
 
-        lab = True
-        if lab:
-            main_distance_clustering = [[] for _ in range(K)]
+        max_main_distance_clustering = [[] for _ in range(K)]
 
-            for cluster_num in range(K):
-                distance_clustering = distance[cluster_labels == cluster_num]
-                for i in range(len(distance_clustering)):
-                    main_distance_clustering[cluster_num].append(distance_clustering[i][cluster_num])
+        for cluster_num in range(K):
+            # save the distance of the points in corresponding cluster
+            distance_clustering = distance[cluster_labels == cluster_num]  # True에 해당하는 곳들만 저장한다
+            for i in range(len(distance_clustering)):
+                max_main_distance_clustering[cluster_num].append(distance_clustering[i][cluster_num])
 
-            for i, cluster in enumerate(main_distance_clustering):
-                main_distance_clustering[i] = np.max(cluster)
-
-            max_main_distance_clustering = main_distance_clustering
+        for i, cluster in enumerate(max_main_distance_clustering):
+            # save the maximum disatance between the points in each the cluster
+            max_main_distance_clustering[i] = np.max(cluster)
 
         clusters = [[] for _ in range(K)]  # Cluster별 distance 분류
         clusters_index = [[] for _ in range(K)]  # Cluster별 index 분류
 
         for i, cluster_num in enumerate(cluster_labels):
-            clusters[cluster_num].append(main_distance[i])
-            clusters_index[cluster_num].append(self.index[i])
+            clusters[cluster_num].append(main_distance[i])  # adding min distances in each point to corresponding cluster
+            clusters_index[cluster_num].append(self.index[i])  # adding company names in each cluster
 
         outliers = [[] for _ in range(K)]  # Cluster별 outliers' distance 분류
         for i, cluster in enumerate(clusters):
             if max_main_distance_clustering[i] == 0:
                 continue
             for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
-                if distance / max_main_distance_clustering[i] >= 0.6:
+                if distance / max_main_distance_clustering[i] >= 0.5:
                     # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 50%이상이면 outlier 분류
                     outliers[i].append(distance)
 
