@@ -568,7 +568,7 @@ class Clustering:
         outliers = [sublist for sublist in outliers if sublist]
         # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
         clusters.insert(0, outliers)
-
+ 
         self.menshift = clusters
         return self.menshift
 
