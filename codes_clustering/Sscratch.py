@@ -65,7 +65,7 @@ def process_pair(pair, data):
 
 def find_cointegrated_pairs(data: pd.DataFrame):
     data = data.iloc[1:, :]
-
+    print(data)
     invest_list = []
 
     pairs = list(combinations(data.columns, 2))  # 모든 회사 조합
@@ -480,7 +480,7 @@ if Plot:
 
     # Save K_mean clutering method LS_Tables
 
-Save = False
+Save = True
 if Save:
     K_mean_Save = False
     if K_mean_Save:
@@ -671,7 +671,7 @@ if Save:
         print(f'total outliers: {sum}')
 
     # Save Mean Shift clutering method LS_Tables
-    meanshift_Save = True
+    meanshift_Save = False
     if meanshift_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/Meanshift'

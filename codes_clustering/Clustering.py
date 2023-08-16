@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans, OPTICS, DBSCAN, HDBSCAN, estimate_bandwidth, MeanShift
 from sklearn.neighbors import NearestNeighbors
-from sklearn.mixture import BayesianGaussianMixture
+from sklearn.mixture import BayesianGaussianMixture, GaussianMixture
 from scipy.cluster.hierarchy import *
 from scipy.spatial.distance import pdist, squareform
 from sklearn.model_selection import GridSearchCV
@@ -568,11 +568,6 @@ class Clustering:
         self.menshift = clusters
         return self.menshift
 
-    '''good
-    cityblock
-    euclidean
-    l2
-    braycurtis'''
 
 
 class Result_Check_and_Save:
