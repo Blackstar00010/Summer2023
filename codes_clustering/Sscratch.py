@@ -1,30 +1,208 @@
 import time
 import warnings
-from itertools import combinations
-
 import pandas as pd
-from multitasking import *
 import seaborn as sns
 import Clustering as C
 import statsmodels.api as sm
 from PCA_and_ETC import *
-
+from itertools import combinations
 from sklearn.datasets import load_iris
-from statsmodels.tsa.stattools import coint
+from statsmodels.tsa.stattools import coint, kpss
 
 # turn off warning
 warnings.filterwarnings("ignore")
 
-# sample data
-iris = load_iris()
-iris_pd = pd.DataFrame(iris.data[:, 2:], columns=['petal_length', 'petal_width'])
+
+def read_mom_data(data):
+    # mom1 save and data Normalization
+    mom1 = data.values.astype(float)[:, 0]
+    data_normalized = (data - data.mean()) / data.std()
+    mat = data_normalized.values.astype(float)
+
+    # mom1을 제외한 mat/PCA(2-49)
+    # mat = np.delete(mat, 0, axis=1)
+
+    # mom49를 제외한 mat/PCA(1-48)
+    mat = np.delete(mat, 48, axis=1)
+
+    df_combined = pd.DataFrame(mat)
+    df_combined.insert(0, 'Mom1', mom1)
+    df_combined.index = data.index
+
+    return df_combined.T
+
+
+def cointegrate(data, s1, s2):
+    x = data[s1].values
+    y = data[s2].values
+    _, p_value, _ = coint(x, y)
+    return p_value
+
+
+def process_pair(pair, data):
+    pvalue = cointegrate(data, pair)
+
+    spread = data[pair[0]] - data[pair[1]]
+    adf_result = sm.tsa.adfuller(spread)
+    kpss_result = kpss(spread)
+
+    if adf_result[1] <= 0.05 and kpss_result[1] >= 0.05 and pvalue <= 0.01:
+        mean_spread = spread.mean()
+        std_spread = spread.std()
+        z_score = (spread - mean_spread) / std_spread
+
+        if float(z_score[0]) < -2:
+            pair2 = [pair[1], pair[0]]
+        elif float(z_score[0]) > 2:
+            pair2 = pair
+        else:
+            return None
+
+        return pair2
+    else:
+        return None
+
+
+def find_cointegrated_pairs(data: pd.DataFrame) -> list:
+    data = data.iloc[1:, :]
+
+    pairs = pd.DataFrame(combinations(data.columns, 2))  # 모든 회사 조합
+    pairs['pvalue'] = pairs.apply(lambda x: cointegrate(data, x[0], x[1]), axis=1)
+    pairs = pairs.drop(pairs[pairs['pvalue'] > 0.01].index)
+    pairs = pairs.drop(columns=['pvalue'])
+    print('Finished filtering pairs using pvalue!')
+
+    # nC2 rows, 48 cols
+    spread_df: pd.DataFrame = pairs.apply(lambda x: data[x[0]] - data[x[1]], axis=1)
+
+    spread_df['adf_result'] = spread_df.index[spread_df.apply(lambda x: [sm.tsa.adfuller(x)][1], axis=1)]
+    spread_df = spread_df.drop(spread_df[spread_df['adf_result'] > 0.05].index)
+    spread_df = spread_df.drop(columns=['adf_result'])
+    print('Finished filtering pairs using adf_result!')
+
+    spread_df['kpss_result'] = spread_df.index[spread_df.apply(lambda x: [kpss(x)][1], axis=1)]
+    spread_df = spread_df.drop(spread_df[spread_df['kpss_result'] < 0.05].index)
+    spread_df = spread_df.drop(columns=['kpss_result'])
+    print('Finished filtering pairs using kpss_result!')
+
+    spread_sr = spread_df[spread_df.columns[0]]
+    pairs['spread'] = (spread_sr - spread_sr.mean()) / spread_sr.std()
+    pairs = pairs.dropna(subset=['spread'])
+    print('Finished filtering pairs using normalised spread!')
+
+    pairs = pairs.drop(pairs[pairs['spread'].abs() <= 2].index)
+    pairs['pair1'] = pairs[0] * (pairs['spread'] > 0) + pairs[1] * (pairs['spread'] <= 0)
+    pairs['pair2'] = pairs[0] * (pairs['spread'] <= 0) + pairs[1] * (pairs['spread'] > 0)
+
+    print(len(pairs))
+
+    invest_list = pairs[['pair1', 'pair2']].values.tolist()
+    return invest_list
+
+
+def find_cointegrated_pairs_deprecated(data: pd.DataFrame):
+    """
+    Deprecated
+    :param data:
+    :return:
+    """
+    data = data.iloc[1:, :]
+
+    invest_list = []
+
+    pairs = list(combinations(data.columns, 2))  # 모든 회사 조합
+    pairs = [list(t) for t in pairs]
+    pairs_len = 1
+
+    while len(pairs) != pairs_len:
+        pairs_len = len(pairs)
+
+        pairs['pvalue'] = pairs.apply(lambda x: cointegrate(data, x[0], x[1]), axis=1)
+        pairs = pairs.drop(pairs[pairs['pvalue'] > 0.01].index)
+
+        # nC2 rows, 48 cols
+        spread_df = pairs.apply(lambda x: data[x[0]] - data[x[1]], axis=1)
+        spread_df['spread'] = pairs.apply(lambda x: data[x[0]] - data[x[1]], axis=1)
+        pairs['adf_result'] = pairs.apply(lambda x: pd.Series(sm.tsa.adfuller(x['spread'])[1]), axis=1)
+        pairs = pairs.drop(pairs[pairs['adf_result'] > 0.05].index)
+        pairs['kpss_result'] = pairs.apply(lambda x: pd.Series(kpss(x['spread'])), axis=1)
+        pairs = pairs.drop(pairs[pairs['kpss_result'] < 0.05].index)
+
+        mean_spread = pairs['spread'].mean()
+        std_spread = pairs['spread'].std()
+        pairs['spread'] = pairs.apply(lambda x: (data[x['spread']] - mean_spread) / std_spread, axis=1)
+
+        for i, pair in enumerate(pairs):
+
+            pvalue = cointegrate(data, pair[0], pair[1])
+
+            if pvalue > 0.01:
+                continue
+
+            spread = data[pair[0]] - data[pair[1]]
+            adf_result = sm.tsa.adfuller(spread)
+            kpss_result = kpss(spread)
+
+            if adf_result[1] > 0.05 and kpss_result[1] < 0.05:
+                continue
+
+            mean_spread = spread.mean()
+            std_spread = spread.std()
+            z_score = (spread - mean_spread) / std_spread
+            spread_value = float(z_score[0])
+
+            if abs(spread_value) <= 2:
+                continue
+
+            elif spread_value > 2:
+                invest_list.append(pair)
+                pairs = [p for p in pairs if all(item not in pair for item in p)]
+                break
+
+            else:
+                pair = [pair[1], pair[0]]
+                invest_list.append(pair)
+                pairs = [p for p in pairs if all(item not in pair for item in p)]
+                break
+
+        # print(len(pairs))
+        # print(len(invest_list))
+
+        return invest_list
+
+
+def some_other_shit(invest_list):
+    LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
+
+    for cluster_num, firms in enumerate(invest_list):
+        # Sort firms based on momentum_1
+        long_short = [0] * 2
+        long_short[0] = -1
+        long_short[1] = 1
+        # Add the data to the new table
+        for i, firm in enumerate(firms):
+            LS_table.loc[len(LS_table)] = [firm, mom_data.T.loc[firm, 'Mom1'], long_short[i], cluster_num]
+
+    firm_list_after = list(LS_table['Firm Name'])
+    firm_list_before = list(mom_data.T.index)
+    Missing = [item for item in firm_list_before if item not in firm_list_after]
+
+    for i, firm in enumerate(Missing):
+        LS_table.loc[len(LS_table)] = [firm, mom_data.T.loc[firm, 'Mom1'], 0, -1]
+
+    LS_table.sort_values(by='Cluster Index', inplace=True)
+
+    # Save the output to a CSV file in the output directory
+    LS_table.to_csv(os.path.join(output_dir, file), index=False)
+    print(output_dir)
+
 
 Cointegration = False
 if Cointegration:
-    input_dir = '../files/momentum_adj'
-    output_dir = '../files/Clustering_adj/Cointegration'
-    # input_dir = '../files/momentum_adj_close'
-    # output_dir = '../files/Clustering_adj_close/Cointegration'
+    # input_dir = '../files/momentum_adj'
+    # output_dir = '../files/Clustering_adj/Cointegration'
+    input_dir = '../files/momentum_adj_close'
+    output_dir = '../files/Clustering_adj_close/Cointegration'
 
     files = sorted(filename for filename in os.listdir(input_dir))
     for file in files:
@@ -35,286 +213,24 @@ if Cointegration:
 
         data = read_and_preprocess_data(input_dir, file)
 
-
-        def read_mom_data(data):
-            # mom1 save and data Normalization
-            mom1 = data.values.astype(float)[:, 0]
-            data_normalized = (data - data.mean()) / data.std()
-            mat = data_normalized.values.astype(float)
-
-            # mom1을 제외한 mat/PCA(2-49)
-            # mat = np.delete(mat, 0, axis=1)
-
-            # mom49를 제외한 mat/PCA(1-48)
-            mat = np.delete(mat, 48, axis=1)
-
-            df_combined = pd.DataFrame(mat)
-            df_combined.insert(0, 'Mom1', mom1)
-            df_combined.index = data.index
-
-            return df_combined.T
-
-
         mom_data = read_mom_data(data)
 
-
-
-
-        def find_cointegrated_pairs2(data: pd.DataFrame):
-            data = data.iloc[1:, :]
-
-            start_time=time.time()
-
-            pairs = list(combinations(data.columns, 2))  # 모든 회사 조합
-
-            def cointegrate(pair):
-                x=data[pair[0]].values
-                y=data[pair[1]].values
-                _, p_value, _ = coint(x, y)
-                return pair, p_value
-            print('1')
-            import os
-            max_threads=os.cpu_count()
-            print(max_threads)
-            from concurrent.futures import ThreadPoolExecutor
-            with ThreadPoolExecutor(max_workers=4) as executor:
-                results=list(executor.map(cointegrate, pairs))
-            print('2')
-            pair_p_values = sorted(results, key=lambda x: x[1])
-
-            print(len(pairs))
-            print(len(pair_p_values))
-
-            end_time = time.time()
-            execution_time = end_time - start_time
-            print(f"Execution Time: {execution_time:.2f} seconds")
-
-            start_time = time.time()
-            invest_list = []
-            for i, pair in enumerate(pairs):
-
-                # Cointegration 검정
-                score, pvalue, _ = coint(data[pair[0]], data[pair[1]])
-
-                spread = data[pair[0]] - data[pair[1]]
-                adf_result = sm.tsa.adfuller(spread)
-
-                if adf_result[1] > 0.05:
-                    continue
-
-                if pvalue > 0.01:
-                    continue
-
-                mean_spread = spread.mean()
-                std_spread = spread.std()
-                z_score = (spread - mean_spread) / std_spread
-
-                if float(z_score[0]) < -2:
-                    pair2 = [pair[1], pair[0]]
-
-                elif float(z_score[0]) > 2:
-                    pair2 = pair
-
-                else:
-                    continue
-
-                if pair in pairs:
-                    print('spread is stationary.')
-                    print('spread can be conintegrated.')
-                    print('absolute z_score over 1.5')
-                    print(f'{pair} is first.')
-                    invest_list.append(pair2)
-                    pairs = [p for p in pairs if all(item not in pair for item in p)]
-                    print(len(pairs))
-                else:
-                    continue
-
-            end_time = time.time()
-            execution_time = end_time - start_time
-            print(f"Execution Time: {execution_time:.2f} seconds")
-
-            start_time = time.time()
-            pairs = sorted(set([item for sublist in pairs for item in sublist]))
-
-            LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
-
-            for cluster_num, firms in enumerate(invest_list):
-                # Sort firms based on momentum_1
-                long_short = [0] * 2
-                long_short[0] = -1
-                long_short[1] = 1
-                # Add the data to the new table
-                for i, firm in enumerate(firms):
-                    LS_table.loc[len(LS_table)] = [firm, mom_data.T.loc[firm, 'Mom1'], long_short[i], cluster_num]
-
-            for i, firm in enumerate(pairs):
-                LS_table.loc[len(LS_table)] = [firm, mom_data.T.loc[firm, 'Mom1'], 0, -1]
-
-            firm_list_after = list(LS_table['Firm Name'])
-            firm_list_before = list(mom_data.T.index)
-            Missing = [item for item in firm_list_before if item not in firm_list_after]
-
-            for i, firm in enumerate(Missing):
-                LS_table.loc[len(LS_table)] = [firm, mom_data.T.loc[firm, 'Mom1'], 0, -1]
-
-            LS_table.sort_values(by='Cluster Index', inplace=True)
-
-            # Save the output to a CSV file in the output directory
-            LS_table.to_csv(os.path.join(output_dir, file), index=False)
-            print(output_dir)
-
-            end_time = time.time()
-            execution_time = end_time - start_time
-            print(f"Execution Time: {execution_time:.2f} seconds")
-
-
         start_time = time.time()
-
-        find_cointegrated_pairs2(mom_data)
-
-        end_time = time.time()
-        execution_time = end_time - start_time
-        print(f"Execution Time: {execution_time:.2f} seconds")
-
-        ''' def find_cointegrated_pairs(data: pd.DataFrame):
-            data = data.iloc[:, 1:]
-            n = data.shape[1]
-            score_matrix = np.zeros((n, n))
-            pvalue_matrix = np.ones((n, n))
-            keys = data.keys()
-            pairs = []
-
-            # result
-            stock1 = []
-            stock2 = []
-            pvalue_list = []
-            check_95 = []
-            check_98 = []
-
-            for i in range(n):
-                for j in range(i + 1, n):
-                    S1 = data[keys[i]]
-                    S2 = data[keys[j]]
-                    result = coint(S1, S2)
-                    score = result[0]
-                    pvalue = result[1]
-                    score_matrix[i, j] = score
-                    pvalue_matrix[i, j] = pvalue
-
-                    if pvalue < 0.05:
-                        pairs.append((keys[i], keys[j]))
-                        check_95.append('Y')
-                    else:
-                        check_95.append('N')
-
-                    if pvalue < 0.02:
-                        check_98.append('Y')
-                    else:
-                        check_98.append('N')
-
-                    # result
-                    stock1.append(keys[i])
-                    stock2.append(keys[j])
-                    pvalue_list.append(pvalue)
-
-            pair_pvalue = pd.DataFrame()
-            pair_pvalue['s1'] = stock1
-            pair_pvalue['s2'] = stock2
-            pair_pvalue['pvalue'] = pvalue_list
-            pair_pvalue['check_95'] = check_95
-            pair_pvalue['check_98'] = check_98
-
-            pair_pvalue.sort_values('pvalue', ascending=True, inplace=True)  # ascending=True 오름차순
-
-            return score_matrix, pvalue_matrix, pair_pvalue, pairs
-
-        start_time = time.time()
-
-        scores, pvalues, pair_pvalue, pairs = find_cointegrated_pairs(mom_data)
+        inv_list = find_cointegrated_pairs(mom_data)
+        LS_Table = True
+        if LS_Table:
+            some_other_shit(inv_list)
 
         end_time = time.time()
-        execution_time = end_time - start_time
-        print(f"Execution Time: {execution_time:.2f} seconds")
-
-
-        def save_cointegration(mom_data, pairs, pair_pvalue: pd.DataFrame, output_dir, file):
-            invest_list = []
-
-            for i in range(len(pair_pvalue.index)):
-                pair = list(pair_pvalue.iloc[i, 0:2])
-
-                spread = mom_data[pair[0]] - mom_data[pair[1]]
-                adf_result = sm.tsa.adfuller(spread)
-
-                if adf_result[1] > 0.05:
-                    continue
-
-                if pair_pvalue.iloc[i, 2] > 0.02:
-                    continue
-
-                mean_spread = spread.mean()
-                std_spread = spread.std()
-                z_score = (spread - mean_spread) / std_spread
-
-                if float(z_score.iloc[0]) < -1.5:
-                    pair2 = [pair[1], pair[0]]
-
-                elif float(z_score.iloc[0]) > 1.5:
-                    pair2 = pair
-
-                else:
-                    continue
-
-                if tuple(pair) in pairs:
-                    print('spread is stationary.')
-                    print('spread can be conintegrated.')
-                    print('absolute z_score over 1.5')
-                    print(f'{pair} is first.')
-                    invest_list.append(pair2)
-                    pairs = [p for p in pairs if all(item not in pair for item in p)]
-                    print(pairs)
-                else:
-                    continue
-
-            pairs = sorted(set([item for sublist in pairs for item in sublist]))
-
-            LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
-
-            for cluster_num, firms in enumerate(invest_list):
-                # Sort firms based on momentum_1
-                long_short = [0] * 2
-                long_short[0] = -1
-                long_short[1] = 1
-                # Add the data to the new table
-                for i, firm in enumerate(firms):
-                    LS_table.loc[len(LS_table)] = [firm, mom_data.T.loc[firm, 'Mom1'], long_short[i], cluster_num]
-
-            for i, firm in enumerate(pairs):
-                LS_table.loc[len(LS_table)] = [firm, mom_data.T.loc[firm, 'Mom1'], 0, -1]
-
-            firm_list_after = list(LS_table['Firm Name'])
-            firm_list_before = list(mom_data.T.index)
-            Missing = [item for item in firm_list_before if item not in firm_list_after]
-
-            for i, firm in enumerate(Missing):
-                LS_table.loc[len(LS_table)] = [firm, mom_data.T.loc[firm, 'Mom1'], 0, -1]
-
-            LS_table.sort_values(by='Cluster Index', inplace=True)
-
-            # Save the output to a CSV file in the output directory
-            LS_table.to_csv(os.path.join(output_dir, file), index=False)
-            print(output_dir)
-
-        start_time=time.time()
-
-        save_cointegration(mom_data, pairs, pair_pvalue, output_dir, file)
-
-        end_time = time.time()
-        execution_time = end_time - start_time
-        print(f"Execution Time: {execution_time:.2f} seconds")'''
+        elapsed_time = end_time - start_time
+        print(f"경과 시간: {elapsed_time:.2f} 초")
 
 example = False
 if example:
+    # sample data
+    iris = load_iris()
+    iris_pd = pd.DataFrame(iris.data[:, 2:], columns=['petal_length', 'petal_width'])
+
     # Plot K_mean cluster about individual csv file
     example1 = True
     if example1:
