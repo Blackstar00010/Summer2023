@@ -107,7 +107,7 @@ def find_cointegrated_pairs_deprecated(data: pd.DataFrame):
     :return:
     """
     data = data.iloc[1:, :]
-
+    print(data)
     invest_list = []
 
     pairs = list(combinations(data.columns, 2))  # 모든 회사 조합

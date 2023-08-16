@@ -1,3 +1,5 @@
+import pandas as pd
+
 from PCA_and_ETC import *
 import warnings
 
@@ -24,7 +26,7 @@ for subdir in subdirectories:
     long_short = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
 
     LS_merged_df = pd.DataFrame()
-
+    total_firms = []
     for file in long_short:
         data = pd.read_csv(os.path.join(directory, file))
 
@@ -34,6 +36,8 @@ for subdir in subdirectories:
         # Change the column name into file name (ex: 1990-01)
         file_column_name = os.path.splitext(file)[0]
         data = data.rename(columns={'Long Short': file_column_name})
+
+        total_firms.append(len(LS_merged_df))
 
         if LS_merged_df.empty:
             LS_merged_df = data
@@ -72,10 +76,14 @@ for subdir in subdirectories:
     prod = MOM_merged_df.values * LS_merged_df.values
     prod = pd.DataFrame(prod)
 
+
+
     # prod index set to df1.index
     prod.set_index(MOM_merged_df.index, inplace=True)
     # cumulative return은 1990-02부터 2022-12이기 때문에 prod.columns=df1.columns
     prod.columns = MOM_merged_df.columns
+
+
 
     # 제대로 됐나 확인하기 위해 csv saved.
     # MOM_merged_df.to_csv('../files/adj_close/mom1.csv', index=True)
@@ -90,6 +98,7 @@ for subdir in subdirectories:
     sum/(투자한 회사+투자안한 회사)로 계산되기 때문.'''
     # Count the non-zero LS that is the number of total firm invested(395 by 1 matrix/index=Date)
     non_zero_count = LS_merged_df.astype(bool).sum()
+
     # trade_firm_sum=0
     # for i in range(395):
     #     trade_firm_sum+=non_zero_count[i]
@@ -102,18 +111,43 @@ for subdir in subdirectories:
     # sum about all rows(395 by 1 matrix/index=Date)
     column_sums = prod.sum()
 
+
+
     # calculate mean and make into DataFrame
     # column_means = column_sums / non_zero_count
     column_means = column_sums.values / non_zero_count.values
+
     column_means = pd.DataFrame(column_means)
+
     column_means.index = column_sums.index
+
 
     # Concat the means DataFrame to the result DataFrame(395 by 1 matrix->1 by 395 matrix)
     result_df = pd.concat([result_df, column_means.T], ignore_index=True)
 
+
+total_firms.remove(0)
+total_firms=np.array(total_firms)
+
+
+prod2 = abs(MOM_merged_df.values)
+prod2=pd.DataFrame(prod2)
+prod2.set_index(MOM_merged_df.index, inplace=True)
+prod2.columns=MOM_merged_df.columns
+column_sums2 = prod2.sum()
+
+column_means2 = column_sums2.values /total_firms
+column_means2=pd.DataFrame(column_means2)
+column_means2.index=column_sums.index
+print(column_means2)
+
+result_df = pd.concat([result_df, column_means2.T], ignore_index=True)
+print(result_df)
+
+file_names.append('All')
 # Add a new column to the result DataFrame with the file names
 result_df.insert(0, 'Clustering Method', file_names)
-
+print(result_df)
 # Separate the 'Clustering Method' column from the date columns
 clustering_method = result_df['Clustering Method']
 date_columns_df = result_df.drop('Clustering Method', axis=1)
@@ -177,4 +211,5 @@ if Plot:
         plt.ylabel('Average Value')
         plt.xticks(rotation=45)
         plt.tight_layout()
+
         plt.show()
