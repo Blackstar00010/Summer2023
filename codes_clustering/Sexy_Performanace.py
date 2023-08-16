@@ -1,6 +1,11 @@
 from PCA_and_ETC import *
+import warnings
 
-base_directory = '../files/Clustering_adj/'
+# turn off warning
+warnings.filterwarnings("ignore")
+
+# base_directory = '../files/Clustering_adj/'
+base_directory = '../files/Clustering_adj_close/'
 
 # Get all subdirectories in the base directory
 subdirectories = [d for d in os.listdir(base_directory) if os.path.isdir(os.path.join(base_directory, d))]
@@ -49,7 +54,8 @@ for subdir in subdirectories:
     LS_merged_df = LS_merged_df.drop(LS_merged_df.columns[-1], axis=1)
 
     ###############################
-    MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj.csv')
+    # MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj.csv')
+    MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
 
     # Set Firm Name column into index
     MOM_merged_df.set_index('Firm Name', inplace=True)
@@ -72,9 +78,9 @@ for subdir in subdirectories:
     prod.columns = MOM_merged_df.columns
 
     # 제대로 됐나 확인하기 위해 csv saved.
-    MOM_merged_df.to_csv('../files/adj_close/mom1.csv', index=True)
-    LS_merged_df.to_csv(f'../files/adj_close/LS/{subdir}_LS.csv', index=True)
-    prod.to_csv(f'../files/adj_close/prod/{subdir}_prod.csv', index=True)
+    # MOM_merged_df.to_csv('../files/adj_close/mom1.csv', index=True)
+    # LS_merged_df.to_csv(f'../files/adj_close/LS/{subdir}_LS.csv', index=True)
+    # prod.to_csv(f'../files/adj_close/prod/{subdir}_prod.csv', index=True)
 
     # Return_Check_Merge.py
     '''mom1과 LS_Value 곱한것 평균구하는 부분.
@@ -125,16 +131,18 @@ file_names.append('FTSE 100')
 file = '../files/month_return.csv'
 df = pd.read_csv(file)
 df = df.iloc[1:]
-df = df.iloc[0:, 1:]
-print(df)
+# df = df.iloc[0:, 1:]
+df = df.iloc[0:, 85:]
 df.columns = result_df.columns  # columns name should be same with result_df
 result_df = pd.concat([result_df, df], axis=0)  # add monthly_return right below result_df
 result_df.index = file_names
 result_df = result_df.astype(float)  # set data type as float(df.value was str actually.)
 result_df = result_df.fillna(0)
+result_df = result_df.applymap(lambda x: 0 if abs(x) > 0.4 else x)
 
 # Save a new CSV file
-result_df.to_csv('../files/result_adj.csv', index=True)
+# result_df.to_csv('../files/result_adj.csv', index=True)
+result_df.to_csv('../files/result_adj_close.csv', index=True)
 
 # Add 1 to all data values
 result_df.iloc[:, 0:] = result_df.iloc[:, 0:] + 1

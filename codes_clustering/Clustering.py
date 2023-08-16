@@ -356,7 +356,7 @@ class Clustering:
         self.Agglomerative = clust
         return self.Agglomerative
 
-    def perform_GMM(self, probability: float):
+    def perform_GMM(self, alpha: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
@@ -406,17 +406,17 @@ class Clustering:
         if out1:
             # 각 데이터 포인트의 확률 값 계산
             probabilities = bgm.score_samples(self.PCA_Data)
-
+            # print(pd.DataFrame(probabilities).to_string())
             # 확률 값의 percentiles 계산 (예시로 하위 5% 이하를 outlier로 판단)
-            threshold = np.percentile(probabilities, 20)
-
+            threshold = np.percentile(probabilities, alpha)
+            # print(threshold)
             outliers = []
             for i, probability in enumerate(probabilities):
                 if probability < threshold:
                     outliers.append(i)
 
-            print(len(outliers))
-            # print(outliers)
+
+            # print(len(outliers))
 
             # a에 있는 값을 b에서 빼기
             for value in outliers:
@@ -433,6 +433,8 @@ class Clustering:
             for i, cluster in enumerate(clusters):
                 for t, num in enumerate(cluster):
                     cluster[t] = self.index[num]
+
+            # print(clusters)
 
             # print(len(clusters))
             # print(clusters)
@@ -517,7 +519,7 @@ class Clustering:
         if bandwidth == 0.0:
             bandwidth = 0.1
 
-        ms = MeanShift(bandwidth=bandwidth, bin_seeding=True).fit(self.PCA_Data)
+        ms = MeanShift(bandwidth=bandwidth).fit(self.PCA_Data)
 
         cluster_labels = ms.labels_
         self.test = ms
