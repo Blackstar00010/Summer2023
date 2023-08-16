@@ -1,12 +1,12 @@
+import time
 import warnings
+import pandas as pd
 import seaborn as sns
 import Clustering as C
 import statsmodels.api as sm
 from PCA_and_ETC import *
-from scipy.stats import zscore
 from itertools import combinations
 from sklearn.datasets import load_iris
-from concurrent.futures import ThreadPoolExecutor
 from statsmodels.tsa.stattools import coint, kpss
 
 # turn off warning
@@ -66,119 +66,54 @@ def process_pair(pair, data):
 def find_cointegrated_pairs(data: pd.DataFrame):
     data = data.iloc[1:, :]
 
-    pairs = list(combinations(data.columns, 2))  # 모든 회사 조합
-
     invest_list = []
 
-    pairs=list(data.columns)
+    pairs = list(combinations(data.columns, 2))  # 모든 회사 조합
+    pairs = [list(t) for t in pairs]
+    pairs_len=1
 
-    while pairs!=0:
-        found_break = False
-        for i, pair1 in enumerate(pairs):
+    while len(pairs) != pairs_len:
+        pairs_len=len(pairs)
 
-            for j in range(i + 1, len(pairs)):
-                pair2 = pairs[j]
-                # Cointegration 검정
-                pvalue = cointegrate(data, pair1, pair2)
+        for i, pair in enumerate(pairs):
 
-                if pvalue <= 0.01:
-                    spread = data[pair1] - data[pair2]
-                    adf_result = sm.tsa.adfuller(spread)
-                    kpss_result = kpss(spread)
+            pvalue = cointegrate(data, pair[0], pair[1])
 
-                    if adf_result[1] <= 0.05 and kpss_result[1] >= 0.05:
-                        mean_spread = spread.mean()
-                        std_spread = spread.std()
-                        z_score = (spread - mean_spread) / std_spread
-                        spread_value = float(z_score[0])
+            if pvalue > 0.01:
+                continue
 
-                        if spread_value < -3:
-                            pair = (pair2, pair1)
-                            invest_list.append(pair)
+            spread = data[pair[0]] - data[pair[1]]
+            adf_result = sm.tsa.adfuller(spread)
+            kpss_result = kpss(spread)
 
-                            pairs.remove(pair1)
-                            pairs.remove(pair2)
-                            found_break=True
-                            break
+            if adf_result[1] > 0.05 and kpss_result[1] < 0.05:
+                continue
 
-                        elif spread_value > 3:
-                            pair = (pair1, pair2)
-                            invest_list.append(pair)
+            mean_spread = spread.mean()
+            std_spread = spread.std()
+            z_score = (spread - mean_spread) / std_spread
+            spread_value = float(z_score[0])
 
-                            pairs.remove(pair1)
-                            pairs.remove(pair2)
-                            found_break=True
-                            break
+            if abs(spread_value) <= 2:
+                continue
 
-                        elif abs(spread_value) < 3:
+            elif spread_value > 2:
+                invest_list.append(pair)
+                pairs = [p for p in pairs if all(item not in pair for item in p)]
+                break
 
-                            continue
-
-                    else:
-
-                        continue
-
-                else:
-                
-                    continue
-
-            if found_break:
+            else:
+                pair = [pair[1], pair[0]]
+                invest_list.append(pair)
+                pairs = [p for p in pairs if all(item not in pair for item in p)]
                 break
 
         print(len(pairs))
         print(len(invest_list))
 
-    # while len(pairs) != 0:
-    #     print('re')
-    #     for i, pair in enumerate(pairs):
-    #
-    #         # Cointegration 검정
-    #         pvalue = cointegrate(data, pair[0], pair[1])
-    #
-    #         if pvalue <= 0.01:
-    #             spread = data[pair[0]] - data[pair[1]]
-    #             adf_result = sm.tsa.adfuller(spread)
-    #             kpss_result = kpss(spread)
-    #
-    #             if adf_result[1] <= 0.05 and kpss_result[1] >= 0.05:
-    #                 mean_spread = spread.mean()
-    #                 std_spread = spread.std()
-    #                 z_score = (spread - mean_spread) / std_spread
-    #                 spread_value = float(z_score[0])
-    #
-    #                 if spread_value < -3:
-    #                     pair2 = (pair[1], pair[0])
-    #                     invest_list.append(pair2)
-    #
-    #                     pairs = [p for p in pairs if all(item not in pair for item in p)]
-    #                     break
-    #
-    #                 elif spread_value > 3:
-    #                     invest_list.append(pair)
-    #
-    #                     pairs = [p for p in pairs if all(item not in pair for item in p)]
-    #                     break
-    #
-    #                 elif abs(spread_value) < 3:
-    #                     print(3)
-    #                     continue
-    #
-    #             else:
-    #                 print(2)
-    #                 continue
-    #
-    #         else:
-    #             print(1)
-    #             continue
-    #
-    #     print(len(pairs))
-    #     print(len(invest_list))
-
     LS_Table = True
     if LS_Table:
         LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
-
-        pairs = sorted(set([item for sublist in pairs for item in sublist]))
 
         for cluster_num, firms in enumerate(invest_list):
             # Sort firms based on momentum_1
@@ -192,9 +127,6 @@ def find_cointegrated_pairs(data: pd.DataFrame):
         firm_list_after = list(LS_table['Firm Name'])
         firm_list_before = list(mom_data.T.index)
         Missing = [item for item in firm_list_before if item not in firm_list_after]
-
-        for i, firm in enumerate(pairs):
-            LS_table.loc[len(LS_table)] = [firm, mom_data.T.loc[firm, 'Mom1'], 0, -1]
 
         for i, firm in enumerate(Missing):
             LS_table.loc[len(LS_table)] = [firm, mom_data.T.loc[firm, 'Mom1'], 0, -1]
@@ -224,7 +156,13 @@ if Cointegration:
 
         mom_data = read_mom_data(data)
 
+        start_time=time.time()
         find_cointegrated_pairs(mom_data)
+
+
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"경과 시간: {elapsed_time:.2f} 초")
 
 example = False
 if example:
