@@ -138,7 +138,7 @@ if BGM_Plot:
     t_SNE('GMM', df_combined, Do_Clustering.Gaussian_labels)
 
     # Do_Result_Plot.LS_Table_Save(Do_Clustering.Gaussian, '../files/Clustering_adj/Gaussian_Mixture_Model',file)
-# hyper parameter outlier probability range(0.05, 0.15, 0.01) should be tested manually.
+# hyper parameter outlier probability range(5, 20, 5) should be tested manually.
 
 # Plot OPTICS cluster about individual csv file
 optics_Plot = False

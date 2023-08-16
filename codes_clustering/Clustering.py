@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans, OPTICS, DBSCAN, HDBSCAN, estimate_bandwidth, MeanShift
+from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
 from sklearn.mixture import BayesianGaussianMixture
 from scipy.cluster.hierarchy import *
@@ -40,6 +40,8 @@ class Clustering:
         self.OPTIC = []
         self.HDBSCAN = []
         self.menshift = []
+        self.BIRCH=[]
+        self.Affinity=[]
 
         self.K_Mean_labels = []
         self.DBSCAN_labels = []
@@ -48,6 +50,8 @@ class Clustering:
         self.OPTIC_labels = []
         self.HDBSCAN_labels = []
         self.menshift_labels = []
+        self.BIRCH_labels=[]
+        self.Affinity_labels=[]
 
         self.lab = []
         self.lab_labels = []
@@ -520,11 +524,53 @@ class Clustering:
         self.menshift = clusters
         return self.menshift
 
-    '''good
-    cityblock
-    euclidean
-    l2
-    braycurtis'''
+    def perform_BIRCH(self):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
+        birch= Birch(threshold=0.5, branching_factor=50).fit(self.PCA_Data)
+        cluster_labels=birch.labels_
+
+        self.test=birch
+        self.BIRCH_labels=cluster_labels
+
+        # Get the unique cluster labels
+        unique_labels = sorted(list(set(cluster_labels)))
+
+        clust = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(cluster_labels):
+            clust[unique_labels.index(cluster_label)].append(self.index[i])
+
+        # outlier가 없으면 빈리스트 추가
+        if -1 not in unique_labels:
+            clust.insert(0, [])
+
+        self.BIRCH = clust
+        return self.BIRCH
+
+    def perform_Affinity(self, damping):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
+        affinity= AffinityPropagation(damping=damping).fit(self.PCA_Data)
+        cluster_labels=affinity.labels_
+
+        self.test=affinity
+        self.Affinity_labels=cluster_labels
+
+        # Get the unique cluster labels
+        unique_labels = sorted(list(set(cluster_labels)))
+
+        clust = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(cluster_labels):
+            clust[unique_labels.index(cluster_label)].append(self.index[i])
+
+        # outlier가 없으면 빈리스트 추가
+        if -1 not in unique_labels:
+            clust.insert(0, [])
+
+        self.Affinity = clust
+        return self.Affinity
 
 
 class Result_Check_and_Save:

@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore")
 iris = load_iris()
 iris_pd = pd.DataFrame(iris.data[:, 2:], columns=['petal_length', 'petal_width'])
 
-Cointegration = True
+Cointegration = False
 if Cointegration:
     input_dir = '../files/momentum_adj'
     output_dir = '../files/Clustering_adj/Cointegration'
@@ -625,7 +625,7 @@ if Plot:
 
     # Save K_mean clutering method LS_Tables
 
-Save = False
+Save = True
 if Save:
     K_mean_Save = False
     if K_mean_Save:
@@ -816,7 +816,7 @@ if Save:
         print(f'total outliers: {sum}')
 
     # Save Mean Shift clutering method LS_Tables
-    meanshift_Save = True
+    meanshift_Save = False
     if meanshift_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/Meanshift'
@@ -866,4 +866,66 @@ if Save:
             # Save LS_Table CSV File
             Do_Result_Save.Reversal_Table_Save(data, output_dir, file)
 
-# ToDo: BIRCH, Affinity Propagation
+    # Save BIRCH clutering method LS_Tables
+    birch_Save = False
+    if birch_Save:
+        # input_dir = '../files/momentum_adj'
+        # output_dir ='../files/Clustering_adj/HDBSCAN'
+
+        input_dir = '../files/momentum_adj_close'
+        output_dir = '../files/Clustering_adj_close/BIRCH'
+        files = sorted(filename for filename in os.listdir(input_dir))
+        sum = 0
+        for file in files:
+            print(file)
+
+            # convert mom_data into PCA_data
+            data = read_and_preprocess_data(input_dir, file)
+            df_combined = generate_PCA_Data(data)
+
+            # Call initial method
+            Do_Clustering = C.Clustering(df_combined)
+            Do_Result_Save = C.Result_Check_and_Save(df_combined)
+
+            # Do clustering and get 2D list of cluster index
+            Do_Clustering.BIRCH = Do_Clustering.perform_BIRCH()
+
+            sum += Do_Result_Save.count_outlier(Do_Clustering.BIRCH)
+
+            # Save LS_Table CSV File
+            Do_Result_Save.LS_Table_Save(Do_Clustering.BIRCH, output_dir, file)
+
+        print(f'total outliers: {sum}')
+
+    # Save Affinity Propagation clutering method LS_Tables
+    affinity_Save = True
+    if affinity_Save:
+        # input_dir = '../files/momentum_adj'
+        # output_dir ='../files/Clustering_adj/HDBSCAN'
+
+        input_dir = '../files/momentum_adj_close'
+        output_dir = '../files/Clustering_adj_close/Affinity_Propagation'
+        files = sorted(filename for filename in os.listdir(input_dir))
+        sum = 0
+        for file in files:
+            print(file)
+
+            # convert mom_data into PCA_data
+            data = read_and_preprocess_data(input_dir, file)
+            df_combined = generate_PCA_Data(data)
+
+            # Call initial method
+            Do_Clustering = C.Clustering(df_combined)
+            Do_Result_Save = C.Result_Check_and_Save(df_combined)
+
+            # Do clustering and get 2D list of cluster index
+            Do_Clustering.BIRCH = Do_Clustering.perform_Affinity(0.5)
+
+            sum += Do_Result_Save.count_outlier(Do_Clustering.Affinity)
+
+            # Save LS_Table CSV File
+            Do_Result_Save.LS_Table_Save(Do_Clustering.Affinity, output_dir, file)
+
+        print(f'total outliers: {sum}')
+
+# ToDo: Affinity Propagation
