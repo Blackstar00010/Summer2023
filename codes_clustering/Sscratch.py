@@ -65,7 +65,7 @@ def process_pair(pair, data):
 
 def find_cointegrated_pairs(data: pd.DataFrame) -> list:
     data = data.iloc[1:, :]
-
+    print('1')
     pairs = pd.DataFrame(combinations(data.columns, 2))  # 모든 회사 조합
     pairs['pvalue'] = pairs.apply(lambda x: cointegrate(data, x[0], x[1]), axis=1)
     pairs = pairs.drop(pairs[pairs['pvalue'] > 0.01].index)
@@ -132,38 +132,38 @@ def find_cointegrated_pairs_deprecated(data: pd.DataFrame):
         std_spread = pairs['spread'].std()
         pairs['spread'] = pairs.apply(lambda x: (data[x['spread']] - mean_spread) / std_spread, axis=1)
 
-        for i, pair in enumerate(pairs):
-
-            pvalue = cointegrate(data, pair[0], pair[1])
-
-            if pvalue > 0.01:
-                continue
-
-            spread = data[pair[0]] - data[pair[1]]
-            adf_result = sm.tsa.adfuller(spread)
-            kpss_result = kpss(spread)
-
-            if adf_result[1] > 0.05 and kpss_result[1] < 0.05:
-                continue
-
-            mean_spread = spread.mean()
-            std_spread = spread.std()
-            z_score = (spread - mean_spread) / std_spread
-            spread_value = float(z_score[0])
-
-            if abs(spread_value) <= 2:
-                continue
-
-            elif spread_value > 2:
-                invest_list.append(pair)
-                pairs = [p for p in pairs if all(item not in pair for item in p)]
-                break
-
-            else:
-                pair = [pair[1], pair[0]]
-                invest_list.append(pair)
-                pairs = [p for p in pairs if all(item not in pair for item in p)]
-                break
+        # for i, pair in enumerate(pairs):
+        #
+        #     pvalue = cointegrate(data, pair[0], pair[1])
+        #
+        #     if pvalue > 0.01:
+        #         continue
+        #
+        #     spread = data[pair[0]] - data[pair[1]]
+        #     adf_result = sm.tsa.adfuller(spread)
+        #     kpss_result = kpss(spread)
+        #
+        #     if adf_result[1] > 0.05 and kpss_result[1] < 0.05:
+        #         continue
+        #
+        #     mean_spread = spread.mean()
+        #     std_spread = spread.std()
+        #     z_score = (spread - mean_spread) / std_spread
+        #     spread_value = float(z_score[0])
+        #
+        #     if abs(spread_value) <= 2:
+        #         continue
+        #
+        #     elif spread_value > 2:
+        #         invest_list.append(pair)
+        #         pairs = [p for p in pairs if all(item not in pair for item in p)]
+        #         break
+        #
+        #     else:
+        #         pair = [pair[1], pair[0]]
+        #         invest_list.append(pair)
+        #         pairs = [p for p in pairs if all(item not in pair for item in p)]
+        #         break
 
         # print(len(pairs))
         # print(len(invest_list))
@@ -197,7 +197,7 @@ def some_other_shit(invest_list):
     print(output_dir)
 
 
-Cointegration = False
+Cointegration = True
 if Cointegration:
     # input_dir = '../files/momentum_adj'
     # output_dir = '../files/Clustering_adj/Cointegration'
@@ -843,5 +843,3 @@ if Save:
             Do_Result_Save.LS_Table_Save(Do_Clustering.Affinity, output_dir, file)
 
         print(f'total outliers: {sum}')
-
-# ToDo: Affinity Propagation
