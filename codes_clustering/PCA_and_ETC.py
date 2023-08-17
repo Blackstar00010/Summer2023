@@ -1,10 +1,11 @@
 import os
 from concurrent.futures import ProcessPoolExecutor
-
+import warnings
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
+from joblib import Parallel, delayed
 from sklearn import metrics
 from sklearn import manifold
 from itertools import combinations
@@ -13,6 +14,8 @@ from statsmodels.tsa.stattools import coint, kpss
 from sklearn.model_selection import GridSearchCV
 from sklearn.mixture import BayesianGaussianMixture
 
+# turn off warning
+warnings.filterwarnings("ignore")
 
 def generate_PCA_Data(data: pd.DataFrame):
     '''
@@ -187,64 +190,67 @@ if coin:
         _, p_value, _ = coint(x, y)
         return p_value
 
-
-    def process_pair(pair, data):
-        pvalue = cointegrate(data, pair)
-
-        spread = data[pair[0]] - data[pair[1]]
-        adf_result = sm.tsa.adfuller(spread)
-        kpss_result = kpss(spread)
-
-        if adf_result[1] <= 0.05 and kpss_result[1] >= 0.05 and pvalue <= 0.01:
-            mean_spread = spread.mean()
-            std_spread = spread.std()
-            z_score = (spread - mean_spread) / std_spread
-
-            if float(z_score[0]) < -2:
-                pair2 = [pair[1], pair[0]]
-            elif float(z_score[0]) > 2:
-                pair2 = pair
-            else:
-                return None
-
-            return pair2
-        else:
-            return None
+    def adf_result(pair):
+        return sm.tsa.adfuller(pair)[1]
 
 
-    def find_cointegrated_pairs(data: pd.DataFrame) -> list:
+    def kpss_result(pair):
+        return kpss(pair)[1]
+
+
+    def find_cointegrated_pairs(data: pd.DataFrame, only_pairs=True) -> list:
         data = data.iloc[1:, :]
-        print('1')
         pairs = pd.DataFrame(combinations(data.columns, 2))  # 모든 회사 조합
-        pairs['pvalue'] = pairs.apply(lambda x: cointegrate(data, x[0], x[1]), axis=1)
-        pairs = pairs.drop(pairs[pairs['pvalue'] > 0.01].index)
-        pairs = pairs.drop(columns=['pvalue'])
+        print(len(pairs))
+        pairs['pvalue'] = Parallel(n_jobs=8)(delayed(cointegrate)(data,pair[0],pair[1]) for pair in pairs.values)
+        pairs = pairs.loc[pairs.index[pairs['pvalue'] < 0.01], :]
+        print(pairs)
+        print(len(pairs))
         print('Finished filtering pairs using pvalue!')
 
-        # nC2 rows, 48 cols
-        spread_df: pd.DataFrame = pairs.apply(lambda x: data[x[0]] - data[x[1]], axis=1)
 
-        spread_df['adf_result'] = spread_df.index[spread_df.apply(lambda x: sm.tsa.adfuller(x)[1], axis=1)]
-        spread_df = spread_df.drop(spread_df[spread_df['adf_result'] > 0.05].index)
+        spread_df: pd.DataFrame = pairs.apply(lambda x: data[x[0]] - data[x[1]], axis=1)
+        # spread_df = Parallel(n_jobs=8)(data[pair[0]]-data[pair[1]] for pair in pairs.values)
+        # spread_df['adf_result'] = spread_df.apply(lambda x: sm.tsa.adfuller(x), axis=1)
+        # spread_df['adf_result'] = spread_df['adf_result'].apply(lambda x: x[1])
+        spread_df['adf_result'] = Parallel(n_jobs=8)(delayed(adf_result)(pair) for pair in spread_df.values)
+        spread_df = spread_df.loc[spread_df.index[spread_df['adf_result'] < 0.05], :]
+        # spread_df = spread_df.drop(spread_df[spread_df['adf_result'] > 0.05].index)
         spread_df = spread_df.drop(columns=['adf_result'])
+        print(len(spread_df))
         print('Finished filtering pairs using adf_result!')
 
-        spread_df['kpss_result'] = spread_df.index[spread_df.apply(lambda x: kpss(x)[1], axis=1)]
-        spread_df = spread_df.drop(spread_df[spread_df['kpss_result'] < 0.05].index)
+        # spread_df['kpss_result'] = spread_df.drop(columns='adf_result').apply(lambda x: kpss(x), axis=1)
+        # spread_df['kpss_result'] = spread_df['kpss_result'].apply(lambda x: x[1])
+        spread_df['kpss_result'] = Parallel(n_jobs=8)(delayed(kpss_result)(pair) for pair in spread_df.values)
+        spread_df = spread_df.loc[spread_df.index[spread_df['kpss_result'] > 0.05], :]
+        # spread_df = spread_df.drop(spread_df[spread_df['kpss_result'] < 0.05].index)
+        # misc_df = pd.DataFrame(spread_df[['adf_result', 'kpss_result']]) if not only_pairs else None
         spread_df = spread_df.drop(columns=['kpss_result'])
+        print(len(spread_df))
         print('Finished filtering pairs using kpss_result!')
 
         spread_sr = spread_df[spread_df.columns[0]]
         pairs['spread'] = (spread_sr - spread_sr.mean()) / spread_sr.std()
+        # spread_df = (spread_df - spread_df.mean()) / spread_df.std()
+        # pairs['spread'] = spread_df[spread_df.columns[0]]
+        # misc_df = pd.concat([misc_df, pairs['spread'].rename('spread')]) if not only_pairs else None
         pairs = pairs.dropna(subset=['spread'])
-        print('Finished filtering pairs using normalised spread!')
+        print(pairs)
 
-        pairs = pairs.drop(pairs[pairs['spread'].abs() <= 2].index)
+        pairs = pairs.loc[pairs.index[pairs['spread'].abs() > 2], :]
+        # pairs = pairs.drop(pairs[pairs['spread'].abs() <= 2].index)
         pairs['pair1'] = pairs[0] * (pairs['spread'] > 0) + pairs[1] * (pairs['spread'] <= 0)
         pairs['pair2'] = pairs[0] * (pairs['spread'] <= 0) + pairs[1] * (pairs['spread'] > 0)
-        print(len(pairs))
+        pairs = pairs.drop(columns=[0, 1])
+        print('Finished filtering pairs using normalised spread!')
 
-        invest_list = pairs[['pair1', 'pair2']].values.tolist()
+        pairs.sort_values(by='pvalue', axis=0, inplace=True)
+        pairs = pairs.drop_duplicates(subset='pair1')
+        pairs = pairs.drop_duplicates(subset='pair2')
+        invest_list = pairs.values.tolist()
+
+        print(len(pairs))
         return invest_list
 
 
@@ -258,11 +264,17 @@ if coin:
         invest_list = []
 
         pairs = list(combinations(data.columns, 2))  # 모든 회사 조합
+        print(len(pairs))
         pairs_len = 1
+
+        count_p=0
+        count_s=0
+        count_n=0
+
 
         while len(pairs) != pairs_len:
             pairs_len = len(pairs)
-            found_break = False
+
             for i, pair in enumerate(pairs):
                 pvalue = cointegrate(data, pair[0], pair[1])
 
@@ -270,14 +282,16 @@ if coin:
                     continue
 
                 else:
+                    count_p+=1
                     spread = data[pair[0]] - data[pair[1]]
                     adf_result = sm.tsa.adfuller(spread)
                     kpss_result = kpss(spread)
 
-                    if adf_result[1] > 0.05 and kpss_result[1] < 0.05:
+                    if adf_result[1] > 0.05 or kpss_result[1] < 0.05:
                         continue
 
                     else:
+                        count_s+=1
                         mean_spread = spread.mean()
                         std_spread = spread.std()
                         z_score = (spread - mean_spread) / std_spread
@@ -289,21 +303,28 @@ if coin:
 
                         elif spread_value < -2:
                             pair = (pair[1], pair[0])
+                            # pair = (pair[1], pair[0], pvalue, adf_result[1], kpss_result[1], spread_value)
                             invest_list.append(pair)
                             pairs = [p for p in pairs if all(item not in pair for item in p)]
+                            count_n+=1
+
                             break
 
                         elif spread_value > 2:
                             pair = (pair[0], pair[1])
+                            # pair = (pair[0], pair[1], pvalue, adf_result[1], kpss_result[1], spread_value)
                             invest_list.append(pair)
                             pairs = [p for p in pairs if all(item not in pair for item in p)]
+                            count_n+=1
+
                             break
 
             print(len(pairs))
             print(len(invest_list))
 
-            if found_break:
-                break
+        print(f'pvalue {count_p}')
+        print(f'stationary {count_s}')
+        print(f'final {count_n}')
 
         return invest_list
 
@@ -333,21 +354,35 @@ if coin:
         LS_table.to_csv(os.path.join(output_dir, file), index=False)
         print(output_dir)
 
-coin2=True
+coin2=False
 if coin2:
 
-    def calculate_cointegration(pairs, data):
-        p_values = []
-        for pair in pairs:
-            print(pair)
-            p_value = cointegrate(data, pairs.iloc[pair,0], pairs.iloc[pair,1])
-            p_values.append(p_value)
+    # def calculate_cointegration(pairs, data):
+    #     p_values = []
+    #     for i in range(len(pairs)):
+    #         p_value = cointegrate(data, pairs.iloc[i,0], pairs.iloc[i,1])
+    #         print(i)
+    #         p_values.append(p_value)
+    #         p_value_list = Parallel(n_jobs=8)(delayed(cointegrate(data, pairs.iloc[i,0], pairs.iloc[i,1])))
+    #     return p_values
+
+
+    def calculate_cointegration(pairs, data, n_jobs):
+        def cointegrate_pair(pair):
+            asset1 = pair[0]
+            asset2 = pair[1]
+            p_value = cointegrate(data, asset1, asset2)  # Assuming cointegrate function is defined
+            return p_value
+
+        p_values = Parallel(n_jobs=n_jobs)(delayed(cointegrate_pair)(pair) for pair in pairs.values)
+
+
         return p_values
 
 
     def filter_pairs_by_cointegration(pairs, data):
         with ProcessPoolExecutor() as executor:
-            p_values = calculate_cointegration(pairs, data)
+            p_values = calculate_cointegration(pairs, data, 8)
             print(p_values)
         return pairs[pd.Series(p_values,index=pairs.index) <= 0.01]
 
@@ -369,12 +404,12 @@ if coin2:
         kpss_values = pairs.apply(kpss_result, axis=1)
         return pairs[pd.Series(kpss_values) >= 0.05]
 
-
     def find_cointegrated_pairs2(data: pd.DataFrame) -> list:
         data = data.iloc[1:, :]
 
         pairs = pd.DataFrame(combinations(data.columns, 2))
         print('Finished generating pairs!')
+        print(pairs.values)
 
         pairs = filter_pairs_by_cointegration(pairs, data)
         print('Finished filtering pairs using cointegration!')

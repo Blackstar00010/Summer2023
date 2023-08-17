@@ -9,29 +9,27 @@ warnings.filterwarnings("ignore")
 
 Cointegration = True
 if Cointegration:
-    # input_dir = '../files/momentum_adj'
-    # output_dir = '../files/Clustering_adj/Cointegration'
-    input_dir = '../files/momentum_adj_close'
-    output_dir = '../files/Clustering_adj_close/Cointegration'
+    input_dir = '../files/momentum_adj'
+    output_dir = '../files/Clustering_adj/Cointegration'
+    # input_dir = '../files/momentum_adj_close'
+    # output_dir = '../files/Clustering_adj_close/Cointegration'
 
     files = sorted(filename for filename in os.listdir(input_dir))
     for file in files:
         print(file)
 
-
         data = read_and_preprocess_data(input_dir, file)
 
         mom_data = read_mom_data(data)
 
-
-
         # inv_list = find_cointegrated_pairs_deprecated(mom_data)
-        inv_list = find_cointegrated_pairs2(mom_data)
+        inv_list = find_cointegrated_pairs(mom_data, only_pairs=True)
 
         print(inv_list)
-        LS_Table = False
+        LS_Table = True
         if LS_Table:
             save_cointegrated_LS(output_dir, file, mom_data, inv_list)
+
 
 example = False
 if example:
@@ -661,7 +659,3 @@ if Save:
             Do_Result_Save.LS_Table_Save(Do_Clustering.Affinity, output_dir, file)
 
         print(f'total outliers: {sum}')
-
-
-
-

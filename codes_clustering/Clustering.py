@@ -148,7 +148,7 @@ class Clustering:
 
         eps = sorted_distances[alpha_percentile_index]
 
-        dbscan = DBSCAN(min_samples=ms, eps=eps, metric='euclidean').fit(self.PCA_Data)
+        dbscan = DBSCAN(eps=eps, metric='euclidean').fit(self.PCA_Data)
         cluster_labels = dbscan.labels_
 
         self.test = dbscan
@@ -178,7 +178,7 @@ class Clustering:
         if ms < 2:
             ms = 2
 
-        Hdbscan = HDBSCAN(min_cluster_size=ms, min_samples=3, allow_single_cluster=True).fit(self.PCA_Data)
+        Hdbscan = HDBSCAN(min_samples=5, allow_single_cluster=True).fit(self.PCA_Data)
         cluster_labels = Hdbscan.labels_
 
         self.test = Hdbscan
