@@ -7,7 +7,7 @@ from sklearn.datasets import load_iris
 # turn off warning
 warnings.filterwarnings("ignore")
 
-Cointegration = False
+Cointegration = True
 if Cointegration:
     # input_dir = '../files/momentum_adj'
     # output_dir = '../files/Clustering_adj/Cointegration'
@@ -26,7 +26,7 @@ if Cointegration:
 
 
         # inv_list = find_cointegrated_pairs_deprecated(mom_data)
-        inv_list = find_cointegrated_pairs(mom_data)
+        inv_list = find_cointegrated_pairs2(mom_data)
 
         print(inv_list)
         LS_Table = False
@@ -349,7 +349,7 @@ if Plot:
 
     # Save K_mean clutering method LS_Tables
 
-Save = True
+Save = False
 if Save:
     # Save Reversal method LS_Tables
     Reversal_Save = False

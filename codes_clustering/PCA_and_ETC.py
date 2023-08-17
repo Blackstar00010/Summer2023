@@ -1,4 +1,6 @@
 import os
+from concurrent.futures import ProcessPoolExecutor
+
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -222,12 +224,12 @@ if coin:
         # nC2 rows, 48 cols
         spread_df: pd.DataFrame = pairs.apply(lambda x: data[x[0]] - data[x[1]], axis=1)
 
-        spread_df['adf_result'] = spread_df.index[spread_df.apply(lambda x: [sm.tsa.adfuller(x)][1], axis=1)]
+        spread_df['adf_result'] = spread_df.index[spread_df.apply(lambda x: sm.tsa.adfuller(x)[1], axis=1)]
         spread_df = spread_df.drop(spread_df[spread_df['adf_result'] > 0.05].index)
         spread_df = spread_df.drop(columns=['adf_result'])
         print('Finished filtering pairs using adf_result!')
 
-        spread_df['kpss_result'] = spread_df.index[spread_df.apply(lambda x: [kpss(x)][1], axis=1)]
+        spread_df['kpss_result'] = spread_df.index[spread_df.apply(lambda x: kpss(x)[1], axis=1)]
         spread_df = spread_df.drop(spread_df[spread_df['kpss_result'] < 0.05].index)
         spread_df = spread_df.drop(columns=['kpss_result'])
         print('Finished filtering pairs using kpss_result!')
@@ -330,6 +332,76 @@ if coin:
         # Save the output to a CSV file in the output directory
         LS_table.to_csv(os.path.join(output_dir, file), index=False)
         print(output_dir)
+
+coin2=True
+if coin2:
+
+    def calculate_cointegration(pairs, data):
+        p_values = []
+        for pair in pairs:
+            print(pair)
+            p_value = cointegrate(data, pairs.iloc[pair,0], pairs.iloc[pair,1])
+            p_values.append(p_value)
+        return p_values
+
+
+    def filter_pairs_by_cointegration(pairs, data):
+        with ProcessPoolExecutor() as executor:
+            p_values = calculate_cointegration(pairs, data)
+            print(p_values)
+        return pairs[pd.Series(p_values,index=pairs.index) <= 0.01]
+
+
+    def filter_pairs_by_adf_result(pairs, data):
+        def adf_result(pair):
+            x = data[pair[0]] - data[pair[1]]
+            return sm.tsa.adfuller(x)[1]
+
+        adf_values = pairs.apply(adf_result, axis=1)
+        return pairs[pd.Series(adf_values) <= 0.05]
+
+
+    def filter_pairs_by_kpss_result(pairs, data):
+        def kpss_result(pair):
+            x = data[pair[0]] - data[pair[1]]
+            return kpss(x)[1]
+
+        kpss_values = pairs.apply(kpss_result, axis=1)
+        return pairs[pd.Series(kpss_values) >= 0.05]
+
+
+    def find_cointegrated_pairs2(data: pd.DataFrame) -> list:
+        data = data.iloc[1:, :]
+
+        pairs = pd.DataFrame(combinations(data.columns, 2))
+        print('Finished generating pairs!')
+
+        pairs = filter_pairs_by_cointegration(pairs, data)
+        print('Finished filtering pairs using cointegration!')
+
+        pairs = filter_pairs_by_adf_result(pairs, data)
+        print('Finished filtering pairs using adf_result!')
+
+        pairs = filter_pairs_by_kpss_result(pairs, data)
+        print('Finished filtering pairs using kpss_result!')
+
+        spread_df = data[pairs[0]] - data[pairs[1]]
+        spread_sr = spread_df.mean(axis=1)
+        spread_std = spread_df.std(axis=1)
+
+        normalized_spread = (spread_sr - spread_sr.mean()) / spread_std
+        pairs['spread'] = normalized_spread
+
+        pairs = pairs.dropna(subset=['spread'])
+        print('Finished filtering pairs using normalized spread!')
+
+        pairs = pairs[abs(pairs['spread']) > 2]
+        pairs['pair1'] = pairs[0] * (pairs['spread'] > 0) + pairs[1] * (pairs['spread'] <= 0)
+        pairs['pair2'] = pairs[0] * (pairs['spread'] <= 0) + pairs[1] * (pairs['spread'] > 0)
+        print(len(pairs))
+
+        invest_list = pairs[['pair1', 'pair2']].values.tolist()
+        return invest_list
 
 # PCA_Result Check
 if __name__ == "__main__":
