@@ -144,7 +144,7 @@ if save_result:
     result_df.index = file_names
     result_df = result_df.astype(float)  # set data type as float(df.value was str actually.)
     result_df = result_df.fillna(0)
-    result_df = result_df.applymap(lambda x: 0 if abs(x) > 0.4 else x)
+    # result_df = result_df.applymap(lambda x: 0 if abs(x) > 0.4 else x)
 
     # Save a new CSV file
     # result_df.to_csv('../files/result_adj.csv', index=True)

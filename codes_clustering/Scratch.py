@@ -1,11 +1,9 @@
-import warnings
 import seaborn as sns
 import Clustering as C
 from PCA_and_ETC import *
 from sklearn.datasets import load_iris
+from sklearn.metrics import silhouette_score
 
-# turn off warning
-warnings.filterwarnings("ignore")
 
 Cointegration = False
 if Cointegration:
@@ -345,7 +343,7 @@ if Plot:
 
     # Save K_mean clutering method LS_Tables
 
-Save = False
+Save = True
 if Save:
     # Save Reversal method LS_Tables
     Reversal_Save = False
@@ -369,7 +367,7 @@ if Save:
 
     # Save K_mean clutering method LS_Tables
     # hyper parameter K(3,5,10,50,100,500,1000,1500) should be tested manually.(paper follow)
-    K_mean_Save = True
+    K_mean_Save = False
     if K_mean_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/K_Means_outlier'
@@ -393,12 +391,14 @@ if Save:
             Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([3])
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0])
-            # print(Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0]))
+
 
             # Save LS_Table CSV File
             for i, cluster in enumerate(Do_Clustering.K_Mean):
                 Do_Result_Save.LS_Table_Save(cluster, output_dir, file)
 
+        silhouette_avg = silhouette_score(df_combined, Do_Clustering.K_Mean_labels)
+        print("The average silhouette score is:", silhouette_avg)
         print(f'total outliers: {sum}')
 
     # Save DBSCAN clutering method LS_Tables
@@ -432,6 +432,8 @@ if Save:
             # Save LS_Table CSV File
             # Do_Result_Save.LS_Table_Save(Do_Clustering.DBSCAN, output_dir, file)
 
+        silhouette_avg = silhouette_score(df_combined, Do_Clustering.DBSCAN_labels)
+        print("The average silhouette score is:", silhouette_avg)
         print(f'total outliers: {sum}')
 
     # Save HDBSCAN clutering method LS_Tables
@@ -464,11 +466,13 @@ if Save:
             # Save LS_Table CSV File
             Do_Result_Save.LS_Table_Save(Do_Clustering.HDBSCAN, output_dir, file)
 
+        silhouette_avg = silhouette_score(df_combined, Do_Clustering.HDBSCAN_labels)
+        print("The average silhouette score is:", silhouette_avg)
         print(f'total outliers: {sum}')
 
     # Save Hirarchical Agglomerative clutering method LS_Tables
     # hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-    Agglormerative_Save = False
+    Agglormerative_Save = True
     if Agglormerative_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/Hierarchical_Agglomerative'
@@ -495,7 +499,8 @@ if Save:
 
             # Save LS_Table CSV File
             Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative, output_dir, file)
-
+        silhouette_avg = silhouette_score(df_combined, Do_Clustering.Agglomerative_labels)
+        print("The average silhouette score is:", silhouette_avg)
         print(f'total outliers: {sum}')
 
     # Save BayesianGaussianMixture clutering method LS_Tables
@@ -527,7 +532,8 @@ if Save:
 
             # Save LS_Table CSV File
             Do_Result_Save.LS_Table_Save(Do_Clustering.Gaussian, output_dir, file)
-
+        silhouette_avg = silhouette_score(df_combined, Do_Clustering.Gaussian_labels)
+        print("The average silhouette score is:", silhouette_avg)
         print(f'total outliers: {sum}')
 
     # Save OPTICS clutering method LS_Tables
@@ -559,10 +565,11 @@ if Save:
 
             # Save LS_Table CSV File
             Do_Result_Save.LS_Table_Save(Do_Clustering.OPTIC, output_dir, file)
-
+        silhouette_avg = silhouette_score(df_combined, Do_Clustering.OPTIC_labels)
+        print("The average silhouette score is:", silhouette_avg)
         print(f'total outliers: {sum}')
 
-    # Save Mean Shift clutering method LS_Tables
+    # Save Meanshift clutering method LS_Tables
     # hyper parameter quantile (0.1, 0.2, 0.3, 0.4) should be tested manually.(paper follow)
     meanshift_Save = False
     if meanshift_Save:
@@ -591,7 +598,8 @@ if Save:
             print(sum)
             # Save LS_Table CSV File
             Do_Result_Save.LS_Table_Save(Do_Clustering.menshift, output_dir, file)
-
+        silhouette_avg = silhouette_score(df_combined, Do_Clustering.menshift_labels)
+        print("The average silhouette score is:", silhouette_avg)
         print(f'total outliers: {sum}')
 
     # Save BIRCH clutering method LS_Tables
@@ -623,11 +631,12 @@ if Save:
 
             # Save LS_Table CSV File
             Do_Result_Save.LS_Table_Save(Do_Clustering.BIRCH, output_dir, file)
-
+        silhouette_avg = silhouette_score(df_combined, Do_Clustering.BIRCH_labels)
+        print("The average silhouette score is:", silhouette_avg)
         print(f'total outliers: {sum}')
 
     # Save Affinity Propagation clutering method LS_Tables
-    # hyper parameter percentile range(0,1, 0.9, 0.1) should be tested manually.(paper follow)
+    # hyper parameter percentile range(0,5, 0.9, 0.1) should be tested manually.(paper follow)
     affinity_Save = False
     if affinity_Save:
         # input_dir = '../files/momentum_adj'
@@ -655,5 +664,6 @@ if Save:
 
             # Save LS_Table CSV File
             Do_Result_Save.LS_Table_Save(Do_Clustering.Affinity, output_dir, file)
-
+        silhouette_avg = silhouette_score(df_combined, Do_Clustering.Affinity_labels)
+        print("The average silhouette score is:", silhouette_avg)
         print(f'total outliers: {sum}')
