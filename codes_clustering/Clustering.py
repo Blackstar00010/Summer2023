@@ -1,5 +1,5 @@
 import math
-from codes_clustering.PCA_and_ETC import *
+from PCA_and_ETC import *
 from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
 from scipy.cluster.hierarchy import *

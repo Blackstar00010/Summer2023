@@ -5,7 +5,7 @@ from sklearn.datasets import load_iris
 from sklearn.metrics import silhouette_score
 
 
-Cointegration = False
+Cointegration = True
 if Cointegration:
     # input_dir = '../files/momentum_adj'
     # output_dir = '../files/Clustering_adj/Cointegration'
@@ -13,9 +13,12 @@ if Cointegration:
     output_dir = '../files/Clustering_adj_close/Cointegration'
 
     files = sorted(filename for filename in os.listdir(input_dir))
+    is_jamesd = 'jamesd' in os.path.abspath('.')
     for file in files:
         print(file)
 
+        if is_jamesd and (int(file[:4]) < 2010):
+            continue
         data = read_and_preprocess_data(input_dir, file)
 
         mom_data = read_mom_data(data)

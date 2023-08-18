@@ -13,6 +13,7 @@ from sklearn.decomposition import PCA
 from statsmodels.tsa.stattools import coint, kpss
 from sklearn.model_selection import GridSearchCV
 from sklearn.mixture import BayesianGaussianMixture
+import multiprocessing as mp
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -164,8 +165,7 @@ def find_optimal_GMM_hyperparameter(data):
     return best_covariance_type
 
 
-coin = False
-if coin:
+if True:
     def read_mom_data(data):
         # mom1 save and data Normalization
         mom1 = data.values.astype(float)[:, 0]
@@ -201,18 +201,19 @@ if coin:
 
 
     def find_cointegrated_pairs(data: pd.DataFrame) -> list:
+        n_jobs = mp.cpu_count()
         data = data.iloc[1:, :]
         pairs = pd.DataFrame(combinations(data.columns, 2))  # 모든 회사 조합
-        pairs['pvalue'] = Parallel(n_jobs=8)(delayed(cointegrate)(data, pair[0], pair[1]) for pair in pairs.values)
+        pairs['pvalue'] = Parallel(n_jobs=n_jobs)(delayed(cointegrate)(data, pair[0], pair[1]) for pair in pairs.values)
         pairs = pairs.loc[pairs.index[pairs['pvalue'] < 0.01], :]
         print('Finished filtering pairs using pvalue!')
 
         spread_df: pd.DataFrame = pairs.apply(lambda x: data[x[0]] - data[x[1]], axis=1)
-        spread_df['adf_result'] = Parallel(n_jobs=8)(delayed(adf_result)(pair) for pair in spread_df.values)
+        spread_df['adf_result'] = Parallel(n_jobs=n_jobs)(delayed(adf_result)(pair) for pair in spread_df.values)
         spread_df = spread_df.loc[spread_df.index[spread_df['adf_result'] < 0.05], :]
         print('Finished filtering pairs using adf_result!')
 
-        spread_df['kpss_result'] = Parallel(n_jobs=8)(delayed(kpss_result)(pair) for pair in spread_df.values)
+        spread_df['kpss_result'] = Parallel(n_jobs=n_jobs)(delayed(kpss_result)(pair) for pair in spread_df.values)
         spread_df = spread_df.loc[spread_df.index[spread_df['kpss_result'] > 0.05], :]
         spread_df = spread_df.drop(columns=['adf_result'])
         spread_df = spread_df.drop(columns=['kpss_result'])
