@@ -7,7 +7,7 @@ from sklearn.datasets import load_iris
 # turn off warning
 warnings.filterwarnings("ignore")
 
-Cointegration = True
+Cointegration = False
 if Cointegration:
     # input_dir = '../files/momentum_adj'
     # output_dir = '../files/Clustering_adj/Cointegration'
@@ -24,6 +24,7 @@ if Cointegration:
 
         # inv_list = find_cointegrated_pairs_deprecated(mom_data)
         inv_list = find_cointegrated_pairs(mom_data)
+
         LS_Table = True
         if LS_Table:
             save_cointegrated_LS(output_dir, file, mom_data, inv_list)

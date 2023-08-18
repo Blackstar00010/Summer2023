@@ -164,7 +164,7 @@ def find_optimal_GMM_hyperparameter(data):
     return best_covariance_type
 
 
-coin = True
+coin = False
 if coin:
     def read_mom_data(data):
         # mom1 save and data Normalization
