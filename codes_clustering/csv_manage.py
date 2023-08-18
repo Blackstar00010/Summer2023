@@ -9,15 +9,20 @@ if first_day_of_month:
     dir = "../files/history/"
     df = pd.read_csv(dir + "adj_close.csv")
 
-    dates = df['Date']
-    months = pd.DataFrame([item[5:7] for item in dates])
+    # dates = df['Date']
+    # months = pd.DataFrame([item[5:7] for item in dates])
 
-    flags = (months == months.shift(1)).dropna()
-    df["Month Start Flag"] = flags
+    months = df['Date'].apply(lambda x: x[5:7])
 
-    df_filtered = df[df['Month Start Flag'] == False]
-    df_filtered = df_filtered.drop(columns='Month Start Flag')
-    df_filtered.to_csv(dir + "adj_close_first_day_of_month.csv", index=False)
+    # flags = (months == months.shift(1)).dropna()
+    # df["Month Start Flag"] = flags
+    #
+    # df_filtered = df[df['Month Start Flag'] == False]
+    # df_filtered = df_filtered.drop(columns='Month Start Flag')
+    # df_filtered.to_csv(dir + "adj_close_first_day_of_month.csv", index=False)
+
+    df_filtered = df.loc[df.index[~(months == months.shift(1))], :]
+    df_filtered.to_csv(dir + "first_day_of_month.csv", index=False)
 
 momentum = False
 if momentum:
@@ -34,17 +39,19 @@ if momentum:
     end_date = pd.to_datetime('2022-12-01')
     months = pd.date_range(start_date, end_date)
 
-    # jamesd: print shits = progress bar
     print('[', end='')
-    for current_date in months:
+    for current_date in df.index[50:]:
         window = df.loc[:current_date].tail(50)
 
         mom = pd.DataFrame(index=range(1, 50), columns=window.columns)
-        for i in range(1, 50):
-            if i == 1:
-                mom.loc[i] = window.iloc[-1] / window.iloc[-2] - 1
-            else:
-                mom.loc[i] = window.iloc[-2] / window.shift(i - 1).iloc[-2] - 1
+
+        mom.loc[1] = window.iloc[-1] / window.iloc[-2] - 1
+        for i in range(2, 50):
+            # if i == 1:
+            #     mom.loc[i] = window.iloc[-1] / window.iloc[-2] - 1
+            # else:
+            #     mom.loc[i] = window.iloc[-2] / window.shift(i - 1).iloc[-2] - 1
+            mom.loc[i] = window.iloc[-2] / window.shift(i - 1).iloc[-2] - 1
 
         mom.index = range(1, 50)
 

@@ -1,6 +1,7 @@
 /files/history_by_ticker/
 /files/history/merged_data.csv
 .DS_Store
+/files/_test/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
