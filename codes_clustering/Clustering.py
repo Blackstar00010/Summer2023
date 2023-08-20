@@ -46,12 +46,10 @@ class Clustering:
         kmeans = BisectingKMeans(n_clusters=K, init='k-means++', n_init=10, max_iter=500,
                                  algorithm='elkan', bisecting_strategy='largest_cluster').fit(self.PCA_Data)
 
-
         cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
 
         self.test = kmeans
         self.K_Mean_labels = cluster_labels
-
 
         # Calculate outlier
         distance = kmeans.fit_transform(self.PCA_Data)  # Distance btw K centroid about all each points
@@ -67,7 +65,6 @@ class Clustering:
         # max distance in own cluster
         for i, cluster in enumerate(main_distance_clustering):
             main_distance_clustering[i] = np.max(cluster)
-
 
         max_main_distance_clustering = main_distance_clustering
 

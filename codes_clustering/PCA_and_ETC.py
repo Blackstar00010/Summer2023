@@ -421,3 +421,4 @@ if __name__ == "__main__":
     plt.scatter(mat_new[:, 0], mat_new[:, 1], alpha=0.8)
     plt.axis('equal')
     plt.show()
+

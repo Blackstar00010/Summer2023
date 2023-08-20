@@ -347,6 +347,8 @@ if Plot:
 
 Save = True
 if Save:
+    number_of_cluster=[]
+
     # Save Reversal method LS_Tables
     Reversal_Save = False
     if Reversal_Save:
@@ -369,7 +371,7 @@ if Save:
 
     # Save K_mean clutering method LS_Tables
     # hyper parameter K(1,2,3,4,5,10,50,100,500,1000) should be tested manually.(paper follow)
-    K_mean_Save = False
+    K_mean_Save = True
     if K_mean_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/K_Means_outlier'
@@ -392,7 +394,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([3])
+            Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([2])
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0])
 
@@ -408,13 +410,14 @@ if Save:
 
         sil = sil / 312
         cl = cl / 312
+        number_of_cluster.append(sum)
         print('average number of clusters:', cl)
         print('silhouette score:', sil)
         print(f'total outliers: {sum}')
 
     # Save DBSCAN clutering method LS_Tables
     # hyper parameter eps percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-    dbscan_Save = False
+    dbscan_Save = True
     if dbscan_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/DBSCAN'
@@ -437,7 +440,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN(0.8)
+            Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN(0.1)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
 
@@ -452,13 +455,14 @@ if Save:
 
         sil = sil / 312
         cl = cl / 312
+        number_of_cluster.append(sum)
         print('average number of clusters:', cl)
         print('silhouette score:', sil)
         print(f'total outliers: {sum}')
 
     # Save HDBSCAN clutering method LS_Tables
     # hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.
-    hdbscan_Save = False
+    hdbscan_Save = True
     if hdbscan_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/HDBSCAN'
@@ -482,7 +486,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.4)
+            Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.1)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
 
@@ -500,13 +504,14 @@ if Save:
 
         sil = sil / sil_num
         cl = cl / 312
+        number_of_cluster.append(sum)
         print('average number of clusters:', cl)
         print('silhouette score:', sil)
         print(f'total outliers: {sum}')
 
     # Save Hirarchical Agglomerative clutering method LS_Tables
     # hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-    Agglormerative_Save = False
+    Agglormerative_Save = True
     if Agglormerative_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/Hierarchical_Agglomerative'
@@ -530,7 +535,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.4)
+            Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.1)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
 
@@ -548,14 +553,15 @@ if Save:
 
         sil = sil / sil_num
         cl = cl / 312
+        number_of_cluster.append(sum)
         print('average number of clusters:', cl)
         print('silhouette score:', sil)
         print(f'total outliers: {sum}')
 
     # Save GaussianMixture clutering method LS_Tables
     # hyper parameter outlier probability [1, 5, 10, 15, 20] should be tested manually.
-    GGM_Save = False
-    if GGM_Save:
+    GMM_Save = True
+    if GMM_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/Gaussian_Mixture_Model'
 
@@ -579,7 +585,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.Gaussian = Do_Clustering.perform_GMM(10)
+            Do_Clustering.Gaussian = Do_Clustering.perform_GMM(45)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.Gaussian)
 
@@ -596,6 +602,7 @@ if Save:
             print("Number of clusters is:", len(sorted(list(set(Do_Clustering.Gaussian_labels)))))
         sil = sil / sil_num
         cl = cl / 312
+        number_of_cluster.append(sum)
         print('average number of clusters:', cl)
         print('silhouette score:', sil)
         print(f'total outliers: {sum}')
@@ -627,7 +634,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.04)
+            Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.01)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
 
@@ -646,13 +653,14 @@ if Save:
 
         sil = sil / sil_num
         cl = cl / 312
+        number_of_cluster.append(sum)
         print('average number of clusters:', cl)
         print('silhouette score:', sil)
         print(f'total outliers: {sum}')
 
     # Save Meanshift clutering method LS_Tables
     # hyper parameter quantile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-    meanshift_Save = False
+    meanshift_Save = True
     if meanshift_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/Meanshift'
@@ -678,7 +686,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.9)
+            Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.1)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.menshift)
 
@@ -697,13 +705,14 @@ if Save:
 
         sil = sil / sil_num
         cl = cl / 312
+        number_of_cluster.append(sum)
         print('average number of clusters:', cl)
         print('silhouette score:', sil)
         print(f'total outliers: {sum}')
 
     # Save BIRCH clutering method LS_Tables
     # hyper parameter percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-    birch_Save = False
+    birch_Save = True
     if birch_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/HDBSCAN'
@@ -727,7 +736,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.BIRCH = Do_Clustering.perform_BIRCH(5)
+            Do_Clustering.BIRCH = Do_Clustering.perform_BIRCH(0.1)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.BIRCH)
 
@@ -746,6 +755,10 @@ if Save:
 
         sil = sil / sil_num
         cl = cl / 312
+        number_of_cluster.append(sum)
         print('average number of clusters:', cl)
         print('silhouette score:', sil)
         print(f'total outliers: {sum}')
+
+number_of_cluster=pd.DataFrame(number_of_cluster, index=['K-mean','DBSCAN', 'HDBSCAN','Agglomerative','GMM','OPTICS','meanshift','BIRCH'],columns=['cluster'])
+number_of_cluster.to_csv('../files/result/number_of_cluster.csv', index=True)

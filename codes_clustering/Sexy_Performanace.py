@@ -1,7 +1,3 @@
-import warnings
-
-import pandas as pd
-
 from PCA_and_ETC import *
 
 # turn off warning
