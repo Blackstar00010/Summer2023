@@ -44,28 +44,27 @@ class Clustering:
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
-        kmeans = BisectingKMeans(n_clusters=K, init='k-means++', n_init=10, max_iter=500, random_state=5, bisecting_strategy='largest_cluster').fit(self.PCA_Data)
+        kmeans = BisectingKMeans(n_clusters=K, init='k-means++', max_iter=500, random_state=5).fit(self.PCA_Data)
         cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
 
         self.test = kmeans
         self.K_Mean_labels = cluster_labels
 
-        distance = kmeans.fit_transform(self.PCA_Data)  # Distance btw K centroid about all each points
+        distance = kmeans.fit_transform(self.PCA_Data)  # Distance btw K centroid aboutall each points
         main_distance = np.min(distance, axis=1)  # Distance btw own K centroid about all each points
 
-        lab = True
-        if lab:
-            main_distance_clustering = [[] for _ in range(K)]
 
-            for cluster_num in range(K):
-                distance_clustering = distance[cluster_labels == cluster_num]
-                for i in range(len(distance_clustering)):
-                    main_distance_clustering[cluster_num].append(distance_clustering[i][cluster_num])
+        main_distance_clustering = [[] for _ in range(K)]
 
-            for i, cluster in enumerate(main_distance_clustering):
-                main_distance_clustering[i] = np.max(cluster)
+        for cluster_num in range(K):
+            distance_clustering = distance[cluster_labels == cluster_num]
+            for i in range(len(distance_clustering)):
+                main_distance_clustering[cluster_num].append(distance_clustering[i][cluster_num])
 
-            max_main_distance_clustering = main_distance_clustering
+        for i, cluster in enumerate(main_distance_clustering):
+            main_distance_clustering[i] = np.max(cluster)
+
+        max_main_distance_clustering = main_distance_clustering
 
         clusters = [[] for _ in range(K)]  # Cluster별 distance 분류
         clusters_index = [[] for _ in range(K)]  # Cluster별 index 분류
