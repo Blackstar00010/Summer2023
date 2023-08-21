@@ -227,72 +227,6 @@ class Clustering:
         self.HDBSCAN = clust
         return self.HDBSCAN
 
-    # def perform_HG(self, threshold: int):
-    #     """
-    #     Perform Agglomerative Clustering and return the clusters.
-    #
-    #     Parameters:
-    #     - threshold (int): Minimum number of points a cluster must have. Clusters with fewer
-    #                       points will be considered as outliers.
-    #
-    #     Returns:
-    #     - list: List of clusters with indices of PCA_Data.
-    #     """
-    #     self.PCA_Data = pd.DataFrame(self.PCA_Data)
-    #     self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
-    #
-    #     # Find the optimal number of clusters using silhouette score
-    #     silhouette_scores = []
-    #     max_clusters = 10  # arbitrary, you can set another limit if you prefer
-    #     for n_cluster in range(2, max_clusters + 1):
-    #         agglomerative = AgglomerativeClustering(n_clusters=n_cluster, affinity='euclidean', linkage='ward')
-    #         labels = agglomerative.fit_predict(self.PCA_Data)
-    #         silhouette_scores.append(silhouette_score(self.PCA_Data, labels))
-    #
-    #     # The number of clusters that gives the max silhouette score is considered as optimal
-    #     n_clusters = silhouette_scores.index(max(silhouette_scores)) + 2
-    #
-    #     agglomerative = AgglomerativeClustering(n_clusters=n_clusters, affinity='euclidean', linkage='ward')
-    #     cluster_labels = agglomerative.fit_predict(self.PCA_Data)
-    #     self.Agglomerative_labels = cluster_labels
-    #
-    #     label_to_indices = {label: [] for label in set(cluster_labels)}
-    #     for i, cluster_label in enumerate(cluster_labels):
-    #         label_to_indices[cluster_label].append(self.index[i])
-    #
-    #     # Identify and separate out the outliers
-    #     outliers = []
-    #     for label, indices in label_to_indices.items():
-    #         if len(indices) < threshold:
-    #             outliers.extend(indices)
-    #             del label_to_indices[label]  # remove the outlier cluster
-    #
-    #     # Sort the remaining clusters and add the outliers as the first entry
-    #     clust = [outliers] + sorted(list(label_to_indices.values()), key=lambda x: len(x), reverse=True)
-    #
-    #     self.Agglomerative = clust
-    #     return self.Agglomerative
-    #
-    # def perform_Agglomerative(self, n_clusters: int):
-    #     self.PCA_Data = pd.DataFrame(self.PCA_Data)
-    #     self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
-    #
-    #     # Apply Agglomerative Clustering
-    #     agglomerative = AgglomerativeClustering(n_clusters=n_clusters, affinity='euclidean', linkage='ward')
-    #     cluster_labels = agglomerative.fit_predict(self.PCA_Data)
-    #
-    #     self.Agglomerative_labels = cluster_labels
-    #
-    #     # Get the unique cluster labels
-    #     unique_labels = sorted(list(set(cluster_labels)))
-    #
-    #     # Create an empty list for each unique label to store indices belonging to that cluster
-    #     clust = [[] for _ in unique_labels]
-    #     for i, cluster_label in enumerate(cluster_labels):
-    #         clust[unique_labels.index(cluster_label)].append(self.index[i])
-    #
-    #     self.Agglomerative = clust
-    #     return self.Agglomerative
 
     def perform_HA(self, threshold: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
@@ -489,7 +423,33 @@ class Clustering:
         cluster_labels = birch.labels_
 
         self.test = birch
-        self.BIRCH_labels = cluster_labels
+
+        # 클러스터의 중심
+        cluster_centers = birch.subcluster_centers_
+
+        # 클러스터 중심과의 거리 계산
+        distances = np.linalg.norm(self.PCA_Data- cluster_centers[cluster_labels], axis=1)
+
+        # 아웃라이어 여부 확인
+        sorted_distances = np.sort(distances)
+
+
+        # Calculate the index for the alpha percentile (alpha)
+        alpha_percentile_index = int(len(sorted_distances) * 0.99)
+
+        # filtered_sorted_distance에서 삭제한 수 만큼 sorted_distance에서도 삭제
+
+        eps = sorted_distances[alpha_percentile_index]
+
+        outliers = np.where(eps <sorted_distances)[0]
+
+        cluster_labels=list(cluster_labels)
+
+        for i, cluster_label in enumerate(cluster_labels):
+            if i in outliers:
+                cluster_labels[i] = -1
+
+        self.BIRCH_labels=cluster_labels
 
         # Get the unique cluster labels
         unique_labels = sorted(list(set(cluster_labels)))
