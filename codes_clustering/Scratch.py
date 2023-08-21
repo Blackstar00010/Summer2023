@@ -15,9 +15,6 @@ if Cointegration:
     is_jamesd = 'jamesd' in os.path.abspath('.')
     for file in files:
         print(file)
-
-        if is_jamesd and (int(file[:4]) < 2010):
-            continue
         if file in os.listdir(output_dir):
             continue
         data = read_and_preprocess_data(input_dir, file)
@@ -396,7 +393,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([3])
+            Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([2])
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0])
 
@@ -442,7 +439,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN(0.2)
+            Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN(0.6)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
 
@@ -488,7 +485,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.2)
+            Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.5)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
 
@@ -537,7 +534,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.2)
+            Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.5)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
 
@@ -587,7 +584,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.Gaussian = Do_Clustering.perform_GMM(40)
+            Do_Clustering.Gaussian = Do_Clustering.perform_GMM(1)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.Gaussian)
 
@@ -636,7 +633,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.03)
+            Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.7)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
 
@@ -688,7 +685,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.2)
+            Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.9)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.menshift)
 
@@ -738,7 +735,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.BIRCH = Do_Clustering.perform_BIRCH(0.2)
+            Do_Clustering.BIRCH = Do_Clustering.perform_BIRCH(0.7)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.BIRCH)
 
@@ -761,7 +758,3 @@ if Save:
         print('average number of clusters:', cl)
         print('silhouette score:', sil)
         print(f'total outliers: {sum}')
-
-print(number_of_cluster)
-number_of_cluster=pd.DataFrame(number_of_cluster, index=['K-mean','DBSCAN', 'HDBSCAN','Agglomerative','GMM','OPTICS','meanshift','BIRCH'],columns=['cluster'])
-number_of_cluster.to_csv('../files/result/number_of_cluster.csv', index=True)

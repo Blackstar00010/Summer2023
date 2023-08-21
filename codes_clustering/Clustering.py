@@ -191,7 +191,6 @@ class Clustering:
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
-
         dist_matrix = pdist(self.PCA_Data, metric='euclidean')
         # data point pair 간의 euclidean distance/firm수 combination 2
 
@@ -226,7 +225,6 @@ class Clustering:
 
         self.HDBSCAN = clust
         return self.HDBSCAN
-
 
     def perform_HA(self, threshold: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
@@ -428,11 +426,10 @@ class Clustering:
         cluster_centers = birch.subcluster_centers_
 
         # 클러스터 중심과의 거리 계산
-        distances = np.linalg.norm(self.PCA_Data- cluster_centers[cluster_labels], axis=1)
+        distances = np.linalg.norm(self.PCA_Data - cluster_centers[cluster_labels], axis=1)
 
         # 아웃라이어 여부 확인
         sorted_distances = np.sort(distances)
-
 
         # Calculate the index for the alpha percentile (alpha)
         alpha_percentile_index = int(len(sorted_distances) * 0.99)
@@ -441,15 +438,15 @@ class Clustering:
 
         eps = sorted_distances[alpha_percentile_index]
 
-        outliers = np.where(eps <sorted_distances)[0]
+        outliers = np.where(eps < sorted_distances)[0]
 
-        cluster_labels=list(cluster_labels)
+        cluster_labels = list(cluster_labels)
 
         for i, cluster_label in enumerate(cluster_labels):
             if i in outliers:
                 cluster_labels[i] = -1
 
-        self.BIRCH_labels=cluster_labels
+        self.BIRCH_labels = cluster_labels
 
         # Get the unique cluster labels
         unique_labels = sorted(list(set(cluster_labels)))
