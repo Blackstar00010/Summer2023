@@ -64,6 +64,8 @@ class Clustering:
 
         # max distance in own cluster
         for i, cluster in enumerate(main_distance_clustering):
+            if not cluster:
+                continue
             main_distance_clustering[i] = np.max(cluster)
 
         max_main_distance_clustering = main_distance_clustering
