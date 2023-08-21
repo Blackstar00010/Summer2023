@@ -189,20 +189,19 @@ class Clustering:
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
-        lab = True
-        if lab:
-            dist_matrix = pdist(self.PCA_Data, metric='euclidean')
-            # data point pair 간의 euclidean distance/firm수 combination 2
 
-            # 연결 매트릭스 계산
-            Z = linkage(dist_matrix, method='average')
+        dist_matrix = pdist(self.PCA_Data, metric='euclidean')
+        # data point pair 간의 euclidean distance/firm수 combination 2
 
-            # cophenetic distance 계산
-            coph_dists = Z[:, 2]  # Z의 두 번째 열은 cophenetic distance 값
+        # 연결 매트릭스 계산
+        Z = linkage(dist_matrix, method='average')
 
-            # 2. Outlier
-            max_d = np.max(coph_dists) * threshold
-            num = find_optimal_HDBSCAN_min_cluster_size(self.PCA_Data)
+        # cophenetic distance 계산
+        coph_dists = Z[:, 2]  # Z의 두 번째 열은 cophenetic distance 값
+
+        # 2. Outlier
+        max_d = np.max(coph_dists) * threshold
+        num = find_optimal_HDBSCAN_min_cluster_size(self.PCA_Data)
 
         # min_cluster_size는 silhouette score가 가장 높은 것 선정. 2부터 5까지 실험.
         Hdbscan = HDBSCAN(min_cluster_size=num, allow_single_cluster=True, cluster_selection_epsilon=max_d).fit(
