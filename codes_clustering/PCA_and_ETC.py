@@ -1,5 +1,4 @@
 import os
-from concurrent.futures import ProcessPoolExecutor
 import warnings
 import numpy as np
 import pandas as pd
@@ -9,10 +8,11 @@ from joblib import Parallel, delayed
 from sklearn import metrics
 from sklearn import manifold
 from itertools import combinations
+from sklearn.cluster import *
 from sklearn.decomposition import PCA
 from statsmodels.tsa.stattools import coint, kpss
 from sklearn.model_selection import GridSearchCV
-from sklearn.mixture import BayesianGaussianMixture
+from sklearn.mixture import *
 import multiprocessing as mp
 
 # turn off warning
@@ -149,8 +149,8 @@ def analysis_clustering_result(data, compartive_label, control_label):
         f"Silhouette Coefficient: {metrics.silhouette_score(data, compartive_label):.3f}")
 
 
-def find_optimal_GMM_hyperparameter(data):
-    bgm = BayesianGaussianMixture()
+def find_optimal_GMM_covariance_type(data):
+    bgm = GaussianMixture()
     # 탐색할 covariance type과 n_components 설정
     param_grid = {
         "covariance_type": ["spherical", "tied", "diag", "full"]
@@ -163,6 +163,20 @@ def find_optimal_GMM_hyperparameter(data):
     # 최적의 covariance type과 n_components 출력
     best_covariance_type = grid_search.best_params_["covariance_type"]
     return best_covariance_type
+
+
+def find_optimal_HDBSCAN_min_cluster_size(data):
+    Hdbscan = HDBSCAN(allow_single_cluster=True)
+    # 탐색할 covariance type과 n_components 설정
+    param_grid = {"min_cluster_size": [2, 3, 4, 5, 6, 7]}
+
+    # BIC score를 평가 지표로 하여 GridSearchCV 실행
+    grid_search = GridSearchCV(Hdbscan, param_grid, scoring='neg_negative_likelihood_ratio')
+    grid_search.fit(data)
+
+    # 최적의 covariance type과 n_components 출력
+    best_min_cluster_size = grid_search.best_params_["min_cluster_size"]
+    return best_min_cluster_size
 
 
 if True:
@@ -217,9 +231,9 @@ if True:
         print('Finished filtering pairs using pvalue!')
 
         spread_df: pd.DataFrame = pairs.apply(lambda x: data[x[0]] - data[x[1]], axis=1)
-        spread_df['adf_result'] = Parallel(n_jobs=n_jobs)(delayed(adf_result)(pair) for pair in spread_df.values)
-        spread_df = spread_df.loc[spread_df.index[spread_df['adf_result'] < 0.05], :]
-        print('Finished filtering pairs using adf_result!')
+        # spread_df['adf_result'] = Parallel(n_jobs=n_jobs)(delayed(adf_result)(pair) for pair in spread_df.values)
+        # spread_df = spread_df.loc[spread_df.index[spread_df['adf_result'] < 0.05], :]
+        # print('Finished filtering pairs using adf_result!')
 
         spread_df['kpss_result'] = Parallel(n_jobs=n_jobs)(delayed(kpss_result)(pair) for pair in spread_df.values)
         spread_df = spread_df.loc[spread_df.index[spread_df['kpss_result'] > 0.05], :]
@@ -415,3 +429,4 @@ if __name__ == "__main__":
     plt.scatter(mat_new[:, 0], mat_new[:, 1], alpha=0.8)
     plt.axis('equal')
     plt.show()
+

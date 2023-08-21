@@ -1,6 +1,4 @@
-import warnings
 from PCA_and_ETC import *
-
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -13,6 +11,7 @@ subdirectories = [d for d in os.listdir(base_directory) if os.path.isdir(os.path
 
 file_names = []
 result_df = pd.DataFrame()
+proportion=[]
 
 # Save subdir name in file_names at the beginning.
 for subdir in subdirectories:
@@ -20,6 +19,7 @@ for subdir in subdirectories:
     file_names.append(subdir)
 
 for subdir in subdirectories:
+    print(subdir)
     # Long_Short_Merge.py
     directory = os.path.join(base_directory, subdir)
     long_short = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
@@ -27,7 +27,7 @@ for subdir in subdirectories:
     LS_merged_df = pd.DataFrame()
     total_firms = []
 
-    merge_LS=True
+    merge_LS = True
     if merge_LS:
         for file in long_short:
             data = pd.read_csv(os.path.join(directory, file))
@@ -59,7 +59,13 @@ for subdir in subdirectories:
         # 마지막 row 버리면 한칸씩 밀어버리는 것과 동치
         LS_merged_df = LS_merged_df.drop(LS_merged_df.columns[-1], axis=1)
 
-    product_LS=True
+        not_non_count = LS_merged_df.count()
+        count_1 = (LS_merged_df == 1).sum()
+        invested_firm=(count_1*2/not_non_count).sum()/311
+        # proportion.loc['proportion']=invested_firm
+        proportion.append(invested_firm)
+
+    product_LS = True
     if product_LS:
         # MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj.csv')
         MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
@@ -100,7 +106,7 @@ for subdir in subdirectories:
         # Concat the means DataFrame to the result DataFrame(395 by 1 matrix->1 by 395 matrix)
         result_df = pd.concat([result_df, column_means.T], ignore_index=True)
 
-all=False
+all = False
 if all:
     total_firms.remove(0)
     total_firms = np.array(total_firms)
@@ -116,7 +122,7 @@ if all:
     result_df = pd.concat([result_df, column_means2.T], ignore_index=True)
     file_names.append('All')
 
-save_result=True
+save_result = True
 if save_result:
     # Add a new column to the result DataFrame with the file names
     result_df.insert(0, 'Clustering Method', file_names)
@@ -144,11 +150,20 @@ if save_result:
     result_df.index = file_names
     result_df = result_df.astype(float)  # set data type as float(df.value was str actually.)
     result_df = result_df.fillna(0)
-    # result_df = result_df.applymap(lambda x: 0 if abs(x) > 0.4 else x)
+
+    proportion.append(0)
+    proportion=pd.DataFrame(proportion, index=file_names, columns=['proportion'])
+    proportion.to_csv('../files/result/invested_proportion.csv', index=True)
+
+    print(result_df.T.describe())
+    result_df.T.describe().to_csv('../files/result/statistics_original.csv', index=True)
+    result_df.to_csv('../files/result/result_original.csv', index=True)
+    result_df = result_df.applymap(lambda x: 0 if abs(x) > 0.4 else x)
 
     # Save a new CSV file
     # result_df.to_csv('../files/result_adj.csv', index=True)
-    result_df.to_csv('../files/result_adj_close.csv', index=True)
+    result_df.T.describe().to_csv('../files/result/statistics_modified.csv', index=True)
+    result_df.to_csv('../files/result/result_modified.csv', index=True)
 
     # Add 1 to all data values
     result_df.iloc[:, 0:] = result_df.iloc[:, 0:] + 1

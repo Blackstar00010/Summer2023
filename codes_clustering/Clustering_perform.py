@@ -3,13 +3,13 @@ import Clustering as C
 from PCA_and_ETC import *
 
 # file to check
-file = '1997-01.csv'
+file = '2022-01.csv'
 
 # turn off warning
 warnings.filterwarnings("ignore")
 
 # Plot K_mean cluster about individual csv file
-K_mean_Plot = False
+K_mean_Plot = True
 if K_mean_Plot:
     input_dir = '../files/momentum_adj_close'
 
@@ -39,7 +39,7 @@ if K_mean_Plot:
 # Plot DBSCAN cluster about individual csv file
 dbscan_Plot = False
 if dbscan_Plot:
-    input_dir = '../files/momentum_adj'
+    input_dir = '../files/momentum_adj_close'
 
     # convert mom_data into PCA_data
     data = read_and_preprocess_data(input_dir, file)
@@ -64,7 +64,7 @@ if dbscan_Plot:
 # Plot HDBSCAN cluster about individual csv file
 hdbscan_Plot = False
 if hdbscan_Plot:
-    input_dir = '../files/momentum_adj'
+    input_dir = '../files/momentum_adj_close'
 
     # convert mom_data into PCA_data
     data = read_and_preprocess_data(input_dir, file)
@@ -75,7 +75,7 @@ if hdbscan_Plot:
     Do_Result_Plot = C.Result_Check_and_Save(df_combined)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.9)
+    Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN()
 
     # Plot clustering result
     Do_Result_Plot.Plot_clusters(Do_Clustering.HDBSCAN)
@@ -87,7 +87,7 @@ if hdbscan_Plot:
 # hyper parameter eps percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
 
 # Plot Agglomerative cluster about individual csv file
-Agglormerative_Plot = True
+Agglormerative_Plot = False
 if Agglormerative_Plot:
     input_dir = '../files/momentum_adj_close'
 
