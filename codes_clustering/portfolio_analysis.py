@@ -1,5 +1,3 @@
-import pandas as pd
-
 from PCA_and_ETC import *
 
 col = ['02/1997-12/2001(DotCom_Bubble)', '01/2002-12/2006(Pax_americana)', '01/2007-12/2009(GFC)',
@@ -68,3 +66,41 @@ for i in range(len(result.index)):
         Calmar_ratio.iloc[j, i] = calmar
 
 print(Calmar_ratio.to_string())
+
+base_directory = '../files/Clustering_adj_close/'
+
+# Get all subdirectories in the base directory
+subdirectories = [d for d in os.listdir(base_directory) if os.path.isdir(os.path.join(base_directory, d))]
+subdirectories.remove('Reversal')
+for subdir in subdirectories:
+    print(subdir)
+    # Long_Short_Merge.py
+    directory = os.path.join(base_directory, subdir)
+    long_short = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
+
+
+    LS_merged_df = pd.DataFrame()
+
+    for file in long_short:
+        data = pd.read_csv(os.path.join(directory, file))
+
+        # Keep only the 'Firm Name' and 'Long Short' columns
+        data = data[['Firm Name', 'Cluster Index']]
+
+        # Change the column name into file name (ex: 1990-01)
+        file_column_name = os.path.splitext(file)[0]
+        data = data.rename(columns={'Cluster Index': file_column_name})
+
+
+        if LS_merged_df.empty:
+            LS_merged_df = data
+        else:
+            LS_merged_df = pd.merge(LS_merged_df, data, on='Firm Name', how='outer')
+
+    # Set Firm Name column into index
+    LS_merged_df.set_index('Firm Name', inplace=True)
+
+    # Sort LS_Value according to Firm Name
+    LS_merged_df = LS_merged_df.max().mean()
+
+    print(LS_merged_df)
