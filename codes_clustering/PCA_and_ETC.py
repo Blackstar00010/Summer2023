@@ -207,15 +207,23 @@ if True:
 
 
     def adf_result(pair):
-        return sm.tsa.adfuller(pair)[1]
+        try:
+            ret = sm.tsa.adfuller(pair)[1]
+        except ValueError:
+            ret = 0.06
+        return ret
 
 
     def kpss_result(pair):
-        return kpss(pair)[1]
+        try:
+            ret = kpss(pair)[1]
+        except:
+            ret = 0.04
+        return ret
 
 
     def find_cointegrated_pairs(data: pd.DataFrame) -> list:
-        n_jobs = mp.cpu_count()
+        n_jobs = 8
         data = data.iloc[1:, :]
         pairs = pd.DataFrame(combinations(data.columns, 2))  # 모든 회사 조합
         pairs['pvalue'] = Parallel(n_jobs=n_jobs)(delayed(cointegrate)(data, pair[0], pair[1]) for pair in pairs.values)

@@ -18,6 +18,8 @@ if Cointegration:
 
         if is_jamesd and (int(file[:4]) < 2010):
             continue
+        if file in os.listdir(output_dir):
+            continue
         data = read_and_preprocess_data(input_dir, file)
 
         mom_data = read_mom_data(data)
