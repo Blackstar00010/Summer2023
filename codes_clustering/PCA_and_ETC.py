@@ -19,49 +19,59 @@ import multiprocessing as mp
 warnings.filterwarnings("ignore")
 
 
+def momentum_suffix_finder(df: pd.DataFrame):
+    """
+
+    :param df:
+    :return:
+    """
+    possible_suffix = ['', 'Momentum', 'MOM', 'mom', 'Momentum_', 'MOM_', 'mom_']
+    for i in range(1, 10):
+        for aposs in possible_suffix:
+            if aposs + str(i) in df.columns:
+                return aposs
+
+
 def generate_PCA_Data(data: pd.DataFrame):
-    '''
+    """
     :param data: momentum_data
     :return: Mom1+PCA_Data
-    '''
+    """
+    suffix = momentum_suffix_finder(data)
 
     # mom1 save and data Normalization
-    mom1 = data.values.astype(float)[:, 0]
+    mom1 = data.astype(float)[:, suffix + '1']
     data_normalized = (data - data.mean()) / data.std()
-    mat = data_normalized.values.astype(float)
+    mat = data_normalized.astype(float)
 
     # mom1을 제외한 mat/PCA(2-49)
     # mat = np.delete(mat, 0, axis=1)
 
     # mom49를 제외한 mat/PCA(1-48)
-    mat = np.delete(mat, 48, axis=1)
+    mat = mat.drop(columns=[suffix + '49'])
 
     # 1. Searching optimal n_components
-    if len(data) < 20:
-        n_components = len(data)
-
-    else:
-        n_components = 20
+    n_components = min(len(data), 20)
 
     pca = PCA(n_components)
     pca.fit(mat)
-    t = np.sum(pca.explained_variance_ratio_)
+    total_variance = np.sum(pca.explained_variance_ratio_)
 
-    while t > 0.99:
+    while total_variance > 0.99:
         n_components -= 1
         pca = PCA(n_components)
         pca.fit(mat)
-        t = np.sum(pca.explained_variance_ratio_)
+        total_variance = np.sum(pca.explained_variance_ratio_)
 
-    while t < 0.99:
+    while total_variance < 0.99:
         n_components += 1
         pca = PCA(n_components)
         pca.fit(mat)
-        t = np.sum(pca.explained_variance_ratio_)
+        total_variance = np.sum(pca.explained_variance_ratio_)
 
     # 2. PCA
     pca_mat = PCA(n_components=n_components).fit(data).transform(data)
-    cols = ['pca_component_{}'.format(i + 1) for i in range(pca_mat.shape[1])]
+    cols = [f'pca_component_{i + 1}' for i in range(pca_mat.shape[1])]
     mat_pd_pca = pd.DataFrame(pca_mat, columns=cols)
     mat_pd_pca_matrix = mat_pd_pca.values
 
@@ -70,17 +80,16 @@ def generate_PCA_Data(data: pd.DataFrame):
     combined_matrix = np.hstack((first_column_matrix, mat_pd_pca_matrix))
     df_combined = pd.DataFrame(combined_matrix)
     df_combined.index = data.index
-    df_combined = pd.DataFrame(df_combined)
 
     return df_combined
 
 
 def read_and_preprocess_data(input_dir, file) -> pd.DataFrame:
-    '''
+    """
     :param input_dir: '../files/momentum_adj'
     :param file: yyyy-mm.csv
     :return: DataFrame
-    '''
+    """
     data = pd.read_csv(os.path.join(input_dir, file), index_col=0)
 
     # Replace infinities with NaN
@@ -429,4 +438,3 @@ if __name__ == "__main__":
     plt.scatter(mat_new[:, 0], mat_new[:, 1], alpha=0.8)
     plt.axis('equal')
     plt.show()
-

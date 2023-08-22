@@ -34,16 +34,16 @@ class Clustering:
         self.lab = []
         self.lab_labels = []
 
-    def outliers(self, K: int):
-        '''
-        :param K: int
+    def outliers(self, k_value: int, alpha: float = 0.5):
+        """
+        :param k_value: the number of clusters
+        :param alpha: the rate at which outliers are filtered
         :return: 2D list
-        '''
-        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        """
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
-        kmeans = BisectingKMeans(n_clusters=K, init='k-means++', n_init=10, max_iter=500,
+        kmeans = BisectingKMeans(n_clusters=k_value, init='k-means++', n_init=10, max_iter=500,
                                  algorithm='elkan', bisecting_strategy='largest_cluster').fit(self.PCA_Data)
 
         cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
@@ -55,9 +55,9 @@ class Clustering:
         distance = kmeans.fit_transform(self.PCA_Data)  # Distance btw K centroid about all each points
         main_distance = np.min(distance, axis=1)  # Distance btw own K centroid about all each points
 
-        main_distance_clustering = [[] for _ in range(K)]
+        main_distance_clustering = [[] for _ in range(k_value)]
 
-        for cluster_num in range(K):
+        for cluster_num in range(k_value):
             distance_clustering = distance[cluster_labels == cluster_num]
             for i in range(len(distance_clustering)):
                 main_distance_clustering[cluster_num].append(distance_clustering[i][cluster_num])
@@ -70,20 +70,20 @@ class Clustering:
 
         max_main_distance_clustering = main_distance_clustering
 
-        clusters = [[] for _ in range(K)]  # Cluster별 distance 분류
-        clusters_index = [[] for _ in range(K)]  # Cluster별 index 분류
+        clusters = [[] for _ in range(k_value)]  # Cluster별 distance 분류
+        clusters_index = [[] for _ in range(k_value)]  # Cluster별 index 분류
 
         for i, cluster_num in enumerate(cluster_labels):
             clusters[cluster_num].append(main_distance[i])
             clusters_index[cluster_num].append(self.index[i])
 
-        outliers = [[] for _ in range(K)]  # Cluster별 outliers' distance 분류
+        outliers = [[] for _ in range(k_value)]  # Cluster별 outliers' distance 분류
         for i, cluster in enumerate(clusters):
             if max_main_distance_clustering[i] == 0:
                 continue
             for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
-                if distance / max_main_distance_clustering[i] >= 0.5:
-                    # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 50%이상이면 outlier 분류
+                if distance / max_main_distance_clustering[i] >= alpha:
+                    # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 alpha 이상이면 outlier 분류
                     outliers[i].append(distance)
 
         outliers_index = []  # Cluster별 outliers's index 분류
@@ -112,19 +112,19 @@ class Clustering:
 
         return clusters_index
 
-    def perform_kmeans(self, k_values: list):
-        '''
-        :param k_values: list
+    def perform_kmeans(self, k_value: int, alpha: float = 0.5):
+        """
+        :param k_value: k value to be tested
+        :param alpha: the rate at which outliers are filtered
         :return: 3D list
-        '''
+        """
         clusters_k = []
-        for k in k_values:
-            n_sample = self.PCA_Data.shape[0]  # number of values in the file
-            # Skip if the number of values are less than k
-            if n_sample <= k_values[0]:
-                k = n_sample
-            clust = self.outliers(k)
-            clusters_k.append(clust)
+        n_sample = self.PCA_Data.shape[0]  # number of values in the file
+        # Skip if the number of values are less than k
+        if n_sample <= k_value:
+            k = n_sample
+        clusters = self.outliers(k_value, alpha)
+        clusters_k.append(clusters)
 
         self.K_Mean = clusters_k
         return self.K_Mean

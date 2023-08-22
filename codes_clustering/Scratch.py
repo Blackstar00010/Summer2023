@@ -41,7 +41,7 @@ if example:
         Do_Clustering = C.Clustering(iris_pd)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([3])
+        Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(3)
 
         iris_pd['species'] = iris.target
         x_kc = Do_Clustering.test.cluster_centers_[:, 0]
@@ -174,7 +174,7 @@ if Plot:
         Do_Result_Plot = C.Result_Check_and_Save(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([10])
+        Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(10)
 
         # Plot clustering result
         Do_Result_Plot.Plot_clusters_Kmean(Do_Clustering.K_Mean)
@@ -393,7 +393,7 @@ if Save:
             Do_Result_Save = C.Result_Check_and_Save(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([2])
+            Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(2)
 
             sum += Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0])
 
