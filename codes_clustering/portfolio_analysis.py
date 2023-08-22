@@ -4,10 +4,10 @@ from PCA_and_ETC import *
 
 col = ['02/1997-12/2001(DotCom_Bubble)', '01/2002-12/2006(Pax_americana)', '01/2007-12/2009(GFC)',
        '01/2010-12/2013(QE)',
-       '01/2014-12/2017(eurozone_crisis)', '01/2018-12/2019(Brexit)', '01/2020-12/2022(corona)']
+       '01/2014-12/2017(eurozone_crisis)', '01/2018-12/2019(Brexit)', '01/2020-12/2022(corona)', 'total_period']
 
 period = [range(1, 60), range(60, 120), range(120, 156), range(156, 204), range(204, 252), range(252, 276),
-          range(276, 312)]
+          range(276, 312),range(1,312)]
 
 result = pd.read_csv('../files/result/result_modified.csv')
 
