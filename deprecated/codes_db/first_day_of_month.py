@@ -2,7 +2,7 @@ import pandas as pd
 
 # Creates a new table only containing the rows of dates that are first business day of the month
 
-dir = "../../files/history/"
+dir = "../../files/price_data/"
 
 df = pd.read_csv(dir + "price_data1986.csv")
 

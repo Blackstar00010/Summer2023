@@ -4,7 +4,7 @@ from PCA_and_ETC import *
 # file to check
 file = '2022-01.csv'
 
-input_dir = '../files/momentum_adj_close'
+input_dir = '../files/characteristics'
 
 # turn off warning
 warnings.filterwarnings("ignore")

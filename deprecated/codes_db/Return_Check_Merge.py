@@ -47,7 +47,7 @@ file_names.append('Benchmark')
 
 lab=True
 if lab:
-    file = '../../files/month_return.csv'
+    file = '../../files/ftse_return.csv'
     df = pd.read_csv(file)
     df = df.iloc[1:]  # Jan data eliminate
     df = df.iloc[0:, 1:]  # save only data

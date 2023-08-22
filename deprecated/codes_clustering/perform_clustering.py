@@ -5,7 +5,7 @@ from codes_clustering.PCA_and_ETC import *
 YSL's version
 '''
 
-positions_directory = '../files/Clustering_adj_close/'
+positions_directory = '../files/clustering_result/'
 
 # Save K_mean clutering method LS_Tables
 K_mean_Save = False
@@ -217,7 +217,7 @@ Cointegration = False
 if Cointegration:
     # input_dir = '../files/momentum_adj'
     # output_dir = '../files/Clustering_adj/Cointegration'
-    input_dir = '../files/momentum_adj_close'
+    input_dir = '../files/characteristics'
     output_dir = '../files/Clustering_adj_close/Cointegration'
 
     files = sorted(filename for filename in os.listdir(input_dir))

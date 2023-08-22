@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Load the CSV file
-df = pd.read_csv('../../files/history/index_close_m.csv')
+df = pd.read_csv('../../files/price_data/index_close_m.csv')
 
 # Convert the date column to datetime
 df['Date'] = pd.to_datetime(df['Date'])

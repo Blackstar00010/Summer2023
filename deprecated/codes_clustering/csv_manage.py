@@ -5,7 +5,7 @@ import pandas as pd
 
 weird_value_out = False
 if weird_value_out:
-    directory = '../files/momentum_adj_close'
+    directory = '../files/characteristics'
     monthly_files = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
 
     for file in monthly_files:
@@ -28,7 +28,7 @@ if weird_value_out:
 
 weird_value_out_csv = False
 if weird_value_out_csv:
-    directory = '../files/momentum_adj_close'
+    directory = '../files/characteristics'
     monthly_files = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
 
     output_data = []
@@ -59,7 +59,7 @@ if return_factor:
     # For each month from 1990-01 to 2022-12, it creates a new table of 48 return factor
     # Return Factor: ratio of the current month's value to the value from 1 months ago minus 1
 
-    df = pd.read_csv('../files/history/first_day_of_month.csv')
+    df = pd.read_csv('../files/price_data/first_day_of_month.csv')
     df['Date'] = pd.to_datetime(df['Date'])
     df.set_index('Date', inplace=True)
 

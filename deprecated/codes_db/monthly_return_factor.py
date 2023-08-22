@@ -12,4 +12,4 @@ return_factor_df = pd.DataFrame({
     'Return Factor': return_factor
 })
 
-return_factor_df.T.to_csv('../files/month_return.csv', index=False)
+return_factor_df.T.to_csv('../files/ftse_return.csv', index=False)

@@ -242,8 +242,8 @@ class Companies:
     def get_history(self, index=None, raw=False) -> list:
         """
         Returns previous fetch(es) of data.
-        :param index: The indices of history (e.g. -1 -> last fetch, 0 -> first fetch, [0, -1] -> first and last fetch, None -> all)
-        :param raw: True if you want to fetch the history of raw data
+        :param index: The indices of price_data (e.g. -1 -> last fetch, 0 -> first fetch, [0, -1] -> first and last fetch, None -> all)
+        :param raw: True if you want to fetch the price_data of raw data
         :return: list of dataframe(s)
         """
         ret_list = self._raw_data_list if raw else self._data_list
@@ -268,9 +268,9 @@ class Companies:
 
     def set_history(self, dataframes, raw=False) -> None:
         """
-        Sets the list of fetch history to the given dataframes.
-        :param dataframes: the list to set history as.
-        :param raw: True if you want to set the history of raw data
+        Sets the list of fetch price_data to the given dataframes.
+        :param dataframes: the list to set price_data as.
+        :param raw: True if you want to set the price_data of raw data
         :return: None
         """
         if type(dataframes) is list:
@@ -284,8 +284,8 @@ class Companies:
 
     def clear_history(self, raw=False) -> None:
         """
-        Clears all data history
-        :param raw: True if you want to clear the history of raw data
+        Clears all data price_data
+        :param raw: True if you want to clear the price_data of raw data
         :return: None
         """
         self.set_history([], raw=raw)

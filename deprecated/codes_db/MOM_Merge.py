@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-directory = '../files/momentum_adj_close'
+directory = '../files/characteristics'
 long_short = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
 
 merged_df = pd.DataFrame()

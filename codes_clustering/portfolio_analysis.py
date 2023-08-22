@@ -79,7 +79,7 @@ print(Calmar_ratio.to_string())
 
 Count_Cluster=False
 if Count_Cluster:
-    base_directory = '../files/Clustering_adj_close/'
+    base_directory = '../files/clustering_result/'
     # Get all subdirectories in the base directory
     subdirectories = [d for d in os.listdir(base_directory) if os.path.isdir(os.path.join(base_directory, d))]
     subdirectories.remove('Reversal')

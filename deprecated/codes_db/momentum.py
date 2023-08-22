@@ -5,7 +5,7 @@ import pandas as pd
 # mom_1 = r_{t-1}
 # mom_i = \prod_{j=t-i-1}^{t-2} (r_j+1) - 1, i \in 1,...,4
 
-df = pd.read_csv('../../files/history/adj_close_first_day_of_month.csv')
+df = pd.read_csv('../../files/price_data/adj_close_first_day_of_month.csv')
 df['Date'] = pd.to_datetime(df['Date'])
 df.set_index('Date', inplace=True)
 
@@ -33,7 +33,7 @@ for current_date in months:
     mom = mom.dropna(how='any')
 
     filename = current_date.strftime('%Y-%m') + '.csv'
-    mom.to_csv('../files/momentum_adj_close/' + filename, index_label='Momentum Index')
+    mom.to_csv('../files/characteristics/' + filename, index_label='Momentum Index')
 
     print('-', end='')
     if int(current_date.strftime('%m')) == 12:

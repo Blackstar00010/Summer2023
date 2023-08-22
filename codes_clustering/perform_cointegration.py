@@ -3,8 +3,8 @@ from PCA_and_ETC import *
 
 # input_dir = '../files/momentum_adj'
 # output_dir = '../files/Clustering_adj/Cointegration'
-input_dir = '../files/momentum_adj_close'
-output_dir = '../files/Clustering_adj_close/Cointegration'
+input_dir = '../files/characteristics'
+output_dir = '../files/clustering_result/Cointegration'
 
 files = sorted(filename for filename in os.listdir(input_dir))
 is_jamesd = 'jamesd' in os.path.abspath('.')

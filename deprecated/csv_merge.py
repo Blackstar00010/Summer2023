@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-# Reads CSV files from './files/history' directory and merges them based on the 'Date' column.
+# Reads CSV files from './files/price_data' directory and merges them based on the 'Date' column.
 # Code for sorting the date was added because the order of the date was random.
 
 directory = '../files/history_by_ticker'
@@ -26,4 +26,4 @@ merged_data['Date'] = pd.to_datetime(merged_data['Date'])
 merged_data.sort_values('Date', inplace=True)
 merged_data.reset_index(drop=True, inplace=True)
 
-merged_data.to_csv('../files/history/merged_data.csv', index=False)
+merged_data.to_csv('../files/price_data/merged_data.csv', index=False)

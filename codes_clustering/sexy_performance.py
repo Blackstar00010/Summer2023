@@ -4,7 +4,7 @@ from PCA_and_ETC import *
 warnings.filterwarnings("ignore")
 
 # base_directory = '../files/Clustering_adj/'
-base_directory = '../files/Clustering_adj_close/'
+base_directory = '../files/clustering_result/'
 
 # Get all subdirectories in the base directory
 subdirectories = [d for d in os.listdir(base_directory) if os.path.isdir(os.path.join(base_directory, d))]
@@ -140,7 +140,7 @@ if save_result:
     file_names.append('FTSE 100')
 
     # benchmark return merge with result_df
-    file = '../files/month_return.csv'
+    file = '../files/ftse_return.csv'
     df = pd.read_csv(file)
     df = df.iloc[1:]
     # df = df.iloc[0:, 1:]

@@ -4,7 +4,7 @@ import pandas as pd
 first_day_of_month = False
 if first_day_of_month:
     # Creates a new table only containing the rows of dates that are first business day of the month
-    dir = "../files/history/"
+    dir = "../files/price_data/"
     df = pd.read_csv(dir + "adj_close.csv")
 
     months = df['Date'].apply(lambda x: x[5:7])
@@ -18,7 +18,7 @@ if momentum:
     # mom_1 = r_{t-1}
     # mom_i = \prod_{j=t-i-1}^{t-2} (r_j+1) - 1, i \in 1,...,4
 
-    df = pd.read_csv('../files/history/adj_close_first_day_of_month.csv')
+    df = pd.read_csv('../files/price_data/adj_close_first_day_of_month.csv')
     df['Date'] = pd.to_datetime(df['Date'])
     df.set_index('Date', inplace=True)
 
@@ -38,7 +38,7 @@ if momentum:
         mom = mom.dropna(how='any')
 
         filename = current_date.strftime('%Y-%m') + '.csv'
-        mom.to_csv('../files/momentum_adj_close/' + filename, index_label='Momentum Index')
+        mom.to_csv('../files/characteristics/' + filename, index_label='Momentum Index')
 
         print('-', end='')
         if int(current_date.strftime('%m')) == 12:
@@ -48,7 +48,7 @@ if momentum:
 
 MOM_Merge = False
 if MOM_Merge:
-    directory = '../files/momentum_adj_close'
+    directory = '../files/characteristics'
     long_short = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
 
     merged_df = pd.DataFrame()
