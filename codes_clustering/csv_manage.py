@@ -1,5 +1,4 @@
 import os.path
-import csv
 import pandas as pd
 
 first_day_of_month = False

@@ -11,7 +11,7 @@ for file in files:
 
     # Normalize each column
     for column in columns:
-        df[column] = df[column] / df[column].abs().sum()
+        df[column] = df[column] / df[column].abs().outliers_count()
 
     file_name, file_extension = os.path.splitext(file)
 

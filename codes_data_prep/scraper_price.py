@@ -39,7 +39,7 @@ def fix_ohlccv(ohlccv_df: pd.DataFrame) -> pd.DataFrame:
     ohlc_df = ohlccv_df[['Date', 'HIGH', 'LOW', 'CLOSE', 'OPEN']]
     cv_df = ohlccv_df[['Date', 'COUNT', 'VOLUME']].fillna(0)
 
-    nan_counter = ohlc_df.isna().sum(axis=1)
+    nan_counter = ohlc_df.isna().outliers_count(axis=1)
     for i, count in enumerate(nan_counter):
         if count < 1:  # no empty
             continue
@@ -150,7 +150,7 @@ if __name__ == '__main__':
         rics = rics[~rics.isin(already_done)]
 
         for ric in rics:
-            delistedYY = comp_list_df[comp_list_df['RIC'] == ric]['delisted YY'].sum()
+            delistedYY = comp_list_df[comp_list_df['RIC'] == ric]['delisted YY'].outliers_count()
             delistedYY = int(delistedYY)
             is_listed = delistedYY == 0
             try:

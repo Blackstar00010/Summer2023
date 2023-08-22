@@ -15,7 +15,7 @@ profit_factor = pd.DataFrame(index=col, columns=result.iloc[:, 0])
 for i in range(len(result.index)):
     for j in range(len(period)):
         row = result.iloc[i, period[j]]
-        pf = row[row > 0].sum() / np.abs(row[row < 0].sum())
+        pf = row[row > 0].outliers_count() / np.abs(row[row < 0].outliers_count())
         profit_factor.iloc[j, i] = pf
 
 profit_factor.to_csv('../files/result/profit_factor.csv', index=True)
