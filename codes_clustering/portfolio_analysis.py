@@ -1,5 +1,3 @@
-import pandas as pd
-
 from PCA_and_ETC import *
 
 col = ['02/1997-12/2001(DotCom_Bubble)', '01/2002-12/2006(Pax_americana)', '01/2007-12/2009(GFC)',
@@ -20,6 +18,8 @@ for i in range(len(result.index)):
         pf = row[row > 0].sum() / np.abs(row[row < 0].sum())
         profit_factor.iloc[j, i] = pf
 
+profit_factor.to_csv('../files/result/profit_factor.csv', index=True)
+
 print(profit_factor.to_string())
 
 print('sharpe_ratio')
@@ -30,6 +30,8 @@ for i in range(len(result.index)):
         sf = row.mean() / row.std()
         sharpe_ratio.iloc[j, i] = sf
 
+sharpe_ratio.to_csv('../files/result/sharpe_ratio.csv', index=True)
+
 print(sharpe_ratio.to_string())
 
 print('sortino_ratio')
@@ -39,6 +41,8 @@ for i in range(len(result.index)):
         row = result.iloc[i, period[j]]
         sf = row.mean() / row[row<0].std()
         sortino_ratio.iloc[j, i] = sf
+
+sortino_ratio.to_csv('../files/result/sortino_ratio.csv', index=True)
 
 print(sortino_ratio.to_string())
 
@@ -52,6 +56,8 @@ for i in range(len(result.index)):
         drawdown = (cumulative_returns - peak) / peak
         max_drawdown = drawdown.min()
         MDD.iloc[j, i] = max_drawdown
+
+MDD.to_csv('../files/result/MDD.csv', index=True)
 
 print(MDD.to_string())
 
@@ -67,9 +73,11 @@ for i in range(len(result.index)):
         calmar=row.mean()/max_drawdown
         Calmar_ratio.iloc[j, i] = calmar
 
+Calmar_ratio.to_csv('../files/result/Calmar_ratio.csv', index=True)
+
 print(Calmar_ratio.to_string())
 
-Count_Cluster=True
+Count_Cluster=False
 if Count_Cluster:
     base_directory = '../files/Clustering_adj_close/'
     # Get all subdirectories in the base directory
