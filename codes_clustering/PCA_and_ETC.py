@@ -37,10 +37,10 @@ def generate_PCA_Data(data: pd.DataFrame):
     :param data: momentum_data
     :return: Mom1+PCA_Data
     """
-    suffix = momentum_suffix_finder(data)
+    prefix = momentum_suffix_finder(data)
 
     # mom1 save and data Normalization
-    mom1 = data.astype(float).loc[:, suffix + '1']
+    mom1 = data.astype(float).loc[:, prefix + '1']
     data_normalized = (data - data.mean()) / data.std()
     mat = data_normalized.astype(float)
 
@@ -48,7 +48,7 @@ def generate_PCA_Data(data: pd.DataFrame):
     # mat = np.delete(mat, 0, axis=1)
 
     # mom49를 제외한 mat/PCA(1-48)
-    mat = mat.drop(columns=[suffix + '49'])
+    mat = mat.drop(columns=[prefix + '49'])
 
     # 1. Searching optimal n_components
     n_components = min(len(data), 20)
@@ -86,18 +86,29 @@ def generate_PCA_Data(data: pd.DataFrame):
 
 def read_and_preprocess_data(input_dir, file) -> pd.DataFrame:
     """
+    Only for reading YYYY-MM.csv files. Recommend using smart_read() for more general cases.
     :param input_dir: '../files/momentum_adj'
-    :param file: yyyy-mm.csv
+    :param file: YYYY-MM.csv
     :return: DataFrame
     """
-    data = pd.read_csv(os.path.join(input_dir, file), index_col=0)
+    return smart_read(os.path.join(input_dir, file), include_index=True)
+
+
+def smart_read(filename: str, include_index=False) -> pd.DataFrame:
+    """
+
+    :param filename:
+    :param include_index: True if the file already has index column
+    :return:
+    """
+    df = pd.read_csv(filename, index_col=0) if include_index else pd.read_csv(filename)
 
     # Replace infinities with NaN
-    data.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
     # Drop rows with NaN values
-    data.dropna(inplace=True)
+    df.dropna(inplace=True)
 
-    return data
+    return df
 
 
 def t_SNE(title, data, cluster_labels):
@@ -166,7 +177,7 @@ def find_optimal_GMM_covariance_type(data):
     }
 
     # BIC score를 평가 지표로 하여 GridSearchCV 실행
-    grid_search = GridSearchCV(bgm, param_grid=param_grid, scoring='neg_mean_squared_error')
+    grid_search = GridSearchCV(bgm, param_grid=param_grid, scoring='neg_negative_likelihood_ratio')
     grid_search.fit(data)
 
     # 최적의 covariance type과 n_components 출력

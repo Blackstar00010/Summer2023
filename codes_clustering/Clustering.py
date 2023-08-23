@@ -8,9 +8,9 @@ from scipy.spatial.distance import pdist
 
 class Clustering:
     def __init__(self, data: pd.DataFrame):
+        self.test = None
         self.PCA_Data = data
         self.index = data.index
-        self.test = []
 
         self.K_Mean = []
         self.DBSCAN = []
@@ -464,20 +464,29 @@ class Clustering:
         return self.BIRCH
 
 
-class Result_Check_and_Save:
+class ResultCheck:
 
     def __init__(self, data: pd.DataFrame):
         self.PCA_Data = data
 
-    def LS_Table_Save(self, Cluster: list, output_dir, file):
+    def ls_table(self, cluster: list, output_dir, file, save=True):
+        """
+        output columns = ['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index']
+        :param cluster:
+        :param output_dir:
+        :param file:
+        :param save:
+        :return:
+        """
         # New table with firm name, mom_1, long and short index, cluster index
         LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
 
-        for cluster_num, firms in enumerate(Cluster):
+        for cluster_num, firms in enumerate(cluster):
             # if cluster_num == 0:
             #     continue
 
             # Sort firms based on momentum_1
+            firms_sorted = firms.sort_values(by=firms.column[0])
             firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, 0])
             long_short = [0] * len(firms_sorted)
             mom_diffs = []
@@ -492,8 +501,7 @@ class Result_Check_and_Save:
 
             for i in range(len(firms_sorted) // 2):
                 # Only assign long-short indices if the mom1 difference is greater than the standard deviation
-                if abs(self.PCA_Data.loc[firms_sorted[i], 0] - self.PCA_Data.loc[
-                    firms_sorted[-i - 1], 0]) > std_dev:
+                if abs(self.PCA_Data.loc[firms_sorted[i], 0] - self.PCA_Data.loc[firms_sorted[-i - 1], 0]) > std_dev:
                     long_short[i] = 1  # 1 to the low ones
                     long_short[-i - 1] = -1  # -1 to the high ones
                     # 0 to middle point when there are odd numbers in a cluster
@@ -509,10 +517,20 @@ class Result_Check_and_Save:
                 LS_table.loc[len(LS_table)] = [firm, self.PCA_Data.loc[firm, 0], long_short[i], cluster_num]
 
         # Save the output to a CSV file in the output directory
-        LS_table.to_csv(os.path.join(output_dir, file), index=False)
-        print(output_dir)
+        if save:
+            LS_table.to_csv(os.path.join(output_dir, file), index=False)
+            print(f'Exported to {output_dir}!')
+        return LS_table
 
-    def Reversal_Table_Save(self, data: pd.DataFrame, output_dir, file):
+    def reversal_table(self, data: pd.DataFrame, output_dir, file, save=True):
+        """
+
+        :param data:
+        :param output_dir:
+        :param file:
+        :param save:
+        :return:
+        """
         LS_table_reversal = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short'])
         firm_lists = data.index
         firm_sorted = sorted(firm_lists, key=lambda x: data.loc[x, '1'])
@@ -525,9 +543,11 @@ class Result_Check_and_Save:
         for i, firm in enumerate(firm_sorted):
             LS_table_reversal.loc[len(LS_table_reversal)] = [firm, data.loc[firm, '1'], long_short[i]]
 
-        # Save the output to a CSV file in the output directory
-        LS_table_reversal.to_csv(os.path.join(output_dir, file), index=False)
-        print(output_dir)
+        if save:
+            # Save the output to a CSV file in the output directory
+            LS_table_reversal.to_csv(os.path.join(output_dir, file), index=False)
+            print(f'Exported to {output_dir}!')
+        return LS_table_reversal
 
     def Plot_clusters_Kmean(self, clusters: list):
         firm_names = self.PCA_Data.index
@@ -562,7 +582,7 @@ class Result_Check_and_Save:
 
                 plt.show()
 
-    def Plot_clusters(self, cluster: list):
+    def Plot_clusters(self, cluster: list, plttitle=None):
         firm_names = self.PCA_Data.index
         data_array = self.PCA_Data.values[:, 1:].astype(float)
 
@@ -584,7 +604,7 @@ class Result_Check_and_Save:
 
             plt.xlabel('Characteristics')
             plt.ylabel('Data Value')
-            plt.title(title)
+            plt.title(title) if plttitle is None else plt.title(plttitle)
 
             # List the firm names on the side of the graph
             if len(firms) <= 10:
@@ -595,6 +615,11 @@ class Result_Check_and_Save:
             plt.show()
 
     def count_outlier(self, cluster: list):
+        """
+        Deprecated
+        :param cluster:
+        :return:
+        """
         if not cluster:
             return 0
 
