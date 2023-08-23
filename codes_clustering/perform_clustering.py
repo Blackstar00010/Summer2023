@@ -73,7 +73,7 @@ if Reversal_Save:
 
 # Save K_mean clutering method LS_Tables
 # hyper parameter K(1,2,3,4,5,10,50,100,500,1000) should be tested manually.(paper follow)
-K_mean_Save = True
+K_mean_Save = False
 if K_mean_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/K_Means_outlier'
@@ -115,7 +115,7 @@ if K_mean_Save:
 
 # Save DBSCAN clutering method LS_Tables
 # hyper parameter eps percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-dbscan_Save = True
+dbscan_Save = False
 if dbscan_Save:
     # input_dir = '../files/momentum_adj'
     # output_dir ='../files/Clustering_adj/DBSCAN'
@@ -159,7 +159,7 @@ if dbscan_Save:
 
 # Save HDBSCAN clutering method LS_Tables
 # hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.
-hdbscan_Save = True
+hdbscan_Save = False
 if hdbscan_Save:
     # input_dir = '../files/momentum_adj'
     # output_dir ='../files/Clustering_adj/HDBSCAN'
@@ -205,7 +205,7 @@ if hdbscan_Save:
 
 # Save Hirarchical Agglomerative clutering method LS_Tables
 # hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-Agglormerative_Save = True
+Agglormerative_Save = False
 if Agglormerative_Save:
     # input_dir = '../files/momentum_adj'
     # output_dir ='../files/Clustering_adj/Hierarchical_Agglomerative'
@@ -296,7 +296,7 @@ if GMM_Save:
 
 # Save OPTICS clutering method LS_Tables
 # hyper parameter percentile of xi range(0.05, 0.09, 0.01) should be tested manually.
-optics_Save = True
+optics_Save = False
 if optics_Save:
     # input_dir = '../files/momentum_adj'
     # output_dir ='../files/Clustering_adj/OPTICS'
@@ -343,7 +343,7 @@ if optics_Save:
 
 # Save Meanshift clutering method LS_Tables
 # hyper parameter quantile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-meanshift_Save = True
+meanshift_Save = False
 if meanshift_Save:
     # input_dir = '../files/momentum_adj'
     # output_dir ='../files/Clustering_adj/Meanshift'
@@ -394,7 +394,7 @@ if meanshift_Save:
 
 # Save BIRCH clutering method LS_Tables
 # hyper parameter percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-birch_Save = True
+birch_Save = False
 if birch_Save:
         # input_dir = '../files/momentum_adj'
         # output_dir ='../files/Clustering_adj/HDBSCAN'

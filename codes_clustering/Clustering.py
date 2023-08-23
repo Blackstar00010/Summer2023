@@ -283,6 +283,7 @@ class Clustering:
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         type = find_optimal_GMM_covariance_type(self.PCA_Data)
+        print(type)
         # 1. Gaussian Mixture Model
         gmm = GaussianMixture(n_components=2, init_params='k-means++', covariance_type=type).fit(self.PCA_Data)
         cluster_labels = gmm.predict(self.PCA_Data)

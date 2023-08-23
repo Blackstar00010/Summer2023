@@ -40,7 +40,7 @@ def generate_PCA_Data(data: pd.DataFrame):
     suffix = momentum_suffix_finder(data)
 
     # mom1 save and data Normalization
-    mom1 = data.astype(float)[:, suffix + '1']
+    mom1 = data.astype(float).loc[:, suffix + '1']
     data_normalized = (data - data.mean()) / data.std()
     mat = data_normalized.astype(float)
 
@@ -166,7 +166,7 @@ def find_optimal_GMM_covariance_type(data):
     }
 
     # BIC score를 평가 지표로 하여 GridSearchCV 실행
-    grid_search = GridSearchCV(bgm, param_grid=param_grid, scoring='neg_negative_likelihood_ratio')
+    grid_search = GridSearchCV(bgm, param_grid=param_grid, scoring='neg_mean_squared_error')
     grid_search.fit(data)
 
     # 최적의 covariance type과 n_components 출력
