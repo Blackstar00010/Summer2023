@@ -1,4 +1,7 @@
 import math
+
+import pandas as pd
+
 from PCA_and_ETC import *
 from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
@@ -495,7 +498,8 @@ class ResultCheck:
 
             for i in range(len(firms_sorted) // 2):
                 # Calculate the mom1 difference for each pair
-                mom_diff = abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name])
+                mom_diff = abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[
+                    firms_sorted[-i - 1], mom1_col_name])
                 mom_diffs.append(mom_diff)
 
             # Calculate the cross-sectional standard deviation of all pairs' mom1 differences
@@ -503,7 +507,12 @@ class ResultCheck:
 
             for i in range(len(firms_sorted) // 2):
                 # Only assign long-short indices if the mom1 difference is greater than the standard deviation
-                if abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name]) > std_dev:
+                if ((abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] -
+                         self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name]
+                         ) > (std_dev + np.mean(mom_diffs))) and
+                        (abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] -
+                             self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name]
+                             ) < (- std_dev + np.mean(mom_diffs)))):
                     long_short[i] = 1  # 1 to the low ones
                     long_short[-i - 1] = -1  # -1 to the high ones
                     # 0 to middle point when there are odd numbers in a cluster
