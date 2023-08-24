@@ -474,7 +474,7 @@ class ResultCheck:
         self.PCA_Data = data
         self.prefix = momentum_prefix_finder(self.PCA_Data)
 
-    def ls_table(self, cluster: list, output_dir, file, save=True):
+    def ls_table(self, cluster: list, output_dir, file, save=True, raw=True):
         """
         output columns = ['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index']
         :param cluster:
@@ -486,42 +486,36 @@ class ResultCheck:
         # New table with firm name, mom_1, long and short index, cluster index
         LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
 
-        mom1_col_name = self.prefix + '1'
+        if not raw:
+            mom1_col_name = self.prefix + '1'
+        else:
+            mom1_col_name = 0
 
+        all_diffs = []
         for cluster_num, firms in enumerate(cluster):
-
-            # Sort firms based on momentum_1
-            # firms_sorted = firms.sort_values(by=firms.column[0])
             firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, mom1_col_name])
-            long_short = [0] * len(firms_sorted)
-            mom_diffs = []
 
             for i in range(len(firms_sorted) // 2):
-                # Calculate the mom1 difference for each pair
-                mom_diff = abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[
-                    firms_sorted[-i - 1], mom1_col_name])
-                mom_diffs.append(mom_diff)
+                mom_diff = abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name])
+                all_diffs.append(mom_diff)
 
-            # Calculate the cross-sectional standard deviation of all pairs' mom1 differences
-            std_dev = np.std(mom_diffs)
+        std_dev = np.std(all_diffs)
+
+        for cluster_num, firms in enumerate(cluster):
+            firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, mom1_col_name])
+            long_short = [0] * len(firms_sorted)
 
             for i in range(len(firms_sorted) // 2):
                 # Only assign long-short indices if the mom1 difference is greater than the standard deviation
-                if ((abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] -
-                         self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name]
-                         ) > (std_dev + np.mean(mom_diffs))) and
-                        (abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] -
-                             self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name]
-                             ) < (- std_dev + np.mean(mom_diffs)))):
+                if abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name]) > std_dev:
                     long_short[i] = 1  # 1 to the low ones
                     long_short[-i - 1] = -1  # -1 to the high ones
                     # 0 to middle point when there are odd numbers in a cluster
 
             # Outlier cluster를 빼지 않는 대신 LS_Value를 0으로
-            lab = True
-            if lab:
-                if cluster_num == 0:
-                    long_short = [0] * len(firms_sorted)
+
+            if cluster_num == 0:
+                long_short = [0] * len(firms_sorted)
 
             # Add the data to the new table
             for i, firm in enumerate(firms_sorted):
