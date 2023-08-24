@@ -174,8 +174,12 @@ if Agglormerative_Save:
 
         # convert mom_data into PCA_data
         data = read_and_preprocess_data(input_dir, file)
-        df_combined = generate_PCA_Data(data)
-        df_combined=data
+        raw=True
+        if not raw:
+            df_combined = generate_PCA_Data(data)
+        else:
+            df_combined=data
+
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
         Do_Result_Save = C.ResultCheck(df_combined)
@@ -186,7 +190,7 @@ if Agglormerative_Save:
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
         # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file)
+        Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, raw)
 
         if len(sorted(list(set(Do_Clustering.Agglomerative_labels)))) != 1:
             silhouette_avg = silhouette_score(df_combined, Do_Clustering.Agglomerative_labels)
