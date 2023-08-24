@@ -226,7 +226,7 @@ class Clustering:
         self.HDBSCAN = clust
         return self.HDBSCAN
 
-    def perform_HA(self, threshold: float):
+    def perform_HA(self, threshold: float, draw_dendro=False):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
@@ -236,18 +236,19 @@ class Clustering:
         # data point pair 간의 euclidean distance/firm수 combination 2
 
         # 연결 매트릭스 계산
-        Z = linkage(dist_matrix, method='average')
+        Z = linkage(dist_matrix, method='ward')
         '''we adopt the average linkage, which is defined as the average distance between
         the data points in one cluster and the data points in another cluster
         논문과는 다른 부분. average method대신 ward method 사용.
         '''
 
         # # 덴드로그램 시각화
-        # dendrogram(Z)
-        # plt.title('Dendrogram')
-        # plt.xlabel('Samples')
-        # plt.ylabel('Distance')
-        # plt.show()
+        if draw_dendro:
+            dendrogram(Z)
+            plt.title('Dendrogram')
+            plt.xlabel('Samples')
+            plt.ylabel('Distance')
+            plt.show()
 
         # cophenetic distance 계산
         coph_dists = Z[:, 2]  # Z의 두 번째 열은 cophenetic distance 값
