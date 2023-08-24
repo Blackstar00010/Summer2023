@@ -19,17 +19,18 @@ import multiprocessing as mp
 warnings.filterwarnings("ignore")
 
 
-def momentum_suffix_finder(df: pd.DataFrame):
+def momentum_prefix_finder(df: pd.DataFrame):
     """
 
     :param df:
     :return:
     """
-    possible_suffix = ['', 'Momentum', 'MOM', 'mom', 'Momentum_', 'MOM_', 'mom_']
+    possible_prefix = ['', 'Momentum', 'MOM', 'mom', 'Momentum_', 'MOM_', 'mom_', 'Mom_']
     for i in range(1, 10):
-        for aposs in possible_suffix:
+        for aposs in possible_prefix:
             if aposs + str(i) in df.columns:
                 return aposs
+
 
 
 def generate_PCA_Data(data: pd.DataFrame):
@@ -37,7 +38,7 @@ def generate_PCA_Data(data: pd.DataFrame):
     :param data: momentum_data
     :return: Mom1+PCA_Data
     """
-    prefix = momentum_suffix_finder(data)
+    prefix = momentum_prefix_finder(data)
 
     # mom1 save and data Normalization
     mom1 = data.astype(float).loc[:, prefix + '1']
@@ -49,6 +50,7 @@ def generate_PCA_Data(data: pd.DataFrame):
 
     # mom49를 제외한 mat/PCA(1-48)
     mat = mat.drop(columns=[prefix + '49'])
+    mat = mat.dropna(how='all', axis=1)
 
     # 1. Searching optimal n_components
     n_components = min(len(data), 20)

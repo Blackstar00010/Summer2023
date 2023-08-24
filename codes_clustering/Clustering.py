@@ -469,6 +469,7 @@ class ResultCheck:
 
     def __init__(self, data: pd.DataFrame):
         self.PCA_Data = data
+        self.prefix = momentum_prefix_finder(self.PCA_Data)
 
     def ls_table(self, cluster: list, output_dir, file, save=True):
         """
@@ -482,19 +483,19 @@ class ResultCheck:
         # New table with firm name, mom_1, long and short index, cluster index
         LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
 
+        mom1_col_name = self.prefix + '1'
+
         for cluster_num, firms in enumerate(cluster):
-            # if cluster_num == 0:
-            #     continue
 
             # Sort firms based on momentum_1
-            firms_sorted = firms.sort_values(by=firms.column[0])
-            firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, 0])
+            # firms_sorted = firms.sort_values(by=firms.column[0])
+            firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, mom1_col_name])
             long_short = [0] * len(firms_sorted)
             mom_diffs = []
 
             for i in range(len(firms_sorted) // 2):
                 # Calculate the mom1 difference for each pair
-                mom_diff = abs(self.PCA_Data.loc[firms_sorted[i], 0] - self.PCA_Data.loc[firms_sorted[-i - 1], 0])
+                mom_diff = abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name])
                 mom_diffs.append(mom_diff)
 
             # Calculate the cross-sectional standard deviation of all pairs' mom1 differences
@@ -502,7 +503,7 @@ class ResultCheck:
 
             for i in range(len(firms_sorted) // 2):
                 # Only assign long-short indices if the mom1 difference is greater than the standard deviation
-                if abs(self.PCA_Data.loc[firms_sorted[i], 0] - self.PCA_Data.loc[firms_sorted[-i - 1], 0]) > std_dev:
+                if abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name]) > std_dev:
                     long_short[i] = 1  # 1 to the low ones
                     long_short[-i - 1] = -1  # -1 to the high ones
                     # 0 to middle point when there are odd numbers in a cluster
@@ -515,7 +516,7 @@ class ResultCheck:
 
             # Add the data to the new table
             for i, firm in enumerate(firms_sorted):
-                LS_table.loc[len(LS_table)] = [firm, self.PCA_Data.loc[firm, 0], long_short[i], cluster_num]
+                LS_table.loc[len(LS_table)] = [firm, self.PCA_Data.loc[firm, mom1_col_name], long_short[i], cluster_num]
 
         # Save the output to a CSV file in the output directory
         if save:

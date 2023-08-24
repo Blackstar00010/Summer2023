@@ -174,16 +174,16 @@ if Agglormerative_Save:
 
         # convert mom_data into PCA_data
         data = read_and_preprocess_data(input_dir, file)
-        # df_combined = generate_PCA_Data(data)
+        df_combined = generate_PCA_Data(data)
         df_combined=data
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.5)
+        Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.2)
 
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
+        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file)
