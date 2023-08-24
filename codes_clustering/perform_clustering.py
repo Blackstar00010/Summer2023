@@ -158,7 +158,7 @@ if hdbscan_Save:
 
 # Save Hirarchical Agglomerative clutering method LS_Tables
 # hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-Agglormerative_Save = False
+Agglormerative_Save = True
 if Agglormerative_Save:
     # input_dir = '../files/momentum_adj'
     # output_dir ='../files/Clustering_adj/Hierarchical_Agglomerative'
@@ -174,8 +174,8 @@ if Agglormerative_Save:
 
         # convert mom_data into PCA_data
         data = read_and_preprocess_data(input_dir, file)
-        df_combined = generate_PCA_Data(data)
-
+        # df_combined = generate_PCA_Data(data)
+        df_combined=data
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
         Do_Result_Save = C.ResultCheck(df_combined)
@@ -204,7 +204,7 @@ if Agglormerative_Save:
 
 # Save GaussianMixture clutering method LS_Tables
 # hyper parameter outlier probability [1, 5, 10, 15, 20] should be tested manually.
-GMM_Save = True
+GMM_Save = False
 if GMM_Save:
     # input_dir = '../files/momentum_adj'
     # output_dir ='../files/Clustering_adj/Gaussian_Mixture_Model'
