@@ -87,7 +87,7 @@ Agglormerative_Plot = True
 if Agglormerative_Plot:
     # convert mom_data into PCA_data
     data = read_and_preprocess_data(input_dir, file)
-    # df_combined = generate_PCA_Data(data)
+    df_combined = generate_PCA_Data(data)
     df_combined = data
 
     # Call initial method
