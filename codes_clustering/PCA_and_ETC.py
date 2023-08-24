@@ -30,6 +30,7 @@ def momentum_prefix_finder(df: pd.DataFrame):
         for aposs in possible_prefix:
             if aposs + str(i) in df.columns:
                 return aposs
+    return ''
 
 
 
@@ -80,6 +81,7 @@ def generate_PCA_Data(data: pd.DataFrame):
     first_column_matrix = np.array(mom1).reshape(-1, 1)
     combined_matrix = np.hstack((first_column_matrix, mat_pd_pca_matrix))
     df_combined = pd.DataFrame(combined_matrix)
+    df_combined.columns = df_combined.columns.astype(str)
     df_combined.index = data.index
 
     return df_combined

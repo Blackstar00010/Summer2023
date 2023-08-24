@@ -174,12 +174,11 @@ if Agglormerative_Save:
 
         # convert mom_data into PCA_data
         data = read_and_preprocess_data(input_dir, file)
-        raw=True
+        raw=False
         if not raw:
             df_combined = generate_PCA_Data(data)
         else:
-            df_combined=data
-
+            df_combined = data
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
         Do_Result_Save = C.ResultCheck(df_combined)
@@ -328,7 +327,7 @@ if meanshift_Save:
         # Do clustering and get 2D list of cluster index
         Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.9)
 
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.menshift)
+        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.meanshift)
 
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.meanshift, output_dir, file)

@@ -481,15 +481,39 @@ class ResultCheck:
         :param output_dir:
         :param file:
         :param save:
+        :param raw:
         :return:
         """
         # New table with firm name, mom_1, long and short index, cluster index
         LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
 
-        if not raw:
+        if raw:
             mom1_col_name = self.prefix + '1'
         else:
             mom1_col_name = 0
+
+        # consider using this
+        '''
+        shit = []
+        for i in range(len(cluster)):
+            for afirm in cluster[i]:
+                shit.append([afirm, i])
+        shit = pd.DataFrame(shit, columns=['Firm Name', 'Cluster Index'])
+        shit = shit.set_index('Firm Name')
+        shit['Momentum_1'] = self.PCA_Data[mom1_col_name]
+        shit = shit.reset_index()
+        shit = shit.set_index('Firm Name')
+        shit = shit.sort_values(by=['Cluster Index', 'Momentum_1'], ascending=[True, False])
+        spread_vec = (shit.reset_index()['Momentum_1'] -
+                      shit.sort_values(by=['Cluster Index', 'Momentum_1'],
+                                       ascending=[True, True]).reset_index()['Momentum_1'])
+        shit = shit.reset_index()
+        shit['spread'] = spread_vec
+        shit['in_portfolio'] = (shit['spread'].abs() > shit['spread'].std()) * 1
+        shit['LS'] = shit['in_portfolio'] * shit['spread'] / shit['spread'].abs()
+        shit['LS'] = shit['LS'].fillna(0)
+        shit = shit.drop(columns=['spread', 'in_portfolio'])
+        '''
 
         all_diffs = []
         for cluster_num, firms in enumerate(cluster):
@@ -592,7 +616,6 @@ class ResultCheck:
         data_array = self.PCA_Data.values[:, 1:].astype(float)
 
         for j, firms in enumerate(cluster):
-
             if j == 0:
                 print(f'Noise: {firms}')
                 title = 'Noise'
@@ -621,7 +644,7 @@ class ResultCheck:
 
     def count_outlier(self, cluster: list):
         """
-        Deprecated
+
         :param cluster:
         :return:
         """
