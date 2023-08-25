@@ -11,7 +11,7 @@ subdirectories = [d for d in os.listdir(base_directory) if os.path.isdir(os.path
 
 file_names = []
 result_df = pd.DataFrame()
-proportion=[]
+proportion = []
 
 # Save subdir name in file_names at the beginning.
 for subdir in subdirectories:
@@ -61,7 +61,7 @@ for subdir in subdirectories:
 
         not_non_count = LS_merged_df.count()
         count_1 = (LS_merged_df == 1).sum()
-        invested_firm=(count_1*2/not_non_count).sum()/311
+        invested_firm = (count_1 * 2 / not_non_count).sum() / 311
         # proportion.loc['proportion']=invested_firm
         proportion.append(invested_firm)
 
@@ -77,9 +77,10 @@ for subdir in subdirectories:
         # t-1 LS_Value와 t mom1 product
         MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
         LS_merged_df = LS_merged_df.fillna(0)
+        LS_merged_df.columns = MOM_merged_df.columns
 
         # Multiply only the numeric columns
-        prod = MOM_merged_df.values * LS_merged_df.values
+        prod = MOM_merged_df * LS_merged_df
         prod = pd.DataFrame(prod)
 
         # prod index set to df1.index
@@ -88,9 +89,9 @@ for subdir in subdirectories:
         prod.columns = MOM_merged_df.columns
 
         # 제대로 됐나 확인하기 위해 csv saved.
-        # MOM_merged_df.to_csv('../files/adj_close/mom1.csv', index=True)
-        # LS_merged_df.to_csv(f'../files/adj_close/LS/{subdir}_LS.csv', index=True)
-        # prod.to_csv(f'../files/adj_close/prod/{subdir}_prod.csv', index=True)
+        MOM_merged_df.to_csv('../files/mom1.csv', index=True)
+        LS_merged_df.to_csv(f'../files/{subdir}_LS.csv', index=True)
+        prod.to_csv(f'../files/{subdir}_prod.csv', index=True)
 
         # Count the non-zero LS that is the number of total firm invested(395 by 1 matrix/index=Date)
         non_zero_count = LS_merged_df.astype(bool).sum()
@@ -137,49 +138,49 @@ if save_result:
     # Concat the 'Clustering Method' column back with the sorted date columns
     result_df = pd.concat([clustering_method, date_columns_df], axis=1)
     result_df.set_index('Clustering Method', inplace=True)
-    file_names.append('FTSE 100')
-
-    # benchmark return merge with result_df
-    file = '../files/ftse_return.csv'
-    df = pd.read_csv(file)
-    df = df.iloc[1:]
+    # file_names.append('FTSE 100')
+    #
+    # # benchmark return merge with result_df
+    # file = '../files/ftse_return.csv'
+    # df = pd.read_csv(file)
+    # df = df.iloc[1:]
     # df = df.iloc[0:, 1:]
-    df = df.iloc[0:, 85:]
-    df.columns = result_df.columns  # columns name should be same with result_df
-    result_df = pd.concat([result_df, df], axis=0)  # add monthly_return right below result_df
-    result_df.index = file_names
-    result_df = result_df.astype(float)  # set data type as float(df.value was str actually.)
-    result_df = result_df.fillna(0)
+    # # df = df.iloc[0:, 85:]
+    # print(len(df))
+    # df.columns = result_df.columns  # columns name should be same with result_df
+    # result_df = pd.concat([result_df, df], axis=0)  # add monthly_return right below result_df
+    # result_df.index = file_names
+    # result_df = result_df.astype(float)  # set data type as float(df.value was str actually.)
+    # result_df = result_df.fillna(0)
+    #
+    # proportion.append(0)
+    # proportion=pd.DataFrame(proportion, index=file_names, columns=['proportion'])
+    # proportion.to_csv('../files/result/invested_proportion.csv', index=True)
 
-    proportion.append(0)
-    proportion=pd.DataFrame(proportion, index=file_names, columns=['proportion'])
-    proportion.to_csv('../files/result/invested_proportion.csv', index=True)
-
-    print(result_df.T.describe())
     result_df.T.describe().to_csv('../files/result/statistics_original.csv', index=True)
     result_df.to_csv('../files/result/result_original.csv', index=True)
-    result_df = result_df.applymap(lambda x: 0 if abs(x) > 0.4 else x)
-
-    # Save a new CSV file
-    # result_df.to_csv('../files/result_adj.csv', index=True)
-    result_df.T.describe().to_csv('../files/result/statistics_modified.csv', index=True)
-    result_df.to_csv('../files/result/result_modified.csv', index=True)
 
     # Add 1 to all data values
     result_df.iloc[:, 0:] = result_df.iloc[:, 0:] + 1
 
-    # Calculate the cumulative product
-    result_df.iloc[:, 0:] = result_df.iloc[:, 0:].cumprod(axis=1)
+    # transform into log scale
+    result_df.iloc[:, 0:] = np.log(result_df.iloc[:, 0:])
 
-    # Subtract 1 to get back to the original scale
-    result_df.iloc[:, 0:] = result_df.iloc[:, 0:] - 1
+
+    result_df = result_df.applymap(lambda x: 0 if abs(x) > 0.9 else x)
+    print(result_df.T.describe())
+    result_df.T.describe().to_csv('../files/result/statistics_modified.csv', index=True)
+    result_df.to_csv('../files/result/result_modified.csv', index=True)
+
+    # Calculate the cumulative product
+    result_df.iloc[:, 0:] = result_df.iloc[:, 0:].cumsum(axis=1)
 
 Plot = True
 if Plot:
     plt.figure(figsize=(10, 6))
 
     for i in range(len(result_df)):
-        plt.plot(result_df.columns[1:], result_df.iloc[i, 1:], label=result_df.iloc[i, 0])
+        plt.plot(result_df.columns[1:], result_df.iloc[i, 1:].fillna(method='ffill'), label=result_df.iloc[i, 0])
 
     plt.title('RETURN')
     plt.xlabel('Date')
@@ -189,14 +190,14 @@ if Plot:
     plt.tight_layout()
     plt.show()
 
-    # # Plot a graph for each row
-    # for i in range(len(result_df)):
-    #     plt.figure(figsize=(10, 6))
-    #     plt.plot(result_df.columns[1:], result_df.iloc[i, 1:])
-    #     plt.title(result_df.index[i])
-    #     plt.xlabel('Date')
-    #     plt.ylabel('Average Value')
-    #     plt.xticks(rotation=45)
-    #     plt.tight_layout()
-    #
-    #     plt.show()
+    # Plot a graph for each row
+    for i in range(len(result_df)):
+        plt.figure(figsize=(10, 6))
+        plt.plot(result_df.columns[1:], result_df.iloc[i, 1:].fillna(method='ffill'))
+        plt.title(result_df.index[i])
+        plt.xlabel('Date')
+        plt.ylabel('Average Value')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+
+        plt.show()

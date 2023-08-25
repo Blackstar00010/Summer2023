@@ -185,7 +185,7 @@ if Agglormerative_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.2)
+        Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.5)
 
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
