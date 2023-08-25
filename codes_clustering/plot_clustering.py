@@ -2,7 +2,7 @@ import Clustering as C
 from PCA_and_ETC import *
 
 # file to check
-file = '2022-01.csv'
+file = '2021-01.csv'
 
 input_dir = '../files/characteristics'
 
@@ -10,7 +10,7 @@ input_dir = '../files/characteristics'
 warnings.filterwarnings("ignore")
 
 # Plot K_mean cluster about individual csv file
-K_mean_Plot = False
+K_mean_Plot = True
 if K_mean_Plot:
     # convert mom_data into PCA_data
     data = read_and_preprocess_data(input_dir, file)
@@ -83,7 +83,7 @@ if hdbscan_Plot:
 # hyper parameter eps percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
 
 # Plot Agglomerative cluster about individual csv file
-Agglormerative_Plot = True
+Agglormerative_Plot = False
 if Agglormerative_Plot:
     # convert mom_data into PCA_data
     data = read_and_preprocess_data(input_dir, file)

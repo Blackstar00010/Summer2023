@@ -48,7 +48,11 @@ class Clustering:
 
         # kmeans = BisectingKMeans(n_clusters=k_value, init='k-means++', n_init=10, max_iter=500,
         #                          algorithm='elkan', bisecting_strategy='largest_cluster').fit(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500).fit(self.PCA_Data)
+
+        cluster_labels = kmeans.labels_
+        self.K_Mean_labels = cluster_labels
 
         distance_to_own_centroid = np.array([distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for i in range(len(self.PCA_Data))])
 
@@ -63,15 +67,17 @@ class Clustering:
 
         outliers = np.where(distance_to_own_centroid > epsilon)[0]
 
-        filtered_data = np.delete(self.PCA_Data, outliers, axis=0)
+        firm_outliers = []
+        for i in enumerate(kmeans.labels_):
+            firm_outliers.append(self.index[outliers[i]])
 
-        clusters_indices = [[] for _ in range(3)]
+        clusters_indices = [[] for _ in range(k_value)]
         for i, label in enumerate(kmeans.labels_):
             if i in outliers:
                 continue
-            clusters_indices[label].append(i)
+            clusters_indices[label].append(self.index[i])
 
-        clusters_indices.insert(0, list(outliers))
+        clusters_indices.insert(0, list(firm_outliers))
 
         return clusters_indices
 
