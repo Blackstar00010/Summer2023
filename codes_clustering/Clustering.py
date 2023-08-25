@@ -273,7 +273,7 @@ class Clustering:
 
         # 1. Hierachical Agglomerative
         # 거리 행렬 계산
-        dist_matrix = pdist(self.PCA_Data, metric='euclidean')
+        dist_matrix = pdist(self.PCA_Data, metric='cityblock')
         # data point pair 간의 euclidean distance/firm수 combination 2
 
         # 연결 매트릭스 계산
@@ -298,7 +298,7 @@ class Clustering:
         '''In our empirical study, we specify the maximum distance rather than the number of clusters K,
         using a method similar to the method adopted for k-means clustering:
         e is set as an α percentile of the distances between a pair of nearest data points'''
-        # 최대 cophenetic distance의 0.4를 곱한 값을 max_d로 사용
+        # 평균 cophenetic distance의 0.4를 곱한 값을 max_d로 사용
         max_d = np.max(coph_dists) * threshold
 
         # cophenet: dendrogram과 original data 사이 similarity을 나타내는 correlation coefficient

@@ -89,9 +89,9 @@ for subdir in subdirectories:
         prod.columns = MOM_merged_df.columns
 
         # 제대로 됐나 확인하기 위해 csv saved.
-        MOM_merged_df.to_csv('../files/mom1.csv', index=True)
-        LS_merged_df.to_csv(f'../files/{subdir}_LS.csv', index=True)
-        prod.to_csv(f'../files/{subdir}_prod.csv', index=True)
+        # MOM_merged_df.to_csv('../files/mom1.csv', index=True)
+        # LS_merged_df.to_csv(f'../files/{subdir}_LS.csv', index=True)
+        # prod.to_csv(f'../files/{subdir}_prod.csv', index=True)
 
         # Count the non-zero LS that is the number of total firm invested(395 by 1 matrix/index=Date)
         non_zero_count = LS_merged_df.astype(bool).sum()
