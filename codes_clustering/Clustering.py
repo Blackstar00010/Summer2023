@@ -528,7 +528,7 @@ class ResultCheck:
         if raw:
             mom1_col_name = self.prefix + '1'
         else:
-            mom1_col_name = 0
+            mom1_col_name = '0'
 
         # consider using this
         '''
@@ -600,7 +600,8 @@ class ResultCheck:
         """
         LS_table_reversal = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short'])
         firm_lists = data.index
-        firm_sorted = sorted(firm_lists, key=lambda x: data.loc[x, '1'])
+        prefix = momentum_prefix_finder(data)
+        firm_sorted = sorted(firm_lists, key=lambda x: data.loc[x, prefix+'1'])
         long_short = [0] * len(firm_sorted)
         t = int(len(firm_lists) * 0.1)
         for i in range(t):
@@ -608,7 +609,7 @@ class ResultCheck:
             long_short[-i - 1] = -1
 
         for i, firm in enumerate(firm_sorted):
-            LS_table_reversal.loc[len(LS_table_reversal)] = [firm, data.loc[firm, '1'], long_short[i]]
+            LS_table_reversal.loc[len(LS_table_reversal)] = [firm, data.loc[firm, prefix+'1'], long_short[i]]
 
         if save:
             # Save the output to a CSV file in the output directory

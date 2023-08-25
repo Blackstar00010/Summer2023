@@ -20,6 +20,7 @@ if Reversal_Save:
         data = read_and_preprocess_data(input_dir, file)
         Do_Result_Save = C.ResultCheck(data)
 
+
         # Save LS_Table CSV File
         Do_Result_Save.reversal_table(data, output_dir, file)
 
@@ -189,7 +190,7 @@ if Agglormerative_Save:
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
         # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, raw)
+        Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=True, raw=raw)
 
         if len(sorted(list(set(Do_Clustering.Agglomerative_labels)))) != 1:
             silhouette_avg = silhouette_score(df_combined, Do_Clustering.Agglomerative_labels)
