@@ -7,6 +7,7 @@ from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
 from scipy.cluster.hierarchy import *
 from scipy.spatial.distance import pdist
+from scipy.spatial import distance
 
 
 class Clustering:
@@ -43,77 +44,114 @@ class Clustering:
         :param alpha: the rate at which outliers are filtered
         :return: 2D list
         """
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
-        kmeans = BisectingKMeans(n_clusters=k_value, init='k-means++', n_init=10, max_iter=500,
-                                 algorithm='elkan', bisecting_strategy='largest_cluster').fit(self.PCA_Data)
+        # kmeans = BisectingKMeans(n_clusters=k_value, init='k-means++', n_init=10, max_iter=500,
+        #                          algorithm='elkan', bisecting_strategy='largest_cluster').fit(self.PCA_Data)
+        kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500).fit(self.PCA_Data)
 
-        cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
+        distance_to_own_centroid = np.array([distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for i in range(len(self.PCA_Data))])
 
-        self.test = kmeans
-        self.K_Mean_labels = cluster_labels
+        nearest_neighbor_distances = []
+        for i in range(len(self.PCA_Data)):
+            distances = [distance.euclidean(self.PCA_Data[i], self.PCA_Data[j]) for j in range(len(self.PCA_Data)) if i!=j]
+            nearest_neighbor_distances.append(min(distances))
 
-        # Calculate outlier
-        distance = kmeans.fit_transform(self.PCA_Data)  # Distance btw K centroid about all each points
-        main_distance = np.min(distance, axis=1)  # Distance btw own K centroid about all each points
+        sorted_nearest_neighbor_distances = sorted(nearest_neighbor_distances)
 
-        main_distance_clustering = [[] for _ in range(k_value)]
+        epsilon = sorted_nearest_neighbor_distances[int(len(sorted_nearest_neighbor_distances) * alpha)]
 
-        for cluster_num in range(k_value):
-            distance_clustering = distance[cluster_labels == cluster_num]
-            for i in range(len(distance_clustering)):
-                main_distance_clustering[cluster_num].append(distance_clustering[i][cluster_num])
+        outliers = np.where(distance_to_own_centroid > epsilon)[0]
 
-        # max distance in own cluster
-        for i, cluster in enumerate(main_distance_clustering):
-            if not cluster:
+        filtered_data = np.delete(self.PCA_Data, outliers, axis=0)
+
+        clusters_indices = [[] for _ in range(3)]
+        for i, label in enumerate(kmeans.labels_):
+            if i in outliers:
                 continue
-            main_distance_clustering[i] = np.max(cluster)
+            clusters_indices[label].append(i)
 
-        max_main_distance_clustering = main_distance_clustering
+        clusters_indices.insert(0, list(outliers))
 
-        clusters = [[] for _ in range(k_value)]  # Cluster별 distance 분류
-        clusters_index = [[] for _ in range(k_value)]  # Cluster별 index 분류
+        return clusters_indices
 
-        for i, cluster_num in enumerate(cluster_labels):
-            clusters[cluster_num].append(main_distance[i])
-            clusters_index[cluster_num].append(self.index[i])
-
-        outliers = [[] for _ in range(k_value)]  # Cluster별 outliers' distance 분류
-        for i, cluster in enumerate(clusters):
-            if max_main_distance_clustering[i] == 0:
-                continue
-            for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
-                if distance / max_main_distance_clustering[i] >= alpha:
-                    # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 alpha 이상이면 outlier 분류
-                    outliers[i].append(distance)
-
-        outliers_index = []  # Cluster별 outliers's index 분류
-        for i, cluster in enumerate(clusters):
-            if not outliers[i]:
-                continue
-            for k, outlier_dis in enumerate(outliers[i]):
-                for j, distance in enumerate(cluster):
-                    if outlier_dis == distance:
-                        outliers_index.append(clusters_index[i][j])
-                    else:
-                        continue
-
-        outliers_index = list(set(outliers_index))
-
-        # a에 있는 값을 b에서 빼기
-        for value in outliers_index:
-            for row in clusters_index:
-                if value in row:
-                    row.remove(value)
-
-        clusters_index = [sublist for sublist in clusters_index if sublist]  # 빈 리스트 제거
-
-        # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
-        clusters_index.insert(0, outliers_index)
-
-        return clusters_index
+    # def outliers(self, k_value: int, alpha: float = 0.5):
+    #     """
+    #     :param k_value: the number of clusters
+    #     :param alpha: the rate at which outliers are filtered
+    #     :return: 2D list
+    #     """
+    #     self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+    #     # Exclude the first column (firm names) & Exclude MOM_1
+    #
+    #     kmeans = BisectingKMeans(n_clusters=k_value, init='k-means++', n_init=10, max_iter=500,
+    #                              algorithm='elkan', bisecting_strategy='largest_cluster').fit(self.PCA_Data)
+    #
+    #     cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
+    #
+    #     self.test = kmeans
+    #     self.K_Mean_labels = cluster_labels
+    #
+    #     # Calculate outlier
+    #     distance = kmeans.fit_transform(self.PCA_Data)  # Distance btw K centroid about all each points
+    #     main_distance = np.min(distance, axis=1)  # Distance btw own K centroid about all each points
+    #
+    #     main_distance_clustering = [[] for _ in range(k_value)]
+    #
+    #     for cluster_num in range(k_value):
+    #         distance_clustering = distance[cluster_labels == cluster_num]
+    #         for i in range(len(distance_clustering)):
+    #             main_distance_clustering[cluster_num].append(distance_clustering[i][cluster_num])
+    #
+    #     # max distance in own cluster
+    #     for i, cluster in enumerate(main_distance_clustering):
+    #         if not cluster:
+    #             continue
+    #         main_distance_clustering[i] = np.max(cluster)
+    #
+    #     max_main_distance_clustering = main_distance_clustering
+    #
+    #     clusters = [[] for _ in range(k_value)]  # Cluster별 distance 분류
+    #     clusters_index = [[] for _ in range(k_value)]  # Cluster별 index 분류
+    #
+    #     for i, cluster_num in enumerate(cluster_labels):
+    #         clusters[cluster_num].append(main_distance[i])
+    #         clusters_index[cluster_num].append(self.index[i])
+    #
+    #     outliers = [[] for _ in range(k_value)]  # Cluster별 outliers' distance 분류
+    #     for i, cluster in enumerate(clusters):
+    #         if max_main_distance_clustering[i] == 0:
+    #             continue
+    #         for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
+    #             if distance / max_main_distance_clustering[i] >= alpha:
+    #                 # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 alpha 이상이면 outlier 분류
+    #                 outliers[i].append(distance)
+    #
+    #     outliers_index = []  # Cluster별 outliers's index 분류
+    #     for i, cluster in enumerate(clusters):
+    #         if not outliers[i]:
+    #             continue
+    #         for k, outlier_dis in enumerate(outliers[i]):
+    #             for j, distance in enumerate(cluster):
+    #                 if outlier_dis == distance:
+    #                     outliers_index.append(clusters_index[i][j])
+    #                 else:
+    #                     continue
+    #
+    #     outliers_index = list(set(outliers_index))
+    #
+    #     # a에 있는 값을 b에서 빼기
+    #     for value in outliers_index:
+    #         for row in clusters_index:
+    #             if value in row:
+    #                 row.remove(value)
+    #
+    #     clusters_index = [sublist for sublist in clusters_index if sublist]  # 빈 리스트 제거
+    #
+    #     # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
+    #     clusters_index.insert(0, outliers_index)
+    #
+    #     return clusters_index
 
     def perform_kmeans(self, k_value: int, alpha: float = 0.5):
         """
