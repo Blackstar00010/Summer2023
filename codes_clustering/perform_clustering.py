@@ -3,54 +3,6 @@ from PCA_and_ETC import *
 from sklearn.metrics import silhouette_score
 
 
-def cluster(input_dir, output_dir, print_logs=False, print_result=False):
-    """
-
-    :param input_dir:
-    :param output_dir:
-    :return:
-    """
-    files = sorted(filename for filename in os.listdir(input_dir))
-    outliers_count = 0
-    sil = 0
-    cl = 0
-    for file in files:
-        if print_logs:
-            print(file)
-
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        df_combined = generate_PCA_Data(data)
-
-        # Call initial method
-        Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
-
-        # Do clustering and get 2D list of cluster index
-        Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.5)
-
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
-
-        # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.HDBSCAN, output_dir, file)
-
-        if len(set(Do_Clustering.HDBSCAN_labels)) != 1:
-            silhouette_avg = silhouette_score(df_combined, Do_Clustering.HDBSCAN_labels)
-            sil += silhouette_avg
-            if print_logs:
-                print("The average silhouette score is:", silhouette_avg)
-        cl += len(set(Do_Clustering.HDBSCAN_labels))
-
-        if print_logs:
-            print("Number of clusters is:", len(set(Do_Clustering.HDBSCAN_labels)))
-
-    sil = sil / len(files)
-    cl = cl / len(files)
-    if print_result:
-        print('average number of clusters:', cl)
-        print('silhouette score:', sil)
-        print(f'total outliers: {outliers_count}')
-
 # Save Reversal method LS_Tables
 Reversal_Save = False
 if Reversal_Save:
@@ -66,10 +18,10 @@ if Reversal_Save:
 
         # convert mom_data into PCA_data
         data = read_and_preprocess_data(input_dir, file)
-        Do_Result_Save = C.Result_Check_and_Save(data)
+        Do_Result_Save = C.ResultCheck(data)
 
         # Save LS_Table CSV File
-        Do_Result_Save.Reversal_Table_Save(data, output_dir, file)
+        Do_Result_Save.reversal_table(data, output_dir, file)
 
 # Save K_mean clutering method LS_Tables
 # hyper parameter K(1,2,3,4,5,10,50,100,500,1000) should be tested manually.(paper follow)
@@ -86,11 +38,12 @@ if K_mean_Save:
 
         # convert mom_data into PCA_data
         data = read_and_preprocess_data(input_dir, file)
+        data = data.set_index('Momentum Index')
         df_combined = generate_PCA_Data(data)
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(2)
@@ -99,7 +52,7 @@ if K_mean_Save:
 
         # Save LS_Table CSV File
         for i, cluster in enumerate(Do_Clustering.K_Mean):
-            Do_Result_Save.LS_Table_Save(cluster, output_dir, file)
+            Do_Result_Save.ls_table(cluster, output_dir, file)
 
         silhouette_avg = silhouette_score(df_combined, Do_Clustering.K_Mean_labels)
         sil += silhouette_avg
@@ -135,7 +88,7 @@ if dbscan_Save:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN(0.6)
@@ -143,7 +96,7 @@ if dbscan_Save:
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
 
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.DBSCAN, output_dir, file)
+        Do_Result_Save.ls_table(Do_Clustering.DBSCAN, output_dir, file)
 
         silhouette_avg = silhouette_score(df_combined, Do_Clustering.DBSCAN_labels)
         sil += silhouette_avg
@@ -179,7 +132,7 @@ if hdbscan_Save:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.5)
@@ -187,7 +140,7 @@ if hdbscan_Save:
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
 
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.HDBSCAN, output_dir, file)
+        Do_Result_Save.ls_table(Do_Clustering.HDBSCAN, output_dir, file)
 
         if len(set(Do_Clustering.HDBSCAN_labels)) != 1:
             silhouette_avg = silhouette_score(df_combined, Do_Clustering.HDBSCAN_labels)
@@ -205,7 +158,7 @@ if hdbscan_Save:
 
 # Save Hirarchical Agglomerative clutering method LS_Tables
 # hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-Agglormerative_Save = False
+Agglormerative_Save = True
 if Agglormerative_Save:
     # input_dir = '../files/momentum_adj'
     # output_dir ='../files/Clustering_adj/Hierarchical_Agglomerative'
@@ -221,19 +174,22 @@ if Agglormerative_Save:
 
         # convert mom_data into PCA_data
         data = read_and_preprocess_data(input_dir, file)
-        df_combined = generate_PCA_Data(data)
-
+        raw=False
+        if not raw:
+            df_combined = generate_PCA_Data(data)
+        else:
+            df_combined = data
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.5)
+        Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.2)
 
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
+        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative, output_dir, file)
+        Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, raw)
 
         if len(sorted(list(set(Do_Clustering.Agglomerative_labels)))) != 1:
             silhouette_avg = silhouette_score(df_combined, Do_Clustering.Agglomerative_labels)
@@ -251,7 +207,7 @@ if Agglormerative_Save:
 
 # Save GaussianMixture clutering method LS_Tables
 # hyper parameter outlier probability [1, 5, 10, 15, 20] should be tested manually.
-GMM_Save = True
+GMM_Save = False
 if GMM_Save:
     # input_dir = '../files/momentum_adj'
     # output_dir ='../files/Clustering_adj/Gaussian_Mixture_Model'
@@ -271,7 +227,7 @@ if GMM_Save:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.Gaussian = Do_Clustering.perform_GMM(1)
@@ -279,7 +235,7 @@ if GMM_Save:
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Gaussian)
 
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.Gaussian, output_dir, file)
+        Do_Result_Save.ls_table(Do_Clustering.Gaussian, output_dir, file)
 
         if len(sorted(list(set(Do_Clustering.Gaussian_labels)))) != 1:
             silhouette_avg = silhouette_score(df_combined, Do_Clustering.Gaussian_labels)
@@ -316,7 +272,7 @@ if optics_Save:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.7)
@@ -324,7 +280,7 @@ if optics_Save:
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
 
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.OPTIC, output_dir, file)
+        Do_Result_Save.ls_table(Do_Clustering.OPTIC, output_dir, file)
 
         if len(sorted(list(set(Do_Clustering.OPTIC_labels)))) != 1:
             silhouette_avg = silhouette_score(df_combined, Do_Clustering.OPTIC_labels)
@@ -366,15 +322,15 @@ if meanshift_Save:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.9)
 
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.menshift)
+        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.meanshift)
 
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.meanshift, output_dir, file)
+        Do_Result_Save.ls_table(Do_Clustering.meanshift, output_dir, file)
 
         if len(sorted(list(set(Do_Clustering.meanshift_labels)))) != 1:
             silhouette_avg = silhouette_score(df_combined, Do_Clustering.meanshift_labels)
@@ -415,7 +371,7 @@ if birch_Save:
 
             # Call initial method
             Do_Clustering = C.Clustering(df_combined)
-            Do_Result_Save = C.Result_Check_and_Save(df_combined)
+            Do_Result_Save = C.ResultCheck(df_combined)
 
             # Do clustering and get 2D list of cluster index
             Do_Clustering.BIRCH = Do_Clustering.perform_BIRCH(0.7)
@@ -423,7 +379,7 @@ if birch_Save:
             outliers_count += Do_Result_Save.count_outlier(Do_Clustering.BIRCH)
 
             # Save LS_Table CSV File
-            Do_Result_Save.LS_Table_Save(Do_Clustering.BIRCH, output_dir, file)
+            Do_Result_Save.ls_table(Do_Clustering.BIRCH, output_dir, file)
 
             if len(sorted(list(set(Do_Clustering.BIRCH_labels)))) != 1:
                 silhouette_avg = silhouette_score(df_combined, Do_Clustering.BIRCH_labels)

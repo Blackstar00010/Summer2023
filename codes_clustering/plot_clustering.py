@@ -10,15 +10,16 @@ input_dir = '../files/characteristics'
 warnings.filterwarnings("ignore")
 
 # Plot K_mean cluster about individual csv file
-K_mean_Plot = True
+K_mean_Plot = False
 if K_mean_Plot:
     # convert mom_data into PCA_data
     data = read_and_preprocess_data(input_dir, file)
-    df_combined = generate_PCA_Data(data)
+    # df_combined = generate_PCA_Data(data)
+    df_combined = data
 
     # Call initial method
     Do_Clustering = C.Clustering(df_combined)
-    Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+    Do_Result_Plot = C.ResultCheck(df_combined)
 
     # Do clustering and get 2D list of cluster index
     Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(10)
@@ -44,7 +45,7 @@ if dbscan_Plot:
 
     # Call initial method
     Do_Clustering = C.Clustering(df_combined)
-    Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+    Do_Result_Plot = C.ResultCheck(df_combined)
 
     # Do clustering and get 2D list of cluster index
     Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN(0.8)
@@ -67,7 +68,7 @@ if hdbscan_Plot:
 
     # Call initial method
     Do_Clustering = C.Clustering(df_combined)
-    Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+    Do_Result_Plot = C.ResultCheck(df_combined)
 
     # Do clustering and get 2D list of cluster index
     Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN()
@@ -82,22 +83,23 @@ if hdbscan_Plot:
 # hyper parameter eps percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
 
 # Plot Agglomerative cluster about individual csv file
-Agglormerative_Plot = False
+Agglormerative_Plot = True
 if Agglormerative_Plot:
     # convert mom_data into PCA_data
     data = read_and_preprocess_data(input_dir, file)
     df_combined = generate_PCA_Data(data)
+    df_combined = data
 
     # Call initial method
     Do_Clustering = C.Clustering(df_combined)
-    Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+    Do_Result_Plot = C.ResultCheck(df_combined)
 
     # Do clustering and get 2D list of cluster index
     # Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([4])
-    Do_Clustering.Agglomerative = Do_Clustering.perform_HG(0.4)
+    Do_Clustering.Agglomerative = Do_Clustering.perform_HA(4/10, draw_dendro=True)
 
     # Plot clustering result
-    Do_Result_Plot.Plot_clusters(Do_Clustering.Agglomerative)
+    Do_Result_Plot.Plot_clusters(Do_Clustering.Agglomerative, plttitle=str(4/10))
 
     # Plot t_SNE result
     # t_SNE('Hirarchical Agglomerative', df_combined, Do_Clustering.Agglomerative_labels)
@@ -106,7 +108,7 @@ if Agglormerative_Plot:
     # analysis_clustering_result(Do_Clustering.PCA_Data, Do_Clustering.Agglomerative_labels, Do_Clustering.K_Mean_labels)
 
     # Do_Result_Plot.LS_Table_Save(Do_Clustering.Agglomerative, '../files/Clustering_adj/Hierarchical_Agglomerative',file)
-# hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
+    # hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
 
 # Plot BGM cluster about individual csv file
 BGM_Plot = False
@@ -119,7 +121,7 @@ if BGM_Plot:
 
     # Call initial method
     Do_Clustering = C.Clustering(df_combined)
-    Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+    Do_Result_Plot = C.ResultCheck(df_combined)
 
     # Do clustering and get 2D list of cluster index
     Do_Clustering.Gaussian = Do_Clustering.perform_GMM(0.15)
@@ -144,7 +146,7 @@ if optics_Plot:
 
     # Call initial method
     Do_Clustering = C.Clustering(df_combined)
-    Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+    Do_Result_Plot = C.ResultCheck(df_combined)
 
     # Do clustering and get 2D list of cluster index
     Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.5)
@@ -169,7 +171,7 @@ if meanshift_Plot:
 
     # Call initial method
     Do_Clustering = C.Clustering(df_combined)
-    Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+    Do_Result_Plot = C.ResultCheck(df_combined)
 
     # Do clustering and get 2D list of cluster index
     Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.3)

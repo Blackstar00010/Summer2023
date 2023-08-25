@@ -1,17 +1,19 @@
 import math
+
+import pandas as pd
+
 from PCA_and_ETC import *
 from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
 from scipy.cluster.hierarchy import *
 from scipy.spatial.distance import pdist
-from scipy.spatial import distance
 
 
 class Clustering:
     def __init__(self, data: pd.DataFrame):
-        self.PCA_Data = data.values[:, 1:].astype(float)
+        self.test = None
+        self.PCA_Data = data
         self.index = data.index
-        self.test = []
 
         self.K_Mean = []
         self.DBSCAN = []
@@ -41,95 +43,77 @@ class Clustering:
         :param alpha: the rate at which outliers are filtered
         :return: 2D list
         """
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
-        # kmeans = BisectingKMeans(n_clusters=k_value, init='k-means++', n_init=10, max_iter=500,
-        #                          algorithm='elkan', bisecting_strategy='largest_cluster').fit(self.PCA_Data)
-        kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500).fit(self.PCA_Data)
+        kmeans = BisectingKMeans(n_clusters=k_value, init='k-means++', n_init=10, max_iter=500,
+                                 algorithm='elkan', bisecting_strategy='largest_cluster').fit(self.PCA_Data)
 
-        distance_to_own_centroid = np.array([distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for i in range(len(self.PCA_Data))])
+        cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
 
-        nearest_neighbor_distances = []
-        for i in range(len(self.PCA_Data)):
-            distances = [distance.euclidean(self.PCA_Data[i], self.PCA_Data[j]) for j in range(len(self.PCA_Data)) if i!=j]
-            nearest_neighbor_distances.append(min(distances))
+        self.test = kmeans
+        self.K_Mean_labels = cluster_labels
 
-        sorted_nearest_neighbor_distances = sorted(nearest_neighbor_distances)
+        # Calculate outlier
+        distance = kmeans.fit_transform(self.PCA_Data)  # Distance btw K centroid about all each points
+        main_distance = np.min(distance, axis=1)  # Distance btw own K centroid about all each points
 
-        epsilon = sorted_nearest_neighbor_distances[int(len(sorted_nearest_neighbor_distances) * alpha)]
+        main_distance_clustering = [[] for _ in range(k_value)]
 
-        outliers = np.where(distance_to_own_centroid > epsilon)[0]
+        for cluster_num in range(k_value):
+            distance_clustering = distance[cluster_labels == cluster_num]
+            for i in range(len(distance_clustering)):
+                main_distance_clustering[cluster_num].append(distance_clustering[i][cluster_num])
 
-        filtered_data = np.delete(self.PCA_Data, outliers, axis=0)
-
-        clusters_indices = [[] for _ in range(3)]
-        for i, label in enumerate(kmeans.labels_):
-            if i in outliers:
+        # max distance in own cluster
+        for i, cluster in enumerate(main_distance_clustering):
+            if not cluster:
                 continue
-            clusters_indices[label].append(i)
+            main_distance_clustering[i] = np.max(cluster)
 
-        clusters_indices.insert(0, list(outliers))
+        max_main_distance_clustering = main_distance_clustering
 
-        return clusters_indices
-        # # Calculate outlier
-        # distance_to_centroids = kmeans.fit_transform(self.PCA_Data)  # Distance btw K centroid about all each points
-        # cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
-        # self.K_Mean_labels = cluster_labels
-        # main_distance = distance_to_centroids[np.arange(len(distance_to_centroids)), cluster_labels]  # Distance btw own K centroid about all each points
-        #
-        # main_distance_clustering = [[] for _ in range(k_value)]
-        #
-        # for cluster_num in range(k_value):
-        #     distance_clustering = distance_to_centroids[cluster_labels == cluster_num]
-        #     for i in range(len(distance_clustering)):
-        #         main_distance_clustering[cluster_num].append(distance_clustering[i][cluster_num])
-        #
-        # # max distance in own cluster
-        # max_main_distance_clustering = []
-        # for i, cluster in enumerate(main_distance_clustering):
-        #     max_main_distance_clustering.append(np.max(cluster))
+        clusters = [[] for _ in range(k_value)]  # Cluster별 distance 분류
+        clusters_index = [[] for _ in range(k_value)]  # Cluster별 index 분류
 
-        # clusters = [[] for _ in range(k_value)]  # Cluster별 distance 분류
-        # clusters_index = [[] for _ in range(k_value)]  # Cluster별 index 분류
-        #
-        # for i, cluster_num in enumerate(cluster_labels):
-        #     clusters[cluster_num].append(main_distance[i])
-        #     clusters_index[cluster_num].append(self.index[i])
-        #
-        # outliers = [[] for _ in range(k_value)]  # Cluster별 outliers' distance 분류
-        # for i, cluster in enumerate(clusters):
-        #     if max_main_distance_clustering[i] == 0:
-        #         continue
-        #     for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
-        #         if distance / max_main_distance_clustering[i] >= alpha:
-        #             # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 alpha 이상이면 outlier 분류
-        #             outliers[i].append(distance)
-        #
-        # outliers_index = []  # Cluster별 outliers's index 분류
-        # for i, cluster in enumerate(clusters):
-        #     if not outliers[i]:
-        #         continue
-        #     for k, outlier_dis in enumerate(outliers[i]):
-        #         for j, distance in enumerate(cluster):
-        #             if outlier_dis == distance:
-        #                 outliers_index.append(clusters_index[i][j])
-        #             else:
-        #                 continue
-        #
-        # outliers_index = list(set(outliers_index))
-        #
-        # # a에 있는 값을 b에서 빼기
-        # for value in outliers_index:
-        #     for row in clusters_index:
-        #         if value in row:
-        #             row.remove(value)
-        #
-        # clusters_index = [sublist for sublist in clusters_index if sublist]  # 빈 리스트 제거
-        #
-        # # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
-        # clusters_index.insert(0, outliers_index)
-        #
-        # return clusters_index
+        for i, cluster_num in enumerate(cluster_labels):
+            clusters[cluster_num].append(main_distance[i])
+            clusters_index[cluster_num].append(self.index[i])
+
+        outliers = [[] for _ in range(k_value)]  # Cluster별 outliers' distance 분류
+        for i, cluster in enumerate(clusters):
+            if max_main_distance_clustering[i] == 0:
+                continue
+            for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
+                if distance / max_main_distance_clustering[i] >= alpha:
+                    # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 alpha 이상이면 outlier 분류
+                    outliers[i].append(distance)
+
+        outliers_index = []  # Cluster별 outliers's index 분류
+        for i, cluster in enumerate(clusters):
+            if not outliers[i]:
+                continue
+            for k, outlier_dis in enumerate(outliers[i]):
+                for j, distance in enumerate(cluster):
+                    if outlier_dis == distance:
+                        outliers_index.append(clusters_index[i][j])
+                    else:
+                        continue
+
+        outliers_index = list(set(outliers_index))
+
+        # a에 있는 값을 b에서 빼기
+        for value in outliers_index:
+            for row in clusters_index:
+                if value in row:
+                    row.remove(value)
+
+        clusters_index = [sublist for sublist in clusters_index if sublist]  # 빈 리스트 제거
+
+        # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
+        clusters_index.insert(0, outliers_index)
+
+        return clusters_index
 
     def perform_kmeans(self, k_value: int, alpha: float = 0.5):
         """
@@ -149,6 +133,8 @@ class Clustering:
         return self.K_Mean
 
     def perform_DBSCAN(self, threshold: float):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
         ms = int(math.log(len(self.PCA_Data)))
@@ -204,6 +190,8 @@ class Clustering:
         return self.DBSCAN
 
     def perform_HDBSCAN(self, threshold):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
         dist_matrix = pdist(self.PCA_Data, metric='euclidean')
@@ -241,25 +229,29 @@ class Clustering:
         self.HDBSCAN = clust
         return self.HDBSCAN
 
-    def perform_HA(self, threshold: float):
+    def perform_HA(self, threshold: float, draw_dendro=False):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
         # 1. Hierachical Agglomerative
         # 거리 행렬 계산
         dist_matrix = pdist(self.PCA_Data, metric='euclidean')
         # data point pair 간의 euclidean distance/firm수 combination 2
 
         # 연결 매트릭스 계산
-        Z = linkage(dist_matrix, method='average')
+        Z = linkage(dist_matrix, method='ward')
         '''we adopt the average linkage, which is defined as the average distance between
         the data points in one cluster and the data points in another cluster
         논문과는 다른 부분. average method대신 ward method 사용.
         '''
 
         # # 덴드로그램 시각화
-        # dendrogram(Z)
-        # plt.title('Dendrogram')
-        # plt.xlabel('Samples')
-        # plt.ylabel('Distance')
-        # plt.show()
+        if draw_dendro:
+            dendrogram(Z)
+            plt.title('Dendrogram')
+            plt.xlabel('Samples')
+            plt.ylabel('Distance')
+            plt.show()
 
         # cophenetic distance 계산
         coph_dists = Z[:, 2]  # Z의 두 번째 열은 cophenetic distance 값
@@ -291,6 +283,9 @@ class Clustering:
         return self.Agglomerative
 
     def perform_GMM(self, alpha: float):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
         type = find_optimal_GMM_covariance_type(self.PCA_Data)
         print(type)
         # 1. Gaussian Mixture Model
@@ -336,6 +331,9 @@ class Clustering:
         return self.Gaussian
 
     def perform_OPTICS(self, xi):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
         ms = int(math.log(len(self.PCA_Data)))
 
         optics = OPTICS(xi=xi, min_samples=ms, min_cluster_size=2).fit(self.PCA_Data)
@@ -365,6 +363,9 @@ class Clustering:
         return self.OPTIC
 
     def perform_meanshift(self, quantile):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
         # The following bandwidth can be automatically detected using
         bandwidth = estimate_bandwidth(self.PCA_Data, quantile=quantile)
 
@@ -418,6 +419,9 @@ class Clustering:
         return self.meanshift
 
     def perform_BIRCH(self, percentile):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
         birch = Birch(threshold=percentile, branching_factor=50).fit(self.PCA_Data)
         cluster_labels = birch.labels_
 
@@ -464,55 +468,98 @@ class Clustering:
         return self.BIRCH
 
 
-class Result_Check_and_Save:
+class ResultCheck:
 
     def __init__(self, data: pd.DataFrame):
         self.PCA_Data = data
+        self.prefix = momentum_prefix_finder(self.PCA_Data)
 
-    def LS_Table_Save(self, Cluster: list, output_dir, file):
+    def ls_table(self, cluster: list, output_dir, file, save=True, raw=True):
+        """
+        output columns = ['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index']
+        :param cluster:
+        :param output_dir:
+        :param file:
+        :param save:
+        :param raw:
+        :return:
+        """
         # New table with firm name, mom_1, long and short index, cluster index
         LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
 
-        for cluster_num, firms in enumerate(Cluster):
-            # if cluster_num == 0:
-            #     continue
+        if raw:
+            mom1_col_name = self.prefix + '1'
+        else:
+            mom1_col_name = 0
 
-            # Sort firms based on momentum_1
-            firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, 0])
-            long_short = [0] * len(firms_sorted)
-            mom_diffs = []
+        # consider using this
+        '''
+        shit = []
+        for i in range(len(cluster)):
+            for afirm in cluster[i]:
+                shit.append([afirm, i])
+        shit = pd.DataFrame(shit, columns=['Firm Name', 'Cluster Index'])
+        shit = shit.set_index('Firm Name')
+        shit['Momentum_1'] = self.PCA_Data[mom1_col_name]
+        shit = shit.reset_index()
+        shit = shit.set_index('Firm Name')
+        shit = shit.sort_values(by=['Cluster Index', 'Momentum_1'], ascending=[True, False])
+        spread_vec = (shit.reset_index()['Momentum_1'] -
+                      shit.sort_values(by=['Cluster Index', 'Momentum_1'],
+                                       ascending=[True, True]).reset_index()['Momentum_1'])
+        shit = shit.reset_index()
+        shit['spread'] = spread_vec
+        shit['in_portfolio'] = (shit['spread'].abs() > shit['spread'].std()) * 1
+        shit['LS'] = shit['in_portfolio'] * shit['spread'] / shit['spread'].abs()
+        shit['LS'] = shit['LS'].fillna(0)
+        shit = shit.drop(columns=['spread', 'in_portfolio'])
+        '''
+
+        all_diffs = []
+        for cluster_num, firms in enumerate(cluster):
+            firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, mom1_col_name])
 
             for i in range(len(firms_sorted) // 2):
-                # Calculate the mom1 difference for each pair
-                mom_diff = abs(self.PCA_Data.loc[firms_sorted[i], 0] - self.PCA_Data.loc[firms_sorted[-i - 1], 0])
-                mom_diffs.append(mom_diff)
+                mom_diff = abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name])
+                all_diffs.append(mom_diff)
 
-            # Calculate the cross-sectional standard deviation of all pairs' mom1 differences
-            std_dev = np.std(mom_diffs)
+        std_dev = np.std(all_diffs)
+
+        for cluster_num, firms in enumerate(cluster):
+            firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, mom1_col_name])
+            long_short = [0] * len(firms_sorted)
 
             for i in range(len(firms_sorted) // 2):
                 # Only assign long-short indices if the mom1 difference is greater than the standard deviation
-                if abs(self.PCA_Data.loc[firms_sorted[i], 0] - self.PCA_Data.loc[
-                    firms_sorted[-i - 1], 0]) > std_dev:
+                if abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name]) > std_dev:
                     long_short[i] = 1  # 1 to the low ones
                     long_short[-i - 1] = -1  # -1 to the high ones
                     # 0 to middle point when there are odd numbers in a cluster
 
             # Outlier cluster를 빼지 않는 대신 LS_Value를 0으로
-            lab = True
-            if lab:
-                if cluster_num == 0:
-                    long_short = [0] * len(firms_sorted)
+
+            if cluster_num == 0:
+                long_short = [0] * len(firms_sorted)
 
             # Add the data to the new table
             for i, firm in enumerate(firms_sorted):
-                LS_table.loc[len(LS_table)] = [firm, self.PCA_Data.loc[firm, 0], long_short[i], cluster_num]
+                LS_table.loc[len(LS_table)] = [firm, self.PCA_Data.loc[firm, mom1_col_name], long_short[i], cluster_num]
 
         # Save the output to a CSV file in the output directory
-        LS_table.to_csv(os.path.join(output_dir, file), index=False)
-        print(output_dir)
+        if save:
+            LS_table.to_csv(os.path.join(output_dir, file), index=False)
+            print(f'Exported to {output_dir}!')
+        return LS_table
 
-    def Reversal_Table_Save(self, data: pd.DataFrame, output_dir, file):
+    def reversal_table(self, data: pd.DataFrame, output_dir, file, save=True):
+        """
+
+        :param data:
+        :param output_dir:
+        :param file:
+        :param save:
+        :return:
+        """
         LS_table_reversal = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short'])
         firm_lists = data.index
         firm_sorted = sorted(firm_lists, key=lambda x: data.loc[x, '1'])
@@ -525,9 +572,11 @@ class Result_Check_and_Save:
         for i, firm in enumerate(firm_sorted):
             LS_table_reversal.loc[len(LS_table_reversal)] = [firm, data.loc[firm, '1'], long_short[i]]
 
-        # Save the output to a CSV file in the output directory
-        LS_table_reversal.to_csv(os.path.join(output_dir, file), index=False)
-        print(output_dir)
+        if save:
+            # Save the output to a CSV file in the output directory
+            LS_table_reversal.to_csv(os.path.join(output_dir, file), index=False)
+            print(f'Exported to {output_dir}!')
+        return LS_table_reversal
 
     def Plot_clusters_Kmean(self, clusters: list):
         firm_names = self.PCA_Data.index
@@ -562,12 +611,11 @@ class Result_Check_and_Save:
 
                 plt.show()
 
-    def Plot_clusters(self, cluster: list):
+    def Plot_clusters(self, cluster: list, plttitle=None):
         firm_names = self.PCA_Data.index
         data_array = self.PCA_Data.values[:, 1:].astype(float)
 
         for j, firms in enumerate(cluster):
-
             if j == 0:
                 print(f'Noise: {firms}')
                 title = 'Noise'
@@ -584,7 +632,7 @@ class Result_Check_and_Save:
 
             plt.xlabel('Characteristics')
             plt.ylabel('Data Value')
-            plt.title(title)
+            plt.title(title) if plttitle is None else plt.title(plttitle)
 
             # List the firm names on the side of the graph
             if len(firms) <= 10:
@@ -595,6 +643,11 @@ class Result_Check_and_Save:
             plt.show()
 
     def count_outlier(self, cluster: list):
+        """
+
+        :param cluster:
+        :return:
+        """
         if not cluster:
             return 0
 

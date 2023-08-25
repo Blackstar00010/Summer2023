@@ -1,5 +1,6 @@
 import os.path
 import pandas as pd
+from PCA_and_ETC import *
 
 first_day_of_month = False
 if first_day_of_month:
@@ -46,7 +47,7 @@ if momentum:
     if int(current_date.strftime('%m')) != 12:
         print(f'] {current_date.strftime("%Y-%m")} done!\n[')
 
-MOM_Merge = False
+MOM_Merge = True
 if MOM_Merge:
     directory = '../files/characteristics'
     long_short = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
@@ -56,13 +57,13 @@ if MOM_Merge:
     for file in long_short:
         data = pd.read_csv(os.path.join(directory, file))
 
-        # Keep only the 'Momentum Index' and '1' columns
-        data = data[['Momentum Index', '1']]
+        # Keep only the column that contains tickers and '1' columns
+        data = pd.concat([data.iloc[:, 0], data.loc[:, momentum_prefix_finder(data) + '1']], axis=1)
 
         file_column_name = os.path.splitext(file)[0]
 
         # Rename the columns
-        data = data.rename(columns={'Momentum Index': 'Firm Name', '1': file_column_name})
+        data = data.rename(columns={data.columns[0]: 'Firm Name', data.columns[1]: file_column_name})
 
         if merged_df.empty:
             merged_df = data

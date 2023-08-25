@@ -21,7 +21,7 @@ if K_mean_Save:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(10)
@@ -30,7 +30,7 @@ if K_mean_Save:
 
         # Save LS_Table CSV File
         for i, cluster in enumerate(Do_Clustering.K_Mean):
-            Do_Result_Save.LS_Table_Save(cluster, positions_directory + 'K_Means_outlier', file)
+            Do_Result_Save.ls_table(cluster, positions_directory + 'K_Means_outlier', file)
 
     print(f'total outliers: {sum}')
 
@@ -48,7 +48,7 @@ if dbscan_Save:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN(0.8)
@@ -56,7 +56,7 @@ if dbscan_Save:
         sum += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
 
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.DBSCAN, positions_directory + 'DBSCAN', file)
+        Do_Result_Save.ls_table(Do_Clustering.DBSCAN, positions_directory + 'DBSCAN', file)
 
     print(f'total outliers: {sum}')
 
@@ -74,7 +74,7 @@ if hdbscan_Save:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN()
@@ -82,7 +82,7 @@ if hdbscan_Save:
         sum += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
 
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.HDBSCAN, positions_directory + 'HDBSCAN', file)
+        Do_Result_Save.ls_table(Do_Clustering.HDBSCAN, positions_directory + 'HDBSCAN', file)
 
     print(f'total outliers: {sum}')
 
@@ -100,7 +100,7 @@ if Agglomerative_Save:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.4)
@@ -108,8 +108,8 @@ if Agglomerative_Save:
         sum += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.Agglomerative,
-                                     positions_directory + 'Hierarchical_Agglomerative', file)
+        Do_Result_Save.ls_table(Do_Clustering.Agglomerative,
+                                positions_directory + 'Hierarchical_Agglomerative', file)
 
     print(f'total outliers: {sum}')
 
@@ -127,7 +127,7 @@ if BGM_Save:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.Gaussian = Do_Clustering.perform_GMM(0.1)
@@ -135,8 +135,8 @@ if BGM_Save:
         sum += Do_Result_Save.count_outlier(Do_Clustering.Gaussian)
 
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.Gaussian, positions_directory + 'Gaussian_Mixture_Model',
-                                     file)
+        Do_Result_Save.ls_table(Do_Clustering.Gaussian, positions_directory + 'Gaussian_Mixture_Model',
+                                file)
 
     print(f'total outliers: {sum}')
 
@@ -154,7 +154,7 @@ if optics_Save:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.5)
@@ -162,7 +162,7 @@ if optics_Save:
         sum += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
 
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.OPTIC, positions_directory + 'OPTICS', file)
+        Do_Result_Save.ls_table(Do_Clustering.OPTIC, positions_directory + 'OPTICS', file)
 
     print(f'total outliers: {sum}')
 
@@ -180,7 +180,7 @@ if meanshift_Save:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.Result_Check_and_Save(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.3)
@@ -188,7 +188,7 @@ if meanshift_Save:
         sum += Do_Result_Save.count_outlier(Do_Clustering.menshift)
 
         # Save LS_Table CSV File
-        Do_Result_Save.LS_Table_Save(Do_Clustering.menshift, positions_directory + 'Meanshift', file)
+        Do_Result_Save.ls_table(Do_Clustering.menshift, positions_directory + 'Meanshift', file)
 
     print(f'total outliers: {sum}')
 
@@ -202,10 +202,10 @@ if Reversal_Save:
 
         # convert mom_data into PCA_data
         data = read_and_preprocess_data(input_dir, file)
-        Do_Result_Save = C.Result_Check_and_Save(data)
+        Do_Result_Save = C.ResultCheck(data)
 
         # Save LS_Table CSV File
-        Do_Result_Save.Reversal_Table_Save(data, positions_directory + 'Reversal', file)
+        Do_Result_Save.reversal_table(data, positions_directory + 'Reversal', file)
 
 '''
 JHK's version
@@ -380,7 +380,7 @@ if Plot:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+        Do_Result_Plot = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(10)
@@ -393,7 +393,7 @@ if Plot:
             t_SNE('K-mean', df_combined, Do_Clustering.K_Mean_labels)
 
             # for i, cluster in enumerate(Do_Clustering.K_Mean):
-            Do_Result_Plot.LS_Table_Save(cluster, '../files/Clustering_adj/K_Means_outlier', file)
+            Do_Result_Plot.ls_table(cluster, '../files/Clustering_adj/K_Means_outlier', file)
         # Do_Result_Plot.Reversal_Table_Save(data, '../files/Clustering_adj/Reversal', file)
     # hyper parameter K(3,5,10,50,100,500,1000,1500) should be tested manually.(paper follow)
 
@@ -408,7 +408,7 @@ if Plot:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+        Do_Result_Plot = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN(0.8)
@@ -433,7 +433,7 @@ if Plot:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+        Do_Result_Plot = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN()
@@ -458,7 +458,7 @@ if Plot:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+        Do_Result_Plot = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         # Do_Clustering.K_Mean = Do_Clustering.perform_kmeans([4])
@@ -487,7 +487,7 @@ if Plot:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+        Do_Result_Plot = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.Gaussian = Do_Clustering.perform_GMM(0.15)
@@ -512,7 +512,7 @@ if Plot:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+        Do_Result_Plot = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.5)
@@ -537,7 +537,7 @@ if Plot:
 
         # Call initial method
         Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Plot = C.Result_Check_and_Save(df_combined)
+        Do_Result_Plot = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
         Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.3)
