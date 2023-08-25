@@ -4,11 +4,12 @@ from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
 from scipy.cluster.hierarchy import *
 from scipy.spatial.distance import pdist
+from scipy.spatial import distance
 
 
 class Clustering:
     def __init__(self, data: pd.DataFrame):
-        self.PCA_Data = data
+        self.PCA_Data = data.values[:, 1:].astype(float)
         self.index = data.index
         self.test = []
 
@@ -40,77 +41,95 @@ class Clustering:
         :param alpha: the rate at which outliers are filtered
         :return: 2D list
         """
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
-        kmeans = BisectingKMeans(n_clusters=k_value, init='k-means++', n_init=10, max_iter=500,
-                                 algorithm='elkan', bisecting_strategy='largest_cluster').fit(self.PCA_Data)
+        # kmeans = BisectingKMeans(n_clusters=k_value, init='k-means++', n_init=10, max_iter=500,
+        #                          algorithm='elkan', bisecting_strategy='largest_cluster').fit(self.PCA_Data)
+        kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500).fit(self.PCA_Data)
 
-        cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
+        distance_to_own_centroid = np.array([distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for i in range(len(self.PCA_Data))])
 
-        self.test = kmeans
-        self.K_Mean_labels = cluster_labels
+        nearest_neighbor_distances = []
+        for i in range(len(self.PCA_Data)):
+            distances = [distance.euclidean(self.PCA_Data[i], self.PCA_Data[j]) for j in range(len(self.PCA_Data)) if i!=j]
+            nearest_neighbor_distances.append(min(distances))
 
-        # Calculate outlier
-        distance = kmeans.fit_transform(self.PCA_Data)  # Distance btw K centroid about all each points
-        main_distance = np.min(distance, axis=1)  # Distance btw own K centroid about all each points
+        sorted_nearest_neighbor_distances = sorted(nearest_neighbor_distances)
 
-        main_distance_clustering = [[] for _ in range(k_value)]
+        epsilon = sorted_nearest_neighbor_distances[int(len(sorted_nearest_neighbor_distances) * alpha)]
 
-        for cluster_num in range(k_value):
-            distance_clustering = distance[cluster_labels == cluster_num]
-            for i in range(len(distance_clustering)):
-                main_distance_clustering[cluster_num].append(distance_clustering[i][cluster_num])
+        outliers = np.where(distance_to_own_centroid > epsilon)[0]
 
-        # max distance in own cluster
-        for i, cluster in enumerate(main_distance_clustering):
-            if not cluster:
+        filtered_data = np.delete(self.PCA_Data, outliers, axis=0)
+
+        clusters_indices = [[] for _ in range(3)]
+        for i, label in enumerate(kmeans.labels_):
+            if i in outliers:
                 continue
-            main_distance_clustering[i] = np.max(cluster)
+            clusters_indices[label].append(i)
 
-        max_main_distance_clustering = main_distance_clustering
+        clusters_indices.insert(0, list(outliers))
 
-        clusters = [[] for _ in range(k_value)]  # Cluster별 distance 분류
-        clusters_index = [[] for _ in range(k_value)]  # Cluster별 index 분류
+        return clusters_indices
+        # # Calculate outlier
+        # distance_to_centroids = kmeans.fit_transform(self.PCA_Data)  # Distance btw K centroid about all each points
+        # cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
+        # self.K_Mean_labels = cluster_labels
+        # main_distance = distance_to_centroids[np.arange(len(distance_to_centroids)), cluster_labels]  # Distance btw own K centroid about all each points
+        #
+        # main_distance_clustering = [[] for _ in range(k_value)]
+        #
+        # for cluster_num in range(k_value):
+        #     distance_clustering = distance_to_centroids[cluster_labels == cluster_num]
+        #     for i in range(len(distance_clustering)):
+        #         main_distance_clustering[cluster_num].append(distance_clustering[i][cluster_num])
+        #
+        # # max distance in own cluster
+        # max_main_distance_clustering = []
+        # for i, cluster in enumerate(main_distance_clustering):
+        #     max_main_distance_clustering.append(np.max(cluster))
 
-        for i, cluster_num in enumerate(cluster_labels):
-            clusters[cluster_num].append(main_distance[i])
-            clusters_index[cluster_num].append(self.index[i])
-
-        outliers = [[] for _ in range(k_value)]  # Cluster별 outliers' distance 분류
-        for i, cluster in enumerate(clusters):
-            if max_main_distance_clustering[i] == 0:
-                continue
-            for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
-                if distance / max_main_distance_clustering[i] >= alpha:
-                    # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 alpha 이상이면 outlier 분류
-                    outliers[i].append(distance)
-
-        outliers_index = []  # Cluster별 outliers's index 분류
-        for i, cluster in enumerate(clusters):
-            if not outliers[i]:
-                continue
-            for k, outlier_dis in enumerate(outliers[i]):
-                for j, distance in enumerate(cluster):
-                    if outlier_dis == distance:
-                        outliers_index.append(clusters_index[i][j])
-                    else:
-                        continue
-
-        outliers_index = list(set(outliers_index))
-
-        # a에 있는 값을 b에서 빼기
-        for value in outliers_index:
-            for row in clusters_index:
-                if value in row:
-                    row.remove(value)
-
-        clusters_index = [sublist for sublist in clusters_index if sublist]  # 빈 리스트 제거
-
-        # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
-        clusters_index.insert(0, outliers_index)
-
-        return clusters_index
+        # clusters = [[] for _ in range(k_value)]  # Cluster별 distance 분류
+        # clusters_index = [[] for _ in range(k_value)]  # Cluster별 index 분류
+        #
+        # for i, cluster_num in enumerate(cluster_labels):
+        #     clusters[cluster_num].append(main_distance[i])
+        #     clusters_index[cluster_num].append(self.index[i])
+        #
+        # outliers = [[] for _ in range(k_value)]  # Cluster별 outliers' distance 분류
+        # for i, cluster in enumerate(clusters):
+        #     if max_main_distance_clustering[i] == 0:
+        #         continue
+        #     for j, distance in enumerate(cluster):  # distance = 자기가 속한 클러스터 내에서 중심과의 거리, cluster별로 계산해야 함.
+        #         if distance / max_main_distance_clustering[i] >= alpha:
+        #             # distance / 소속 cluster 점들 중 중심과 가장 먼 점의 거리 비율이 alpha 이상이면 outlier 분류
+        #             outliers[i].append(distance)
+        #
+        # outliers_index = []  # Cluster별 outliers's index 분류
+        # for i, cluster in enumerate(clusters):
+        #     if not outliers[i]:
+        #         continue
+        #     for k, outlier_dis in enumerate(outliers[i]):
+        #         for j, distance in enumerate(cluster):
+        #             if outlier_dis == distance:
+        #                 outliers_index.append(clusters_index[i][j])
+        #             else:
+        #                 continue
+        #
+        # outliers_index = list(set(outliers_index))
+        #
+        # # a에 있는 값을 b에서 빼기
+        # for value in outliers_index:
+        #     for row in clusters_index:
+        #         if value in row:
+        #             row.remove(value)
+        #
+        # clusters_index = [sublist for sublist in clusters_index if sublist]  # 빈 리스트 제거
+        #
+        # # 1차원 리스트로 전환된 outlier를 cluster 맨앞에 저장.
+        # clusters_index.insert(0, outliers_index)
+        #
+        # return clusters_index
 
     def perform_kmeans(self, k_value: int, alpha: float = 0.5):
         """
@@ -130,8 +149,6 @@ class Clustering:
         return self.K_Mean
 
     def perform_DBSCAN(self, threshold: float):
-        self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
         ms = int(math.log(len(self.PCA_Data)))
@@ -187,8 +204,6 @@ class Clustering:
         return self.DBSCAN
 
     def perform_HDBSCAN(self, threshold):
-        self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
         dist_matrix = pdist(self.PCA_Data, metric='euclidean')
@@ -227,9 +242,6 @@ class Clustering:
         return self.HDBSCAN
 
     def perform_HA(self, threshold: float):
-        self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
-
         # 1. Hierachical Agglomerative
         # 거리 행렬 계산
         dist_matrix = pdist(self.PCA_Data, metric='euclidean')
@@ -279,9 +291,6 @@ class Clustering:
         return self.Agglomerative
 
     def perform_GMM(self, alpha: float):
-        self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
-
         type = find_optimal_GMM_covariance_type(self.PCA_Data)
         print(type)
         # 1. Gaussian Mixture Model
@@ -327,9 +336,6 @@ class Clustering:
         return self.Gaussian
 
     def perform_OPTICS(self, xi):
-        self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
-
         ms = int(math.log(len(self.PCA_Data)))
 
         optics = OPTICS(xi=xi, min_samples=ms, min_cluster_size=2).fit(self.PCA_Data)
@@ -359,9 +365,6 @@ class Clustering:
         return self.OPTIC
 
     def perform_meanshift(self, quantile):
-        self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
-
         # The following bandwidth can be automatically detected using
         bandwidth = estimate_bandwidth(self.PCA_Data, quantile=quantile)
 
@@ -415,9 +418,6 @@ class Clustering:
         return self.meanshift
 
     def perform_BIRCH(self, percentile):
-        self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
-
         birch = Birch(threshold=percentile, branching_factor=50).fit(self.PCA_Data)
         cluster_labels = birch.labels_
 
