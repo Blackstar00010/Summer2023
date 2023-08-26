@@ -185,12 +185,12 @@ if Agglormerative_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.1, draw_dendro=False)
+        Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.5, draw_dendro=False)
 
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
         # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=True, raw=raw)
+        Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=False, raw=raw)
 
         if len(sorted(list(set(Do_Clustering.Agglomerative_labels)))) != 1:
             silhouette_avg = silhouette_score(df_combined, Do_Clustering.Agglomerative_labels)

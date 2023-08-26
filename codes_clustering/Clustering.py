@@ -269,6 +269,7 @@ class Clustering:
 
     def perform_HA(self, threshold: float, draw_dendro=False):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
+
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Hierachical Agglomerative
@@ -299,15 +300,19 @@ class Clustering:
         using a method similar to the method adopted for k-means clustering:
         e is set as an α percentile of the distances between a pair of nearest data points'''
         # 평균 cophenetic distance의 0.4를 곱한 값을 max_d로 사용
-        max_d = np.max(coph_dists) * threshold
+        max_d = np.average(coph_dists) * threshold
 
         # cophenet: dendrogram과 original data 사이 similarity을 나타내는 correlation coefficient
         # 숫자가 클 수록 원본데이터와 유사도가 떨어짐. dendrogram에서 distance의미.
 
         # Cluster k개 생성
         clusters = fcluster(Z, max_d, criterion='distance')
+
         self.Agglomerative_labels = clusters
         unique_labels = sorted(list(set(clusters)))
+
+
+        print(clusters)
 
         clust = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(clusters):

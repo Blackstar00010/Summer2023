@@ -1,3 +1,5 @@
+import pandas as pd
+
 from PCA_and_ETC import *
 
 col=['03/1990-12/1991','01/1992-12/1994(Black_Wednesday)','01/1995-12/2001(Dotcom_Bubble)','01/2002-12/2006','01/2007-12/2009(GFC)',
@@ -10,14 +12,13 @@ result = pd.read_csv('../files/result/result_modified.csv')
 
 print('profit_factor')
 profit_factor = pd.DataFrame(index=col, columns=result.iloc[:, 0])
-
 for i in range(len(result.index)):
     for j in range(len(period)):
         row = result.iloc[i, period[j]]
         pf = row[row > 0].sum() / np.abs(row[row < 0].sum())
         profit_factor.iloc[j, i] = pf
 
-profit_factor.to_csv('../files/result/profit_factor.csv', index=True)
+profit_factor['metric'] = 'Profit_factor'
 
 print(profit_factor.to_string())
 
@@ -29,7 +30,7 @@ for i in range(len(result.index)):
         sf = row.mean() / row.std()
         sharpe_ratio.iloc[j, i] = sf
 
-sharpe_ratio.to_csv('../files/result/sharpe_ratio.csv', index=True)
+sharpe_ratio['metric'] = 'Sharpe'
 
 print(sharpe_ratio.to_string())
 
@@ -41,7 +42,7 @@ for i in range(len(result.index)):
         sf = row.mean() / row[row<0].std()
         sortino_ratio.iloc[j, i] = sf
 
-sortino_ratio.to_csv('../files/result/sortino_ratio.csv', index=True)
+sortino_ratio['metric'] = 'Sortino'
 
 print(sortino_ratio.to_string())
 
@@ -56,7 +57,7 @@ for i in range(len(result.index)):
         max_drawdown = drawdown.min()
         MDD.iloc[j, i] = max_drawdown
 
-MDD.to_csv('../files/result/MDD.csv', index=True)
+MDD['metric'] = 'MDD'
 
 print(MDD.to_string())
 
@@ -72,45 +73,10 @@ for i in range(len(result.index)):
         calmar=row.mean()/max_drawdown
         Calmar_ratio.iloc[j, i] = calmar
 
-Calmar_ratio.to_csv('../files/result/Calmar_ratio.csv', index=True)
+Calmar_ratio['metric'] = 'Calmar'
 
 print(Calmar_ratio.to_string())
-#
-# Count_Cluster=False
-# if Count_Cluster:
-#     base_directory = '../files/clustering_result/'
-#     # Get all subdirectories in the base directory
-#     subdirectories = [d for d in os.listdir(base_directory) if os.path.isdir(os.path.join(base_directory, d))]
-#     subdirectories.remove('Reversal')
-#     for subdir in subdirectories:
-#         print(subdir)
-#         # Long_Short_Merge.py
-#         directory = os.path.join(base_directory, subdir)
-#         long_short = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
-#
-#
-#         LS_merged_df = pd.DataFrame()
-#
-#         for file in long_short:
-#             data = pd.read_csv(os.path.join(directory, file))
-#
-#             # Keep only the 'Firm Name' and 'Long Short' columns
-#             data = data[['Firm Name', 'Cluster Index']]
-#
-#             # Change the column name into file name (ex: 1990-01)
-#             file_column_name = os.path.splitext(file)[0]
-#             data = data.rename(columns={'Cluster Index': file_column_name})
-#
-#
-#             if LS_merged_df.empty:
-#                 LS_merged_df = data
-#             else:
-#                 LS_merged_df = pd.merge(LS_merged_df, data, on='Firm Name', how='outer')
-#
-#         # Set Firm Name column into index
-#         LS_merged_df.set_index('Firm Name', inplace=True)
-#
-#         # Sort LS_Value according to Firm Name
-#         LS_merged_df = LS_merged_df.max().mean()
-#
-#         print(LS_merged_df)
+
+profit_factor=pd.concat([sharpe_ratio, sortino_ratio, MDD, Calmar_ratio],axis=0)
+
+profit_factor.to_csv('../files/result/total.csv', index=True)

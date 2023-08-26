@@ -13,7 +13,6 @@ from sklearn.decomposition import PCA
 from statsmodels.tsa.stattools import coint, kpss
 from sklearn.model_selection import GridSearchCV
 from sklearn.mixture import *
-import multiprocessing as mp
 
 # turn off warning
 warnings.filterwarnings("ignore")
