@@ -50,11 +50,14 @@ class Clustering:
         #                          algorithm='elkan', bisecting_strategy='largest_cluster').fit(self.PCA_Data)
         kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500).fit(self.PCA_Data)
 
-        distance_to_own_centroid = np.array([distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for i in range(len(self.PCA_Data))])
+        distance_to_own_centroid = np.array(
+            [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for i in
+             range(len(self.PCA_Data))])
 
         nearest_neighbor_distances = []
         for i in range(len(self.PCA_Data)):
-            distances = [distance.euclidean(self.PCA_Data[i], self.PCA_Data[j]) for j in range(len(self.PCA_Data)) if i!=j]
+            distances = [distance.euclidean(self.PCA_Data[i], self.PCA_Data[j]) for j in range(len(self.PCA_Data)) if
+                         i != j]
             nearest_neighbor_distances.append(min(distances))
 
         sorted_nearest_neighbor_distances = sorted(nearest_neighbor_distances)
@@ -300,7 +303,7 @@ class Clustering:
         using a method similar to the method adopted for k-means clustering:
         e is set as an α percentile of the distances between a pair of nearest data points'''
         # 평균 cophenetic distance의 0.4를 곱한 값을 max_d로 사용
-        max_d = np.average(coph_dists) * threshold
+        max_d = np.max(coph_dists) * threshold
 
         # cophenet: dendrogram과 original data 사이 similarity을 나타내는 correlation coefficient
         # 숫자가 클 수록 원본데이터와 유사도가 떨어짐. dendrogram에서 distance의미.
@@ -310,9 +313,6 @@ class Clustering:
 
         self.Agglomerative_labels = clusters
         unique_labels = sorted(list(set(clusters)))
-
-
-        print(clusters)
 
         clust = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(clusters):
@@ -563,7 +563,8 @@ class ResultCheck:
             firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, mom1_col_name])
 
             for i in range(len(firms_sorted) // 2):
-                mom_diff = abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name])
+                mom_diff = abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[
+                    firms_sorted[-i - 1], mom1_col_name])
                 all_diffs.append(mom_diff)
 
         std_dev = np.std(all_diffs)
@@ -574,7 +575,8 @@ class ResultCheck:
 
             for i in range(len(firms_sorted) // 2):
                 # Only assign long-short indices if the mom1 difference is greater than the standard deviation
-                if abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name]) > std_dev:
+                if abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[
+                    firms_sorted[-i - 1], mom1_col_name]) > std_dev:
                     long_short[i] = 1  # 1 to the low ones
                     long_short[-i - 1] = -1  # -1 to the high ones
                     # 0 to middle point when there are odd numbers in a cluster
@@ -606,7 +608,7 @@ class ResultCheck:
         LS_table_reversal = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short'])
         firm_lists = data.index
         prefix = momentum_prefix_finder(data)
-        firm_sorted = sorted(firm_lists, key=lambda x: data.loc[x, prefix+'1'])
+        firm_sorted = sorted(firm_lists, key=lambda x: data.loc[x, prefix + '1'])
         long_short = [0] * len(firm_sorted)
         t = int(len(firm_lists) * 0.1)
         for i in range(t):
@@ -614,7 +616,7 @@ class ResultCheck:
             long_short[-i - 1] = -1
 
         for i, firm in enumerate(firm_sorted):
-            LS_table_reversal.loc[len(LS_table_reversal)] = [firm, data.loc[firm, prefix+'1'], long_short[i]]
+            LS_table_reversal.loc[len(LS_table_reversal)] = [firm, data.loc[firm, prefix + '1'], long_short[i]]
 
         if save:
             # Save the output to a CSV file in the output directory

@@ -10,40 +10,32 @@ if K_mean_Save:
     output_dir = '../files/clustering_result/K_Means_outlier'
     files = sorted(filename for filename in os.listdir(input_dir))
     outliers_count = 0
-    sil = 0
     cl = 0
-    for file in files:
-        print(file)
+    for i in [2,3,4,5,10,50,100,500,1000]:
+        print(i)
 
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        data = data.set_index('Momentum Index')
-        df_combined = generate_PCA_Data(data)
+        for file in files:
+            print(file)
 
-        # Call initial method
-        Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.ResultCheck(df_combined)
+            # convert mom_data into PCA_data
+            data = read_and_preprocess_data(input_dir, file)
+            df_combined = generate_PCA_Data(data)
 
-        # Do clustering and get 2D list of cluster index
-        Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(2)
+            # Call initial method
+            Do_Clustering = C.Clustering(df_combined)
+            Do_Result_Save = C.ResultCheck(df_combined)
 
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0])
+            # Do clustering and get 2D list of cluster index
+            Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(i,0.5)
 
-        # Save LS_Table CSV File
-        for i, cluster in enumerate(Do_Clustering.K_Mean):
-            Do_Result_Save.ls_table(cluster, output_dir, file)
+            outliers_count += Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0])
 
-        silhouette_avg = silhouette_score(df_combined, Do_Clustering.K_Mean_labels)
-        sil += silhouette_avg
-        cl += len(sorted(list(set(Do_Clustering.K_Mean_labels))))
-        print("The average silhouette score is:", silhouette_avg)
-        print("Number of clusters is:", len(set(Do_Clustering.K_Mean_labels)))
+            cl += len(sorted(list(set(Do_Clustering.K_Mean_labels))))
+            print("Number of clusters is:", len(set(Do_Clustering.K_Mean_labels)))
 
-    sil = sil / len(files)
-    cl = cl / len(files)
-    print('average number of clusters:', cl)
-    print('silhouette score:', sil)
-    print(f'total outliers: {outliers_count}')
+        cl = cl / len(files)
+        print('average number of clusters:', cl)
+        print(f'total outliers: {outliers_count}')
 
 # Save DBSCAN clutering method LS_Tables
 # hyper parameter eps percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
@@ -56,7 +48,6 @@ if dbscan_Save:
     output_dir = '../files/clustering_result/DBSCAN'
     files = sorted(filename for filename in os.listdir(input_dir))
     outliers_count = 0
-    sil = 0
     cl = 0
     for file in files:
         print(file)
@@ -74,19 +65,11 @@ if dbscan_Save:
 
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
 
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.DBSCAN, output_dir, file)
-
-        silhouette_avg = silhouette_score(df_combined, Do_Clustering.DBSCAN_labels)
-        sil += silhouette_avg
-        cl += len(set(Do_Clustering.DBSCAN_labels))
-        print("The average silhouette score is:", silhouette_avg)
+        cl += len(sorted(list(set(Do_Clustering.DBSCAN_labels))))
         print("Number of clusters is:", len(set(Do_Clustering.DBSCAN_labels)))
 
-    sil = sil / len(files)
     cl = cl / len(files)
     print('average number of clusters:', cl)
-    print('silhouette score:', sil)
     print(f'total outliers: {outliers_count}')
 
 # Save HDBSCAN clutering method LS_Tables
@@ -100,7 +83,6 @@ if hdbscan_Save:
     output_dir = '../files/clustering_result/HDBSCAN'
     files = sorted(filename for filename in os.listdir(input_dir))
     outliers_count = 0
-    sil = 0
     cl = 0
     for file in files:
         print(file)
@@ -118,21 +100,11 @@ if hdbscan_Save:
 
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
 
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.HDBSCAN, output_dir, file)
-
-        if len(set(Do_Clustering.HDBSCAN_labels)) != 1:
-            silhouette_avg = silhouette_score(df_combined, Do_Clustering.HDBSCAN_labels)
-            sil += silhouette_avg
-            print("The average silhouette score is:", silhouette_avg)
-        cl += len(set(Do_Clustering.HDBSCAN_labels))
-
+        cl += len(sorted(list(set(Do_Clustering.HDBSCAN_labels))))
         print("Number of clusters is:", len(set(Do_Clustering.HDBSCAN_labels)))
 
-    sil = sil / len(files)
     cl = cl / len(files)
     print('average number of clusters:', cl)
-    print('silhouette score:', sil)
     print(f'total outliers: {outliers_count}')
 
 # Save Hirarchical Agglomerative clutering method LS_Tables
@@ -146,43 +118,37 @@ if Agglormerative_Save:
     output_dir = '../files/clustering_result/Hierarchical_Agglomerative'
     files = sorted(filename for filename in os.listdir(input_dir))
     outliers_count = 0
-    sil = 0
     cl = 0
-    for file in files:
-        print(file)
 
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        raw=False
-        if not raw:
-            df_combined = generate_PCA_Data(data)
-        else:
-            df_combined = data
-        # Call initial method
-        Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.ResultCheck(df_combined)
+    for i in np.arange(0.1, 1, 0.1):
 
-        # Do clustering and get 2D list of cluster index
-        Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.5, draw_dendro=False)
+        for file in files:
+            print(file)
 
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
+            # convert mom_data into PCA_data
+            data = read_and_preprocess_data(input_dir, file)
+            raw = False
+            if not raw:
+                df_combined = generate_PCA_Data(data)
+            else:
+                df_combined = data
+            # Call initial method
+            Do_Clustering = C.Clustering(df_combined)
+            Do_Result_Save = C.ResultCheck(df_combined)
 
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=False, raw=raw)
+            # Do clustering and get 2D list of cluster index
+            Do_Clustering.Agglomerative = Do_Clustering.perform_HA(i, draw_dendro=False)
 
-        if len(sorted(list(set(Do_Clustering.Agglomerative_labels)))) != 1:
-            silhouette_avg = silhouette_score(df_combined, Do_Clustering.Agglomerative_labels)
-            sil += silhouette_avg
-            print("The average silhouette score is:", silhouette_avg)
-        cl += len(sorted(list(set(Do_Clustering.Agglomerative_labels))))
+            outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
-        print("Number of clusters is:", len(sorted(list(set(Do_Clustering.Agglomerative_labels)))))
+            t=Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=False, raw=False)
 
-    sil = sil / len(files)
-    cl = cl / len(files)
-    print('average number of clusters:', cl)
-    print('silhouette score:', sil)
-    print(f'total outliers: {outliers_count}')
+            cl += len(sorted(list(set(Do_Clustering.Agglomerative_labels))))
+            print("Number of clusters is:", len(set(Do_Clustering.Agglomerative_labels)))
+
+        cl = cl / len(files)
+        print('average number of clusters:', cl)
+        print(f'total outliers: {outliers_count}')
 
 # Save GaussianMixture clutering method LS_Tables
 # hyper parameter outlier probability [1, 5, 10, 15, 20] should be tested manually.
@@ -195,7 +161,6 @@ if GMM_Save:
     output_dir = '../files/clustering_result/Gaussian_Mixture_Model'
     files = sorted(filename for filename in os.listdir(input_dir))
     outliers_count = 0
-    sil = 0
     cl = 0
     for file in files:
         print(file)
@@ -213,20 +178,11 @@ if GMM_Save:
 
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Gaussian)
 
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.Gaussian, output_dir, file)
-
-        if len(sorted(list(set(Do_Clustering.Gaussian_labels)))) != 1:
-            silhouette_avg = silhouette_score(df_combined, Do_Clustering.Gaussian_labels)
-            sil += silhouette_avg
-            print("The average silhouette score is:", silhouette_avg)
         cl += len(sorted(list(set(Do_Clustering.Gaussian_labels))))
+        print("Number of clusters is:", len(set(Do_Clustering.Gaussian_labels)))
 
-        print("Number of clusters is:", len(sorted(list(set(Do_Clustering.Gaussian_labels)))))
-    sil = sil / len(files)
     cl = cl / len(files)
     print('average number of clusters:', cl)
-    print('silhouette score:', sil)
     print(f'total outliers: {outliers_count}')
 
 # Save OPTICS clutering method LS_Tables
@@ -240,7 +196,6 @@ if optics_Save:
     output_dir = '../files/clustering_result/OPTICS'
     files = sorted(filename for filename in os.listdir(input_dir))
     outliers_count = 0
-    sil = 0
     cl = 0
     for file in files:
         print(file)
@@ -258,22 +213,11 @@ if optics_Save:
 
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
 
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.OPTIC, output_dir, file)
-
-        if len(sorted(list(set(Do_Clustering.OPTIC_labels)))) != 1:
-            silhouette_avg = silhouette_score(df_combined, Do_Clustering.OPTIC_labels)
-            sil += silhouette_avg
-            print("The average silhouette score is:", silhouette_avg)
-
         cl += len(sorted(list(set(Do_Clustering.OPTIC_labels))))
+        print("Number of clusters is:", len(set(Do_Clustering.OPTIC_labels)))
 
-        print("Number of clusters is:", len(sorted(list(set(Do_Clustering.OPTIC_labels)))))
-
-    sil = sil / len(files)
     cl = cl / len(files)
     print('average number of clusters:', cl)
-    print('silhouette score:', sil)
     print(f'total outliers: {outliers_count}')
 
 # Save Meanshift clutering method LS_Tables
@@ -287,7 +231,6 @@ if meanshift_Save:
     output_dir = '../files/clustering_result/Meanshift'
     files = sorted(filename for filename in os.listdir(input_dir))
     outliers_count = 0
-    sil = 0
     cl = 0
     sil_num = 0
     for file in files:
@@ -308,70 +251,45 @@ if meanshift_Save:
 
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.meanshift)
 
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.meanshift, output_dir, file)
-
-        if len(sorted(list(set(Do_Clustering.meanshift_labels)))) != 1:
-            silhouette_avg = silhouette_score(df_combined, Do_Clustering.meanshift_labels)
-            sil += silhouette_avg
-            sil_num += 1
-            print("The average silhouette score is:", silhouette_avg)
-
         cl += len(sorted(list(set(Do_Clustering.meanshift_labels))))
+        print("Number of clusters is:", len(set(Do_Clustering.meanshift_labels)))
 
-        print("Number of clusters is:", len(sorted(list(set(Do_Clustering.meanshift_labels)))))
-
-    sil = sil / sil_num
     cl = cl / len(files)
     print('average number of clusters:', cl)
-    print('silhouette score:', sil)
     print(f'total outliers: {outliers_count}')
 
 # Save BIRCH clutering method LS_Tables
 # hyper parameter percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
 birch_Save = False
 if birch_Save:
-        # input_dir = '../files/momentum_adj'
-        # output_dir ='../files/Clustering_adj/HDBSCAN'
+    # input_dir = '../files/momentum_adj'
+    # output_dir ='../files/Clustering_adj/HDBSCAN'
 
-        input_dir = '../files/characteristics'
-        output_dir = '../files/clustering_result/BIRCH'
-        files = sorted(filename for filename in os.listdir(input_dir))
-        outliers_count = 0
-        sil = 0
-        cl = 0
-        sil_num = 0
-        for file in files:
-            print(file)
+    input_dir = '../files/characteristics'
+    output_dir = '../files/clustering_result/BIRCH'
+    files = sorted(filename for filename in os.listdir(input_dir))
+    outliers_count = 0
+    cl = 0
+    sil_num = 0
+    for file in files:
+        print(file)
 
-            # convert mom_data into PCA_data
-            data = read_and_preprocess_data(input_dir, file)
-            df_combined = generate_PCA_Data(data)
+        # convert mom_data into PCA_data
+        data = read_and_preprocess_data(input_dir, file)
+        df_combined = generate_PCA_Data(data)
 
-            # Call initial method
-            Do_Clustering = C.Clustering(df_combined)
-            Do_Result_Save = C.ResultCheck(df_combined)
+        # Call initial method
+        Do_Clustering = C.Clustering(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
-            # Do clustering and get 2D list of cluster index
-            Do_Clustering.BIRCH = Do_Clustering.perform_BIRCH(0.7)
+        # Do clustering and get 2D list of cluster index
+        Do_Clustering.BIRCH = Do_Clustering.perform_BIRCH(0.7)
 
-            outliers_count += Do_Result_Save.count_outlier(Do_Clustering.BIRCH)
+        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.BIRCH)
 
-            # Save LS_Table CSV File
-            Do_Result_Save.ls_table(Do_Clustering.BIRCH, output_dir, file)
+        cl += len(sorted(list(set(Do_Clustering.BIRCH_labels))))
+        print("Number of clusters is:", len(set(Do_Clustering.BIRCH_labels)))
 
-            if len(sorted(list(set(Do_Clustering.BIRCH_labels)))) != 1:
-                silhouette_avg = silhouette_score(df_combined, Do_Clustering.BIRCH_labels)
-                sil += silhouette_avg
-                sil_num += 1
-                print("The average silhouette score is:", silhouette_avg)
-
-            cl += len(sorted(list(set(Do_Clustering.BIRCH_labels))))
-
-            print("Number of clusters is:", len(sorted(list(set(Do_Clustering.BIRCH_labels)))))
-
-        sil = sil / sil_num
-        cl = cl / len(files)
-        print('average number of clusters:', cl)
-        print('silhouette score:', sil)
-        print(f'total outliers: {outliers_count}')
+    cl = cl / len(files)
+    print('average number of clusters:', cl)
+    print(f'total outliers: {outliers_count}')
