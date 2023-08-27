@@ -2,7 +2,6 @@ import Clustering as C
 from PCA_and_ETC import *
 from sklearn.metrics import silhouette_score
 
-
 # Save Reversal method LS_Tables
 Reversal_Save = False
 if Reversal_Save:
@@ -174,7 +173,7 @@ if Agglormerative_Save:
 
         # convert mom_data into PCA_data
         data = read_and_preprocess_data(input_dir, file)
-        raw=False
+        raw = False
         if not raw:
             df_combined = generate_PCA_Data(data)
         else:
@@ -184,12 +183,12 @@ if Agglormerative_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.2)
+        Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.5, draw_dendro=False)
 
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
         # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, raw)
+        Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=False, raw=raw)
 
         if len(sorted(list(set(Do_Clustering.Agglomerative_labels)))) != 1:
             silhouette_avg = silhouette_score(df_combined, Do_Clustering.Agglomerative_labels)
@@ -352,47 +351,47 @@ if meanshift_Save:
 # hyper parameter percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
 birch_Save = False
 if birch_Save:
-        # input_dir = '../files/momentum_adj'
-        # output_dir ='../files/Clustering_adj/HDBSCAN'
+    # input_dir = '../files/momentum_adj'
+    # output_dir ='../files/Clustering_adj/HDBSCAN'
 
-        input_dir = '../files/characteristics'
-        output_dir = '../files/clustering_result/BIRCH'
-        files = sorted(filename for filename in os.listdir(input_dir))
-        outliers_count = 0
-        sil = 0
-        cl = 0
-        sil_num = 0
-        for file in files:
-            print(file)
+    input_dir = '../files/characteristics'
+    output_dir = '../files/clustering_result/BIRCH'
+    files = sorted(filename for filename in os.listdir(input_dir))
+    outliers_count = 0
+    sil = 0
+    cl = 0
+    sil_num = 0
+    for file in files:
+        print(file)
 
-            # convert mom_data into PCA_data
-            data = read_and_preprocess_data(input_dir, file)
-            df_combined = generate_PCA_Data(data)
+        # convert mom_data into PCA_data
+        data = read_and_preprocess_data(input_dir, file)
+        df_combined = generate_PCA_Data(data)
 
-            # Call initial method
-            Do_Clustering = C.Clustering(df_combined)
-            Do_Result_Save = C.ResultCheck(df_combined)
+        # Call initial method
+        Do_Clustering = C.Clustering(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
 
-            # Do clustering and get 2D list of cluster index
-            Do_Clustering.BIRCH = Do_Clustering.perform_BIRCH(0.7)
+        # Do clustering and get 2D list of cluster index
+        Do_Clustering.BIRCH = Do_Clustering.perform_BIRCH(0.7)
 
-            outliers_count += Do_Result_Save.count_outlier(Do_Clustering.BIRCH)
+        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.BIRCH)
 
-            # Save LS_Table CSV File
-            Do_Result_Save.ls_table(Do_Clustering.BIRCH, output_dir, file)
+        # Save LS_Table CSV File
+        Do_Result_Save.ls_table(Do_Clustering.BIRCH, output_dir, file)
 
-            if len(sorted(list(set(Do_Clustering.BIRCH_labels)))) != 1:
-                silhouette_avg = silhouette_score(df_combined, Do_Clustering.BIRCH_labels)
-                sil += silhouette_avg
-                sil_num += 1
-                print("The average silhouette score is:", silhouette_avg)
+        if len(sorted(list(set(Do_Clustering.BIRCH_labels)))) != 1:
+            silhouette_avg = silhouette_score(df_combined, Do_Clustering.BIRCH_labels)
+            sil += silhouette_avg
+            sil_num += 1
+            print("The average silhouette score is:", silhouette_avg)
 
-            cl += len(sorted(list(set(Do_Clustering.BIRCH_labels))))
+        cl += len(sorted(list(set(Do_Clustering.BIRCH_labels))))
 
-            print("Number of clusters is:", len(sorted(list(set(Do_Clustering.BIRCH_labels)))))
+        print("Number of clusters is:", len(sorted(list(set(Do_Clustering.BIRCH_labels)))))
 
-        sil = sil / sil_num
-        cl = cl / len(files)
-        print('average number of clusters:', cl)
-        print('silhouette score:', sil)
-        print(f'total outliers: {outliers_count}')
+    sil = sil / sil_num
+    cl = cl / len(files)
+    print('average number of clusters:', cl)
+    print('silhouette score:', sil)
+    print(f'total outliers: {outliers_count}')

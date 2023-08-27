@@ -13,7 +13,6 @@ from sklearn.decomposition import PCA
 from statsmodels.tsa.stattools import coint, kpss
 from sklearn.model_selection import GridSearchCV
 from sklearn.mixture import *
-import multiprocessing as mp
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -45,7 +44,6 @@ def generate_PCA_Data(data: pd.DataFrame):
     mom1 = data.astype(float).loc[:, prefix + '1']
     data_normalized = (data - data.mean()) / data.std()
     mat = data_normalized.astype(float)
-
     # mom1을 제외한 mat/PCA(2-49)
     # mat = np.delete(mat, 0, axis=1)
 
