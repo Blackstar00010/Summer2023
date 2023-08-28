@@ -8,6 +8,7 @@ period = [range(1,23), range(23,59), range(59,143), range(143,203), range(203,23
 
 result = pd.read_csv('../files/result/result_modified.csv')
 
+
 print('profit_factor')
 profit_factor = pd.DataFrame(index=col, columns=result.iloc[:, 0])
 for i in range(len(result.index)):

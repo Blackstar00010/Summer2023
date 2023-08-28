@@ -8,7 +8,7 @@ MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
 
 # Save K_mean clutering method LS_Tables
 # hyper parameter K(2,3,4,5,10,50,100,500,1000) should be tested manually.(paper follow)
-K_mean_Save = False
+K_mean_Save = True
 if K_mean_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -19,7 +19,7 @@ if K_mean_Save:
     outliers_count = 0
     cl = 0
 
-    for i in [2, 3, 4, 5, 10, 50, 100, 500, 1000]:
+    for i in [10, 2]:
         file_names.append(f'{i}')
         LS_merged_df = pd.DataFrame()
 
@@ -42,7 +42,7 @@ if K_mean_Save:
 
             outliers_count += Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0])
 
-            table = Do_Result_Save.ls_table(Do_Clustering.K_Mean, output_dir, file, save=False, raw=False)
+            table = Do_Result_Save.ls_table(Do_Clustering.K_Mean[0], output_dir, file, save=False, raw=False)
 
             LS_merged_df = merge_LS_Table(table, LS_merged_df, file)
 
@@ -94,7 +94,7 @@ if dbscan_Save:
 
             outliers_count += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
 
-            table = Do_Result_Save.ls_table(Do_Clustering.DBSCAN, output_dir, file, save=False, raw=False)
+            table = Do_Result_Save.ls_table(Do_Clustering.DBSCAN, output_dir, file, save=False, raw=raw)
 
             LS_merged_df = merge_LS_Table(table, LS_merged_df, file)
 
@@ -250,7 +250,7 @@ if Agglormerative_Save:
 
             outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
-            table = Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=False, raw=False)
+            table = Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=False, raw=raw)
 
             LS_merged_df = merge_LS_Table(table, LS_merged_df, file)
 
@@ -372,7 +372,7 @@ if meanshift_Save:
 
 # Save BIRCH clutering method LS_Tables
 # hyper parameter percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow)
-birch_Save = True
+birch_Save = False
 if birch_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -383,7 +383,7 @@ if birch_Save:
     outliers_count = 0
     cl = 0
 
-    for i in np.arange(0.1, 0.3, 0.1):
+    for i in np.arange(0.1, 1, 0.1):
         file_names.append(f'{i}')
         LS_merged_df = pd.DataFrame()
 

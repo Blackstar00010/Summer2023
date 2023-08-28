@@ -536,7 +536,7 @@ class ResultCheck:
         # New table with firm name, mom_1, long and short index, cluster index
         LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
 
-        if raw:
+        if not raw:
             mom1_col_name = self.prefix + '1'
         else:
             mom1_col_name = 0
@@ -550,8 +550,6 @@ class ResultCheck:
         shit = pd.DataFrame(shit, columns=['Firm Name', 'Cluster Index'])
         shit = shit.set_index('Firm Name')
         shit['Momentum_1'] = self.PCA_Data[mom1_col_name]
-        shit = shit.reset_index()
-        shit = shit.set_index('Firm Name')
         shit = shit.sort_values(by=['Cluster Index', 'Momentum_1'], ascending=[True, False])
         spread_vec = (shit.reset_index()['Momentum_1'] -
                       shit.sort_values(by=['Cluster Index', 'Momentum_1'],
@@ -559,10 +557,10 @@ class ResultCheck:
         shit = shit.reset_index()
         shit['spread'] = spread_vec
         shit['in_portfolio'] = (shit['spread'].abs() > shit['spread'].std()) * 1
-        shit['LS'] = shit['in_portfolio'] * shit['spread'] / shit['spread'].abs()
+        shit['LS'] = shit['in_portfolio'] * (-shit['spread'] / shit['spread'].abs())
         shit['LS'] = shit['LS'].fillna(0)
         shit = shit.drop(columns=['spread', 'in_portfolio'])
-        '''
+        # '''
 
         all_diffs = []
         for cluster_num, firms in enumerate(cluster):

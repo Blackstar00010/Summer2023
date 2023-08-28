@@ -136,8 +136,31 @@ def save_and_plot_LS_Table(result_df, file_names, FTSE=False, apply_log=True):
     result_df = result_df.applymap(
         lambda x: float('NaN') if x < 1 - 1 / criterion else x) if not apply_log else result_df
     result_df = result_df.fillna(method='ffill', axis=1)
-    print(result_df.T.describe())
-    result_df.T.describe().to_csv('../files/result/statistics_modified.csv', index=True)
+
+    sharpe_ratio = pd.DataFrame(index=['Sharpe ratio'], columns=result_df.index)
+
+    for i in range(len(result_df.index)):
+        for j in range(1):
+            row = result_df.iloc[i, :]
+            sf = row.mean() / row.std()
+            sharpe_ratio.iloc[j, i] = sf
+
+    result_modified=pd.concat([result_df.T.describe(), sharpe_ratio], axis=0)
+
+    MDD = pd.DataFrame(index=['Maximum drawdown'], columns=result_df.index)
+
+    for i in range(len(result_df.index)):
+        for j in range(1):
+            row = result_df.iloc[i, :]
+            cumulative_returns = (1 + row).cumprod()
+            peak = cumulative_returns.cummax()
+            drawdown = (cumulative_returns - peak) / peak
+            max_drawdown = drawdown.min()
+            MDD.iloc[j, i] = max_drawdown
+
+    result_modified=pd.concat([result_modified, MDD], axis=0)
+
+    result_modified.to_csv('../files/result/statistics_modified.csv', index=True)
     result_df.to_csv('../files/result/result_modified.csv', index=True)
 
     # Calculate the cumulative product
