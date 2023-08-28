@@ -22,14 +22,14 @@ if K_mean_Plot:
     Do_Result_Plot = C.ResultCheck(df_combined)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(10)
+    Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(50)
 
     # Plot clustering result
     Do_Result_Plot.Plot_clusters_Kmean(Do_Clustering.K_Mean)
 
     # Plot t_SNE result
-    for i, cluster in enumerate(Do_Clustering.K_Mean):
-        t_SNE('K-mean', df_combined, Do_Clustering.K_Mean_labels)
+    # for i, cluster in enumerate(Do_Clustering.K_Mean):
+    #     t_SNE('K-mean', df_combined, Do_Clustering.K_Mean_labels)
 
     # for i, cluster in enumerate(Do_Clustering.K_Mean):
     #     Do_Result_Plot.LS_Table_Save(cluster, '../files/Clustering_adj/K_Means_outlier', file)

@@ -1,7 +1,5 @@
 import math
-
 import pandas as pd
-
 from PCA_and_ETC import *
 from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
@@ -48,9 +46,17 @@ class Clustering:
 
         # kmeans = BisectingKMeans(n_clusters=k_value, init='k-means++', n_init=10, max_iter=500,
         #                          algorithm='elkan', bisecting_strategy='largest_cluster').fit(self.PCA_Data)
+
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
         kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500).fit(self.PCA_Data)
 
-        distance_to_own_centroid = np.array([distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for i in range(len(self.PCA_Data))])
+        distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for i in range(len(self.PCA_Data))]
+
+        cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
+
+        self.test = kmeans
+        self.K_Mean_labels = cluster_labels
 
         nearest_neighbor_distances = []
         for i in range(len(self.PCA_Data)):
@@ -61,11 +67,11 @@ class Clustering:
 
         epsilon = sorted_nearest_neighbor_distances[int(len(sorted_nearest_neighbor_distances) * alpha)]
 
-        outliers = np.where(distance_to_own_centroid > epsilon)[0]
+        # outliers = np.where(distance_to_own_centroid > epsilon)[0]
 
-        filtered_data = np.delete(self.PCA_Data, outliers, axis=0)
+        outliers = [i for i, dist in enumerate(distance_to_own_centroid) if dist > epsilon]
 
-        clusters_indices = [[] for _ in range(3)]
+        clusters_indices = [[] for _ in range(k_value)]
         for i, label in enumerate(kmeans.labels_):
             if i in outliers:
                 continue
@@ -73,7 +79,12 @@ class Clustering:
 
         clusters_indices.insert(0, list(outliers))
 
-        return clusters_indices
+        final_cluster = [[] for _ in clusters_indices]
+        for i, num in enumerate(clusters_indices):
+            for j in num:
+                final_cluster[i].append(self.index[j])
+        final_cluster = [cluster for cluster in final_cluster if cluster]
+        return final_cluster
 
     # def outliers(self, k_value: int, alpha: float = 0.5):
     #     """
