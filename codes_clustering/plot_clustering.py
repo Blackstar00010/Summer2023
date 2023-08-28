@@ -2,7 +2,7 @@ import Clustering as C
 from PCA_and_ETC import *
 
 # file to check
-file = '2022-01.csv'
+file = '2021-01.csv'
 
 input_dir = '../files/characteristics'
 
@@ -10,7 +10,7 @@ input_dir = '../files/characteristics'
 warnings.filterwarnings("ignore")
 
 # Plot K_mean cluster about individual csv file
-K_mean_Plot = False
+K_mean_Plot = True
 if K_mean_Plot:
     # convert mom_data into PCA_data
     data = read_and_preprocess_data(input_dir, file)
@@ -22,14 +22,14 @@ if K_mean_Plot:
     Do_Result_Plot = C.ResultCheck(df_combined)
 
     # Do clustering and get 2D list of cluster index
-    Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(10)
+    Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(50)
 
     # Plot clustering result
     Do_Result_Plot.Plot_clusters_Kmean(Do_Clustering.K_Mean)
 
     # Plot t_SNE result
-    for i, cluster in enumerate(Do_Clustering.K_Mean):
-        t_SNE('K-mean', df_combined, Do_Clustering.K_Mean_labels)
+    # for i, cluster in enumerate(Do_Clustering.K_Mean):
+    #     t_SNE('K-mean', df_combined, Do_Clustering.K_Mean_labels)
 
     # for i, cluster in enumerate(Do_Clustering.K_Mean):
     #     Do_Result_Plot.LS_Table_Save(cluster, '../files/Clustering_adj/K_Means_outlier', file)
@@ -83,7 +83,7 @@ if hdbscan_Plot:
 # hyper parameter eps percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
 
 # Plot Agglomerative cluster about individual csv file
-Agglormerative_Plot = True
+Agglormerative_Plot = False
 if Agglormerative_Plot:
     # convert mom_data into PCA_data
     data = read_and_preprocess_data(input_dir, file)

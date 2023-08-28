@@ -1,7 +1,5 @@
 import math
-
 import pandas as pd
-
 from PCA_and_ETC import *
 from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
@@ -48,27 +46,32 @@ class Clustering:
 
         # kmeans = BisectingKMeans(n_clusters=k_value, init='k-means++', n_init=10, max_iter=500,
         #                          algorithm='elkan', bisecting_strategy='largest_cluster').fit(self.PCA_Data)
+
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
         kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500).fit(self.PCA_Data)
 
-        distance_to_own_centroid = np.array(
-            [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for i in
-             range(len(self.PCA_Data))])
+        distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for i in range(len(self.PCA_Data))]
+
+        cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
+
+        self.test = kmeans
+        self.K_Mean_labels = cluster_labels
 
         nearest_neighbor_distances = []
         for i in range(len(self.PCA_Data)):
-            distances = [distance.euclidean(self.PCA_Data[i], self.PCA_Data[j]) for j in range(len(self.PCA_Data)) if
-                         i != j]
+            distances = [distance.euclidean(self.PCA_Data[i], self.PCA_Data[j]) for j in range(len(self.PCA_Data)) if i!=j]
             nearest_neighbor_distances.append(min(distances))
 
         sorted_nearest_neighbor_distances = sorted(nearest_neighbor_distances)
 
         epsilon = sorted_nearest_neighbor_distances[int(len(sorted_nearest_neighbor_distances) * alpha)]
 
-        outliers = np.where(distance_to_own_centroid > epsilon)[0]
+        # outliers = np.where(distance_to_own_centroid > epsilon)[0]
 
-        filtered_data = np.delete(self.PCA_Data, outliers, axis=0)
+        outliers = [i for i, dist in enumerate(distance_to_own_centroid) if dist > epsilon]
 
-        clusters_indices = [[] for _ in range(3)]
+        clusters_indices = [[] for _ in range(k_value)]
         for i, label in enumerate(kmeans.labels_):
             if i in outliers:
                 continue
@@ -76,7 +79,12 @@ class Clustering:
 
         clusters_indices.insert(0, list(outliers))
 
-        return clusters_indices
+        final_cluster = [[] for _ in clusters_indices]
+        for i, num in enumerate(clusters_indices):
+            for j in num:
+                final_cluster[i].append(self.index[j])
+        final_cluster = [cluster for cluster in final_cluster if cluster]
+        return final_cluster
 
     # def outliers(self, k_value: int, alpha: float = 0.5):
     #     """
@@ -272,16 +280,15 @@ class Clustering:
 
     def perform_HA(self, threshold: float, draw_dendro=False):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # 1. Hierachical Agglomerative
         # 거리 행렬 계산
-        dist_matrix = pdist(self.PCA_Data, metric='cityblock')
+        dist_matrix = pdist(self.PCA_Data, metric='euclidean')
         # data point pair 간의 euclidean distance/firm수 combination 2
 
         # 연결 매트릭스 계산
-        Z = linkage(dist_matrix, method='average')
+        Z = linkage(dist_matrix, method='ward')
         '''we adopt the average linkage, which is defined as the average distance between
         the data points in one cluster and the data points in another cluster
         논문과는 다른 부분. average method대신 ward method 사용.
@@ -302,7 +309,7 @@ class Clustering:
         '''In our empirical study, we specify the maximum distance rather than the number of clusters K,
         using a method similar to the method adopted for k-means clustering:
         e is set as an α percentile of the distances between a pair of nearest data points'''
-        # 평균 cophenetic distance의 0.4를 곱한 값을 max_d로 사용
+        # 최대 cophenetic distance의 0.4를 곱한 값을 max_d로 사용
         max_d = np.max(coph_dists) * threshold
 
         # cophenet: dendrogram과 original data 사이 similarity을 나타내는 correlation coefficient
@@ -310,7 +317,6 @@ class Clustering:
 
         # Cluster k개 생성
         clusters = fcluster(Z, max_d, criterion='distance')
-
         self.Agglomerative_labels = clusters
         unique_labels = sorted(list(set(clusters)))
 
@@ -533,7 +539,7 @@ class ResultCheck:
         if raw:
             mom1_col_name = self.prefix + '1'
         else:
-            mom1_col_name = '0'
+            mom1_col_name = 0
 
         # consider using this
         '''
@@ -563,8 +569,7 @@ class ResultCheck:
             firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, mom1_col_name])
 
             for i in range(len(firms_sorted) // 2):
-                mom_diff = abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[
-                    firms_sorted[-i - 1], mom1_col_name])
+                mom_diff = abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name])
                 all_diffs.append(mom_diff)
 
         std_dev = np.std(all_diffs)
@@ -575,8 +580,7 @@ class ResultCheck:
 
             for i in range(len(firms_sorted) // 2):
                 # Only assign long-short indices if the mom1 difference is greater than the standard deviation
-                if abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[
-                    firms_sorted[-i - 1], mom1_col_name]) > std_dev:
+                if abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name]) > std_dev:
                     long_short[i] = 1  # 1 to the low ones
                     long_short[-i - 1] = -1  # -1 to the high ones
                     # 0 to middle point when there are odd numbers in a cluster
@@ -607,8 +611,7 @@ class ResultCheck:
         """
         LS_table_reversal = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short'])
         firm_lists = data.index
-        prefix = momentum_prefix_finder(data)
-        firm_sorted = sorted(firm_lists, key=lambda x: data.loc[x, prefix + '1'])
+        firm_sorted = sorted(firm_lists, key=lambda x: data.loc[x, '1'])
         long_short = [0] * len(firm_sorted)
         t = int(len(firm_lists) * 0.1)
         for i in range(t):
@@ -616,7 +619,7 @@ class ResultCheck:
             long_short[-i - 1] = -1
 
         for i, firm in enumerate(firm_sorted):
-            LS_table_reversal.loc[len(LS_table_reversal)] = [firm, data.loc[firm, prefix + '1'], long_short[i]]
+            LS_table_reversal.loc[len(LS_table_reversal)] = [firm, data.loc[firm, '1'], long_short[i]]
 
         if save:
             # Save the output to a CSV file in the output directory
