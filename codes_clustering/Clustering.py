@@ -384,7 +384,7 @@ class Clustering:
 
         reachability = optics.reachability_[optics.ordering_]
         # Reachability 값이 threshold를 넘는 데이터 포인트 출력
-        threshold = np.percentile(reachability, 95)
+        threshold = np.percentile(reachability, 99)
         outliers = np.where(reachability > threshold)[0]
         self.OPTIC_labels = labels
 
@@ -689,15 +689,13 @@ class ResultCheck:
             plt.show()
 
     def count_outlier(self, cluster: list):
-        """
-
-        :param cluster:
-        :return:
-        """
+        all_cluster=[item for sublist in cluster for item in sublist]
+        firm_len=len(all_cluster)
         if not cluster:
             return 0
 
         elif not cluster[0]:
             return 0
         else:
-            return len(cluster[0])
+            percentile=len(cluster[0])/firm_len
+            return percentile

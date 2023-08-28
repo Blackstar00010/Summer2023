@@ -1,5 +1,3 @@
-import pandas as pd
-
 from PCA_and_ETC import *
 
 col=['03/1990-12/1991','01/1992-12/1994(Black_Wednesday)','01/1995-12/2001(Dotcom_Bubble)','01/2002-12/2006','01/2007-12/2009(GFC)',
