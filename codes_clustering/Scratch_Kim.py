@@ -1,6 +1,7 @@
 import Clustering as C
 from PCA_and_ETC import *
 
+
 MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
 # Set Firm Name column into index
 MOM_merged_df.set_index('Firm Name', inplace=True)
@@ -19,13 +20,12 @@ if K_mean_Save:
     outliers_count = 0
     cl = 0
 
-    for i in [10, 2]:
+    for i in [2, 10]:
         file_names.append(f'{i}')
         LS_merged_df = pd.DataFrame()
 
         for file in files:
             print(file)
-
             # convert mom_data into PCA_data
             data = read_and_preprocess_data(input_dir, file)
             raw = False
@@ -42,7 +42,7 @@ if K_mean_Save:
 
             outliers_count += Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0])
 
-            table = Do_Result_Save.ls_table(Do_Clustering.K_Mean[0], output_dir, file, save=False, raw=False)
+            table = Do_Result_Save.ls_table(Do_Clustering.K_Mean[0], output_dir, file, save=False, raw=raw)
 
             LS_merged_df = merge_LS_Table(table, LS_merged_df, file)
 
@@ -52,6 +52,7 @@ if K_mean_Save:
         result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
 
         cl = cl / len(files)
+        outliers_count=outliers_count/len(files)
         print('average number of clusters:', cl)
         print(f'total outliers: {outliers_count}')
 
@@ -83,6 +84,7 @@ if dbscan_Save:
             raw = False
             if not raw:
                 df_combined = generate_PCA_Data(data)
+
             else:
                 df_combined = data
             # Call initial method
@@ -97,6 +99,7 @@ if dbscan_Save:
             table = Do_Result_Save.ls_table(Do_Clustering.DBSCAN, output_dir, file, save=False, raw=raw)
 
             LS_merged_df = merge_LS_Table(table, LS_merged_df, file)
+            print(LS_merged_df)
 
             cl += len(sorted(list(set(Do_Clustering.DBSCAN_labels))))
             print("Number of clusters is:", len(set(Do_Clustering.DBSCAN_labels)))
@@ -145,6 +148,7 @@ if hdbscan_Save:
             Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(i)
 
             outliers_count += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
+
 
             table = Do_Result_Save.ls_table(Do_Clustering.HDBSCAN, output_dir, file, save=False, raw=False)
 
