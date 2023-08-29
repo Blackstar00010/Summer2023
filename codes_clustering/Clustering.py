@@ -700,3 +700,5 @@ class ResultCheck:
         else:
             percentile=len(cluster[0])/firm_len
             return percentile
+
+

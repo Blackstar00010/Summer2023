@@ -14,7 +14,6 @@ subdirectories = [d for d in os.listdir(base_directory) if os.path.isdir(os.path
 
 file_names = []
 result_df = pd.DataFrame()
-proportion = []
 
 # Save subdir name in file_names at the beginning.
 for subdir in subdirectories:

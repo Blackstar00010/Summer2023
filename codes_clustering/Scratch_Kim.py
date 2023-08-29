@@ -50,13 +50,13 @@ if K_mean_Save:
             print("Number of clusters is:", len(set(Do_Clustering.K_Mean_labels)))
 
         result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
-
         cl = cl / len(files)
-        print('average number of clusters:', cl)
+        outliers_count/len(files)
+        print(f'avg of clusters: {cl}')
         print(f'total outliers: {outliers_count}')
 
     print(result_df)
-    save_and_plot_LS_Table(result_df, file_names, FTSE=True, apply_log=True)
+    save_and_plot_LS_Table(result_df, file_names, clustering_name='K_mean', FTSE=True, apply_log=True)
 
 # Save DBSCAN clutering method LS_Tables
 # hyper parameter eps percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow)

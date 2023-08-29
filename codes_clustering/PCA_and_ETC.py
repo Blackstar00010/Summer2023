@@ -59,6 +59,7 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     # Set Firm Name column into index
     LS_merged_df.set_index('Firm Name', inplace=True)
 
+
     # 마지막 row 버리면 한칸씩 밀어버리는 것과 동치
     LS_merged_df = LS_merged_df.drop(LS_merged_df.columns[-1], axis=1)
 
@@ -91,7 +92,7 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     return result_df
 
 
-def save_and_plot_LS_Table(result_df, file_names, FTSE=False, apply_log=True):
+def save_and_plot_LS_Table(clustering_name, result_df, file_names, FTSE=False, apply_log=True):
     # Add a new column to the result DataFrame with the file names
     result_df.insert(0, 'Clustering Method', file_names)
     # Separate the 'Clustering Method' column from the date columns
@@ -122,8 +123,8 @@ def save_and_plot_LS_Table(result_df, file_names, FTSE=False, apply_log=True):
     result_df = result_df.astype(float)  # set data type as float(df.value was str actually.)
     result_df = result_df.fillna(0)
 
-    result_df.T.describe().to_csv('../files/result/statistics_original.csv', index=True)
-    result_df.to_csv('../files/result/result_original.csv', index=True)
+    result_df.T.describe().to_csv(os.path.join('../files/result/',f'{clustering_name}_statistcs_original.csv'), index=True)
+    result_df.to_csv('../files/result/',f'{clustering_name}_result_original.csv', index=True)
 
     # Add 1 to all data values
     result_df.iloc[:, 0:] = result_df.iloc[:, 0:] + 1
@@ -160,8 +161,10 @@ def save_and_plot_LS_Table(result_df, file_names, FTSE=False, apply_log=True):
 
     result_modified=pd.concat([result_modified, MDD], axis=0)
 
-    result_modified.to_csv('../files/result/statistics_modified.csv', index=True)
-    result_df.to_csv('../files/result/result_modified.csv', index=True)
+    result_modified.iloc[1, :] = (result_modified.iloc[1, :] + 1) ** 12 - 1
+
+    result_modified.to_csv(os.path.join('../files/result/',f'{clustering_name}_statistcs_modified.csv'), index=True)
+    result_df.to_csv(os.path.join('../files/result/',f'{clustering_name}_result_modified.csv'), index=True)
 
     # Calculate the cumulative product
     result_df.iloc[:, :] = result_df.iloc[:, :].cumsum(axis=1) if apply_log else result_df.iloc[:, :].cumprod(
