@@ -53,6 +53,7 @@ class Clustering:
 
         distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for i in range(len(self.PCA_Data))]
 
+
         cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
 
         self.test = kmeans
@@ -536,67 +537,74 @@ class ResultCheck:
         # New table with firm name, mom_1, long and short index, cluster index
         LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
 
-        if not raw:
+        if raw:
             mom1_col_name = self.prefix + '1'
         else:
-            mom1_col_name = 0
+            mom1_col_name = '0'
 
         # consider using this
-        '''
-        shit = []
+        # '''
+        clusters = []
         for i in range(len(cluster)):
-            for afirm in cluster[i]:
-                shit.append([afirm, i])
-        shit = pd.DataFrame(shit, columns=['Firm Name', 'Cluster Index'])
-        shit = shit.set_index('Firm Name')
-        shit['Momentum_1'] = self.PCA_Data[mom1_col_name]
-        shit = shit.sort_values(by=['Cluster Index', 'Momentum_1'], ascending=[True, False])
-        spread_vec = (shit.reset_index()['Momentum_1'] -
-                      shit.sort_values(by=['Cluster Index', 'Momentum_1'],
-                                       ascending=[True, True]).reset_index()['Momentum_1'])
-        shit = shit.reset_index()
-        shit['spread'] = spread_vec
-        shit['in_portfolio'] = (shit['spread'].abs() > shit['spread'].std()) * 1
-        shit['LS'] = shit['in_portfolio'] * (-shit['spread'] / shit['spread'].abs())
-        shit['LS'] = shit['LS'].fillna(0)
-        shit = shit.drop(columns=['spread', 'in_portfolio'])
+            for firms in cluster[i]:
+                clusters.append([firms, i])
+        clusters = pd.DataFrame(clusters, columns=['Firm Name', 'Cluster Index'])
+        clusters = clusters.set_index('Firm Name')
+        clusters['Momentum_1'] = self.PCA_Data[mom1_col_name]
+        clusters = clusters.sort_values(by=['Cluster Index', 'Momentum_1'], ascending=[True, False])
+        spread_vec = (clusters.reset_index()['Momentum_1'] -clusters.sort_values(by=['Cluster Index', 'Momentum_1'],\
+                        ascending=[True, True]).reset_index()['Momentum_1'])
+        clusters = clusters.reset_index()
+        clusters['spread'] = spread_vec
+        clusters['in_portfolio'] = (clusters['spread'].abs() > clusters['spread'].std()) * 1
+        clusters['Long Short'] = clusters['in_portfolio'] * (-clusters['spread'] / clusters['spread'].abs())
+        clusters['Long Short'] = clusters['Long Short'].fillna(0)
+        clusters = clusters.drop(columns=['spread', 'in_portfolio'])
+        clusters.loc[clusters['Cluster Index'] == 0, 'Long Short'] = 0
+        clusters.sort_values('Cluster Index', inplace=True)
+        clusters=clusters[['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index']]
+
         # '''
 
-        all_diffs = []
-        for cluster_num, firms in enumerate(cluster):
-            firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, mom1_col_name])
+        ls_origin=False
+        if ls_origin:
+            all_diffs = []
+            for cluster_num, firms in enumerate(cluster):
+                firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, mom1_col_name])
 
-            for i in range(len(firms_sorted) // 2):
-                mom_diff = abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name])
-                all_diffs.append(mom_diff)
+                for i in range(len(firms_sorted) // 2):
+                    mom_diff = abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name])
+                    all_diffs.append(mom_diff)
 
-        std_dev = np.std(all_diffs)
+            std_dev = np.std(all_diffs)
 
-        for cluster_num, firms in enumerate(cluster):
-            firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, mom1_col_name])
-            long_short = [0] * len(firms_sorted)
-
-            for i in range(len(firms_sorted) // 2):
-                # Only assign long-short indices if the mom1 difference is greater than the standard deviation
-                if abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name]) > std_dev:
-                    long_short[i] = 1  # 1 to the low ones
-                    long_short[-i - 1] = -1  # -1 to the high ones
-                    # 0 to middle point when there are odd numbers in a cluster
-
-            # Outlier cluster를 빼지 않는 대신 LS_Value를 0으로
-
-            if cluster_num == 0:
+            for cluster_num, firms in enumerate(cluster):
+                firms_sorted = sorted(firms, key=lambda x: self.PCA_Data.loc[x, mom1_col_name])
                 long_short = [0] * len(firms_sorted)
 
-            # Add the data to the new table
-            for i, firm in enumerate(firms_sorted):
-                LS_table.loc[len(LS_table)] = [firm, self.PCA_Data.loc[firm, mom1_col_name], long_short[i], cluster_num]
+                for i in range(len(firms_sorted) // 2):
+                    # Only assign long-short indices if the mom1 difference is greater than the standard deviation
+                    if abs(self.PCA_Data.loc[firms_sorted[i], mom1_col_name] - self.PCA_Data.loc[firms_sorted[-i - 1], mom1_col_name]) > std_dev:
+                        long_short[i] = 1  # 1 to the low ones
+                        long_short[-i - 1] = -1  # -1 to the high ones
+                        # 0 to middle point when there are odd numbers in a cluster
 
-        # Save the output to a CSV file in the output directory
-        if save:
-            LS_table.to_csv(os.path.join(output_dir, file), index=False)
-            print(f'Exported to {output_dir}!')
-        return LS_table
+                # Outlier cluster를 빼지 않는 대신 LS_Value를 0으로
+
+                if cluster_num == 0:
+                    long_short = [0] * len(firms_sorted)
+
+                # Add the data to the new table
+                for i, firm in enumerate(firms_sorted):
+                    LS_table.loc[len(LS_table)] = [firm, self.PCA_Data.loc[firm, mom1_col_name], long_short[i], cluster_num]
+
+            LS_table.sort_values('Cluster Index', inplace=True)
+            # Save the output to a CSV file in the output directory
+            if save:
+                LS_table.to_csv(os.path.join(output_dir, file), index=False)
+                print(f'Exported to {output_dir}!')
+
+        return clusters
 
     def reversal_table(self, data: pd.DataFrame, output_dir, file, save=True):
         """
