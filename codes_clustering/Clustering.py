@@ -1,5 +1,7 @@
 import math
-import pandas as pd
+
+import numpy as np
+
 from PCA_and_ETC import *
 from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
@@ -190,36 +192,40 @@ class Clustering:
         ms = int(math.log(len(self.PCA_Data)))
 
         # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
-        nbrs = NearestNeighbors(n_neighbors=ms).fit(self.PCA_Data)
+        # 1번째는 자기자신이니까 +1
+        nbrs = NearestNeighbors(n_neighbors=ms+1).fit(self.PCA_Data)
+
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         avg_distances = np.mean(distances[:, 1:], axis=1)
+        eps=np.percentile(avg_distances, threshold*100)
 
         # Sort the average distances in ascending order
-        sorted_distances = np.sort(avg_distances)
-        t = len(sorted_distances)
+        # sorted_distances = np.sort(avg_distances)
+        # t = len(sorted_distances)
 
-        # Z-Score 정규화
-        mean = sorted_distances.mean()
-        std = sorted_distances.std()
-        z_score_normalized_array = (sorted_distances - mean) / std
+        # # Z-Score 정규화
+        # mean = sorted_distances.mean()
+        # std = sorted_distances.std()
+        # z_score_normalized_array = (sorted_distances - mean) / std
 
-        # 표준 편차 2 이상인 데이터 삭제
-        filtered_sorted_distances = z_score_normalized_array[abs(z_score_normalized_array) < 2]
-        k = len(filtered_sorted_distances)
+        # # 표준 편차 3 이상인 데이터 삭제
+        # filtered_sorted_distances = z_score_normalized_array[abs(z_score_normalized_array) < 3]
+        # k = len(filtered_sorted_distances)
 
         # Calculate the index for the alpha percentile (alpha)
-        alpha_percentile_index = int(len(filtered_sorted_distances) * threshold)
+        # alpha_percentile_index = int(len(sorted_distances) * threshold)
+
 
         # filtered_sorted_distance에서 삭제한 수 만큼 sorted_distance에서도 삭제
-        sorted_distances = sorted_distances[:-t + k]
-        eps = sorted_distances[alpha_percentile_index]
+        # sorted_distances = sorted_distances[:-t + k]
+        # eps = sorted_distances[alpha_percentile_index]
 
         # for i in np.arange(0.1, 1.0, 0.1):
         #     alpha_percentile_index = int(len(filtered_sorted_distances) * i)
         #     eps = sorted_distances[alpha_percentile_index]
         #     print(eps)
 
-        dbscan = DBSCAN(min_samples=ms, eps=eps, metric='euclidean').fit(self.PCA_Data)
+        dbscan = DBSCAN(min_samples=ms, eps=eps, metric='l1').fit(self.PCA_Data)
         cluster_labels = dbscan.labels_
 
         self.test = dbscan
@@ -523,6 +529,7 @@ class ResultCheck:
     def __init__(self, data: pd.DataFrame):
         self.PCA_Data = data
         self.prefix = momentum_prefix_finder(self.PCA_Data)
+        self.table=[]
 
     def ls_table(self, cluster: list, output_dir, file, save=True, raw=True):
         """
@@ -604,7 +611,7 @@ class ResultCheck:
                 LS_table.to_csv(os.path.join(output_dir, file), index=False)
                 print(f'Exported to {output_dir}!')
 
-        return clusters
+        self.table=clusters
 
     def reversal_table(self, data: pd.DataFrame, output_dir, file, save=True):
         """
@@ -709,4 +716,7 @@ class ResultCheck:
             percentile=len(cluster[0])/firm_len
             return percentile
 
-
+    def count_stock_of_traded(self):
+        count_non_zero = (self.table['Long Short'] != 0).sum()
+        proportion=count_non_zero/len(self.table)
+        return proportion

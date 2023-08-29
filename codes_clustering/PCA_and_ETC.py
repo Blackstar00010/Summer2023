@@ -52,13 +52,11 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     # Sort LS_Value according to Firm Name
     LS_merged_df = LS_merged_df.sort_values('Firm Name')
 
-
     # I don't know the reason why'''
     # LS_merged_df = LS_merged_df.drop_duplicates(subset=LS_merged_df.columns[0], keep='first')
 
     # Set Firm Name column into index
     LS_merged_df.set_index('Firm Name', inplace=True)
-
 
     # 마지막 row 버리면 한칸씩 밀어버리는 것과 동치
     LS_merged_df = LS_merged_df.drop(LS_merged_df.columns[-1], axis=1)
@@ -92,9 +90,11 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     return result_df
 
 
-def save_and_plot_LS_Table(clustering_name, result_df, file_names, FTSE=False, apply_log=True):
+def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, FTSE=False, apply_log=True):
     # Add a new column to the result DataFrame with the file names
-    result_df.insert(0, 'Clustering Method', file_names)
+    result_df['Clustering Method'] = file_names
+    # result_df.set_index('Clustering Method', inplace=True)
+
     # Separate the 'Clustering Method' column from the date columns
     clustering_method = result_df['Clustering Method']
     date_columns_df = result_df.drop('Clustering Method', axis=1)
@@ -123,8 +123,9 @@ def save_and_plot_LS_Table(clustering_name, result_df, file_names, FTSE=False, a
     result_df = result_df.astype(float)  # set data type as float(df.value was str actually.)
     result_df = result_df.fillna(0)
 
-    result_df.T.describe().to_csv(os.path.join('../files/result/',f'{clustering_name}_statistcs_original.csv'), index=True)
-    result_df.to_csv('../files/result/',f'{clustering_name}_result_original.csv', index=True)
+    result_df.T.describe().to_csv(os.path.join('../files/result/', f'{clustering_name}_statistcs_original.csv'),
+                                  index=True)
+    result_df.to_csv(os.path.join('../files/result/', f'{clustering_name}_result_original.csv'), index=True)
 
     # Add 1 to all data values
     result_df.iloc[:, 0:] = result_df.iloc[:, 0:] + 1
@@ -146,7 +147,7 @@ def save_and_plot_LS_Table(clustering_name, result_df, file_names, FTSE=False, a
             sf = row.mean() / row.std()
             sharpe_ratio.iloc[j, i] = sf
 
-    result_modified=pd.concat([result_df.T.describe(), sharpe_ratio], axis=0)
+    result_modified = pd.concat([result_df.T.describe(), sharpe_ratio], axis=0)
 
     MDD = pd.DataFrame(index=['Maximum drawdown'], columns=result_df.index)
 
@@ -159,12 +160,13 @@ def save_and_plot_LS_Table(clustering_name, result_df, file_names, FTSE=False, a
             max_drawdown = drawdown.min()
             MDD.iloc[j, i] = max_drawdown
 
-    result_modified=pd.concat([result_modified, MDD], axis=0)
+    result_modified = pd.concat([result_modified, MDD], axis=0)
 
     result_modified.iloc[1, :] = (result_modified.iloc[1, :] + 1) ** 12 - 1
+    #ToDo: anual return calculate
 
-    result_modified.to_csv(os.path.join('../files/result/',f'{clustering_name}_statistcs_modified.csv'), index=True)
-    result_df.to_csv(os.path.join('../files/result/',f'{clustering_name}_result_modified.csv'), index=True)
+    result_modified.to_csv(os.path.join('../files/result/', clustering_name + '_statistcs_modified.csv'), index=True)
+    result_df.to_csv(os.path.join('../files/result/', clustering_name + '_result_modified.csv'), index=True)
 
     # Calculate the cumulative product
     result_df.iloc[:, :] = result_df.iloc[:, :].cumsum(axis=1) if apply_log else result_df.iloc[:, :].cumprod(
@@ -197,6 +199,16 @@ def save_and_plot_LS_Table(clustering_name, result_df, file_names, FTSE=False, a
             plt.tight_layout()
 
             plt.show()
+
+
+def save_cluster_info(clustering_name, stat_list: list, file_names):
+    file_names.remove('FTSE 100')
+    stat_df = pd.DataFrame(stat_list,
+                           index=file_names,
+                           columns=['Number of clusters', 'Number of stock in clusters',
+                                    'Number of outliers', 'Number of stock traded']).T
+
+    stat_df.to_csv(os.path.join('../files/result/', f'{clustering_name}_cluster_info.csv'), index=True)
 
 
 def generate_PCA_Data(data: pd.DataFrame):
