@@ -50,7 +50,7 @@ if K_mean_Save:
 
         # Save LS_Table CSV File
         for i, cluster in enumerate(Do_Clustering.K_Mean):
-            Do_Result_Save.ls_table(cluster, output_dir, file)
+            Do_Result_Save.ls_table(cluster, output_dir, file, save=True, raw=False)
 
         silhouette_avg = silhouette_score(df_combined, Do_Clustering.K_Mean_labels)
         sil += silhouette_avg
