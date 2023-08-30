@@ -1,4 +1,7 @@
 import math
+
+import numpy as np
+
 from PCA_and_ETC import *
 from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
@@ -299,15 +302,9 @@ class Clustering:
 
     def perform_HA(self, threshold: float, draw_dendro=False):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        # self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
-        # 1. Hierachical Agglomerative
-        # 거리 행렬 계산
-        dist_matrix = pdist(self.PCA_Data, metric='euclidean')
-        # data point pair 간의 euclidean distance/firm수 combination 2
-
-        # 연결 매트릭스 계산
-        Z = linkage(dist_matrix, method='ward')
+        Z=ward(pdist(self.PCA_Data))
         '''we adopt the average linkage, which is defined as the average distance between
         the data points in one cluster and the data points in another cluster
         논문과는 다른 부분. average method대신 ward method 사용.
@@ -324,6 +321,7 @@ class Clustering:
         # cophenetic distance 계산
         coph_dists = Z[:, 2]  # Z의 두 번째 열은 cophenetic distance 값
 
+
         # 2. Outlier
         '''In our empirical study, we specify the maximum distance rather than the number of clusters K,
         using a method similar to the method adopted for k-means clustering:
@@ -335,22 +333,28 @@ class Clustering:
         # 숫자가 클 수록 원본데이터와 유사도가 떨어짐. dendrogram에서 distance의미.
 
         # Cluster k개 생성
-        clusters = fcluster(Z, max_d, criterion='distance')
-        self.Agglomerative_labels = clusters
-        unique_labels = sorted(list(set(clusters)))
-        print(unique_labels)
+        cluster_labels = fcluster(Z, max_d, criterion='distance')
+        cluster_counts = np.bincount(cluster_labels)
+        unique_labels = sorted(list(set(cluster_labels)))
 
-        for i, cluster_label in enumerate(clusters):
-            if coph_dists[i]>max_d:
-                cluster_label=-1
-            else:
-                continue
+        # ha=AgglomerativeClustering(n_clusters=None, distance_threshold=max_d).fit(self.PCA_Data)
+        # cluster_labels=ha.labels_
+        # cluster_counts = np.bincount(cluster_labels)
+        # unique_labels = sorted(list(set(cluster_labels)))
 
-        unique_labels = sorted(list(set(clusters)))
-        print(unique_labels)
 
+
+        for _, unique_label in enumerate(unique_labels):
+            if cluster_counts[unique_label]<2:
+                for j, cluster_label in enumerate(cluster_labels):
+                    if cluster_label==unique_label:
+                        cluster_labels[j]=-1
+
+        self.Agglomerative_labels = cluster_labels
+
+        unique_labels = sorted(list(set(cluster_labels)))
         clust = [[] for _ in unique_labels]
-        for i, cluster_label in enumerate(clusters):
+        for i, cluster_label in enumerate(cluster_labels):
             clust[unique_labels.index(cluster_label)].append(self.index[i])
 
 

@@ -7,7 +7,7 @@ MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
 
 # Save K_mean clutering method LS_Tables
 # hyper parameter K(2,3,4,5,10,50,100,500,1000) should be tested manually.(paper follow)
-K_mean_Save = True
+K_mean_Save = False
 if K_mean_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -239,7 +239,7 @@ if GMM_Save:
 
 # Save Hirarchical Agglomerative clutering method LS_Tables
 # hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.
-agglomerative_Save = False
+agglomerative_Save = True
 if agglomerative_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -270,7 +270,7 @@ if agglomerative_Save:
             Do_Result_Save = C.ResultCheck(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.perform_HA(i)
+            Do_Clustering.perform_HA(i, draw_dendro=False)
 
             Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=False, raw=raw)
 
