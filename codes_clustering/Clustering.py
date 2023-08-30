@@ -48,7 +48,8 @@ class Clustering:
 
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
-        kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500).fit(self.PCA_Data)
+        # ToDo: random
+        kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500, random_state=10).fit(self.PCA_Data)
 
         distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for i in range(len(self.PCA_Data))]
 
@@ -199,7 +200,7 @@ class Clustering:
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         avg_distances = np.mean(distances[:, 1:], axis=1)
 
-        eps=np.percentile(avg_distances, 90+threshold*10)
+        eps=np.percentile(avg_distances, threshold*100)
 
         print(eps)
 
@@ -237,7 +238,7 @@ class Clustering:
         #     eps = sorted_distances[alpha_percentile_index]
         #     print(eps)
 
-        dbscan = DBSCAN(min_samples=ms, eps=eps, metric='l1').fit(self.PCA_Data)
+        dbscan = DBSCAN(min_samples=ms, eps=eps, metric='euclidean').fit(self.PCA_Data)
         cluster_labels = dbscan.labels_
 
         self.test = dbscan
@@ -273,10 +274,9 @@ class Clustering:
 
         # 2. Outlier
         max_d = np.max(coph_dists) * threshold
-        num = find_optimal_HDBSCAN_min_cluster_size(self.PCA_Data)
 
         # min_cluster_size는 silhouette score가 가장 높은 것 선정. 2부터 5까지 실험.
-        Hdbscan = HDBSCAN(min_cluster_size=num, allow_single_cluster=True, cluster_selection_epsilon=max_d).fit(
+        Hdbscan = HDBSCAN(min_cluster_size=2, allow_single_cluster=True, cluster_selection_epsilon=max_d).fit(
             self.PCA_Data)
         cluster_labels = Hdbscan.labels_
 
@@ -338,10 +338,21 @@ class Clustering:
         clusters = fcluster(Z, max_d, criterion='distance')
         self.Agglomerative_labels = clusters
         unique_labels = sorted(list(set(clusters)))
+        print(unique_labels)
+
+        for i, cluster_label in enumerate(clusters):
+            if coph_dists[i]>max_d:
+                cluster_label=-1
+            else:
+                continue
+
+        unique_labels = sorted(list(set(clusters)))
+        print(unique_labels)
 
         clust = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(clusters):
             clust[unique_labels.index(cluster_label)].append(self.index[i])
+
 
         # outlier가 없으면 빈리스트 추가
         if -1 not in unique_labels:
