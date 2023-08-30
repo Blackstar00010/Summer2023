@@ -20,7 +20,7 @@ if K_mean_Save:
     outliers_count = 0
     figure = 0
 
-    for i in [100]:
+    for i in [5,10,50,100,500,1000, 1500]:
         file_names.append(f'{i}')
         LS_merged_df = pd.DataFrame()
 
@@ -78,7 +78,7 @@ if dbscan_Save:
     outliers_count = 0
     figure = 0
 
-    for i in np.arange(0.9, 1, 0.01):
+    for i in np.arange(0.1, 1, 0.1):
         file_names.append(f'{i}')
         LS_merged_df = pd.DataFrame()
 
@@ -86,7 +86,7 @@ if dbscan_Save:
             print(file)
             # convert mom_data into PCA_data
             data = read_and_preprocess_data(input_dir, file)
-            raw = False
+            raw = True
             if not raw:
                 df_combined = generate_PCA_Data(data)
             else:
@@ -96,7 +96,7 @@ if dbscan_Save:
             Do_Result_Save = C.ResultCheck(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.perform_DBSCAN(i,True)
+            Do_Clustering.perform_DBSCAN(i,histogram=False)
 
             Do_Result_Save.ls_table(Do_Clustering.DBSCAN, output_dir, file, save=False, raw=raw)
 
