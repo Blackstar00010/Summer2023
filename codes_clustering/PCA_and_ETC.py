@@ -169,8 +169,6 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
 
     result_modified = pd.concat([result_modified, MDD], axis=0)
 
-    # ToDo: anual return calculate
-
     result_modified.to_csv(os.path.join('../files/result/', clustering_name + '_statistcs_modified.csv'), index=True)
     result_df.to_csv(os.path.join('../files/result/', clustering_name + '_result_modified.csv'), index=True)
 
