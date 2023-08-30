@@ -24,7 +24,7 @@ if Reversal_Save:
 
 # Save K_mean clutering method LS_Tables
 # hyper parameter K(1,2,3,4,5,10,50,100,500,1000) should be tested manually.(paper follow)
-K_mean_Save = False
+K_mean_Save = True
 if K_mean_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/K_Means_outlier'
@@ -37,7 +37,6 @@ if K_mean_Save:
 
         # convert mom_data into PCA_data
         data = read_and_preprocess_data(input_dir, file)
-        data = data.set_index('Momentum Index')
         df_combined = generate_PCA_Data(data)
 
         # Call initial method
@@ -45,7 +44,7 @@ if K_mean_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(2)
+        Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(50)
 
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0])
 
@@ -157,7 +156,7 @@ if hdbscan_Save:
 
 # Save Hirarchical Agglomerative clutering method LS_Tables
 # hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-Agglormerative_Save = True
+Agglormerative_Save = False
 if Agglormerative_Save:
     # input_dir = '../files/momentum_adj'
     # output_dir ='../files/Clustering_adj/Hierarchical_Agglomerative'

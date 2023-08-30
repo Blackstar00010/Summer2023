@@ -62,10 +62,14 @@ class Clustering:
         self.test = kmeans
         self.K_Mean_labels = cluster_labels
 
-        nearest_neighbor_distances = []
-        for i in range(len(self.PCA_Data)):
-            distances = [distance.euclidean(self.PCA_Data[i], self.PCA_Data[j]) for j in range(len(self.PCA_Data)) if i!=j]
-            nearest_neighbor_distances.append(min(distances))
+        # nearest_neighbor_distances = []
+        # for i in range(len(self.PCA_Data)):
+        #     distances = [distance.euclidean(self.PCA_Data[i], self.PCA_Data[j]) for j in range(len(self.PCA_Data)) if i!=j]
+        #     nearest_neighbor_distances.append(min(distances))
+
+        nbrs = NearestNeighbors(n_neighbors=2, algorithm='auto').fit(self.PCA_Data)
+        distances, indices = nbrs.kneighbors(self.PCA_Data)
+        nearest_neighbor_distances = distances[:, 1]
 
         sorted_nearest_neighbor_distances = sorted(nearest_neighbor_distances)
 
