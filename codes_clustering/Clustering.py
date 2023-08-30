@@ -1,5 +1,6 @@
 import math
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from PCA_and_ETC import *
@@ -184,12 +185,13 @@ class Clustering:
         self.K_Mean = clusters_k
         return self.K_Mean
 
-    def perform_DBSCAN(self, threshold: float):
+    def perform_DBSCAN(self, threshold: float, histogram=False):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
         # Exclude the first column (firm names) & Exclude MOM_1
 
-        ms = int(math.log(len(self.PCA_Data)))
+        # ms = int(math.log(len(self.PCA_Data)))
+        ms=2
 
         # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
         # 1번째는 자기자신이니까 +1
@@ -198,6 +200,15 @@ class Clustering:
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         avg_distances = np.mean(distances[:, 1:], axis=1)
         eps=np.percentile(avg_distances, threshold*100)
+        print(eps)
+
+        if histogram:
+            plt.hist(avg_distances, bins=20)
+            plt.title('fHistogram')
+            plt.xlabel('Value')
+            plt.ylabel('Frequency')
+            plt.xticks(range(0,int(max(avg_distances))+1,2))
+            plt.show()
 
         # Sort the average distances in ascending order
         # sorted_distances = np.sort(avg_distances)
