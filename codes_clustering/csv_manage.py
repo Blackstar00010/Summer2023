@@ -1,5 +1,3 @@
-import os.path
-import pandas as pd
 from PCA_and_ETC import *
 
 first_day_of_month = False

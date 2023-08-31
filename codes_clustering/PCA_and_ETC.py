@@ -132,23 +132,24 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
 
     # transform into log scale
     result_df.iloc[:, 0:] = np.log(result_df.iloc[:, 0:]) if apply_log else result_df.iloc[:, 0:]
-    criterion = np.log(2) if apply_log else 2
 
+    # drop irrational data ( larger than criterion )
+    criterion = np.log(2) if apply_log else 2
     result_df = result_df.applymap(lambda x: float('NaN') if abs(x) > criterion else x)
     result_df = result_df.applymap(
         lambda x: float('NaN') if x < 1 - 1 / criterion else x) if not apply_log else result_df
     result_df = result_df.fillna(method='ffill', axis=1)
 
-    result_modified = pd.DataFrame(index=['count', 'annual return mean', 'annual return std', 'min', 'max'],
+    result_modified = pd.DataFrame(index=['count', 'annual return mean', 'annual return std', 'monthly return min', 'monthly return max'],
                                    columns=result_df.index)
     for i in range(len(result_modified.columns)):
         result_modified.iloc[0, i] = len(result_df.columns)
-        result_modified.iloc[1, i] = np.mean(result_df.iloc[i, :])
+        result_modified.iloc[1, i] = np.mean(result_df.iloc[i, :])*12
         annual_return = [(np.exp(r) - 1) for r in result_df.iloc[i, :]]
         result_modified.iloc[2, i] = np.std(annual_return)
         result_modified.iloc[3, i] = np.min(result_df.iloc[i, :])
         result_modified.iloc[4, i] = np.max(result_df.iloc[i, :])
-    result_modified.iloc[1, :] = result_modified.iloc[1, :] * len(result_df.iloc[1, :]) / 12
+    # result_modified.iloc[1, :] = result_modified.iloc[1, :] * len(result_df.iloc[1, :]) / 12
 
     sharpe_ratio = pd.DataFrame(index=['Sharpe ratio'], columns=result_modified.columns)
 
@@ -188,7 +189,7 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
         plt.xlabel('Date')
         plt.ylabel('cumulative Value')
         # plt.xticks(rotation=45)
-        plt.legend(result_df.index)  # Add a legend to distinguish different lines
+        plt.legend(result_df.index.round())  # Add a legend to distinguish different lines
         plt.tight_layout()
         plt.show()
 
