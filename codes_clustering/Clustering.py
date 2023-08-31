@@ -130,73 +130,6 @@ class Clustering:
         self.DBSCAN = clust
         return self.DBSCAN
 
-    def perform_HDBSCAN(self, threshold):
-        self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
-        # Exclude the first column (firm names) & Exclude MOM_1
-
-        Z = average(pdist(self.PCA_Data))
-
-        # cophenetic distance 계산
-        coph_dists = Z[:, 2]  # Z의 두 번째 열은 cophenetic distance 값
-
-        # 2. Outlier
-        max_d = np.max(coph_dists) * threshold
-
-        # min_cluster_size는 silhouette score가 가장 높은 것 선정. 2부터 5까지 실험.
-        Hdbscan = HDBSCAN(min_cluster_size=2, allow_single_cluster=True, cluster_selection_epsilon=max_d).fit(
-            self.PCA_Data)
-        cluster_labels = Hdbscan.labels_
-
-        self.test = Hdbscan
-        self.HDBSCAN_labels = cluster_labels
-
-        # Get the unique cluster labels
-        unique_labels = sorted(list(set(cluster_labels)))
-
-        clust = [[] for _ in unique_labels]
-        for i, cluster_label in enumerate(cluster_labels):
-            clust[unique_labels.index(cluster_label)].append(self.index[i])
-
-        # outlier가 없으면 빈리스트 추가
-        if -1 not in unique_labels:
-            clust.insert(0, [])
-
-        self.HDBSCAN = clust
-        return self.HDBSCAN
-
-    def perform_OPTICS(self, alpha):
-        self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
-
-        ms = int(math.log(len(self.PCA_Data)))
-
-        optics = OPTICS(xi=0.01, min_samples=ms, min_cluster_size=2, n_jobs=6).fit(self.PCA_Data)
-        labels = optics.labels_
-
-        reachability = optics.reachability_[optics.ordering_]
-        # Reachability 값이 threshold를 넘는 데이터 포인트 출력
-        threshold = np.percentile(reachability, alpha)
-        outliers = np.where(reachability > threshold)[0]
-        self.OPTIC_labels = labels
-
-        for i, cluster_label in enumerate(labels):
-            if i in outliers:
-                labels[i] = -1
-
-        unique_labels = sorted(list(set(labels)))
-        clust = [[] for _ in unique_labels]
-        for i, cluster_label in enumerate(labels):
-            clust[unique_labels.index(cluster_label)].append(self.index[i])
-
-        # outlier가 없으면 빈리스트 추가
-        if -1 not in unique_labels:
-            clust.insert(0, [])
-
-        self.OPTIC = clust
-
-        return self.OPTIC
-
     def perform_HA(self, threshold: float, draw_dendro=False):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
@@ -261,28 +194,78 @@ class Clustering:
         self.Agglomerative = clust
         return self.Agglomerative
 
-    def perform_meanshift(self, quantile):
+    def perform_HDBSCAN(self, threshold):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
-        # The following bandwidth can be automatically detected using
-        bandwidth = estimate_bandwidth(self.PCA_Data, quantile=quantile)
+        nbrs = NearestNeighbors(n_neighbors=3, p=1).fit(self.PCA_Data)
 
-        ms = MeanShift(bandwidth=bandwidth, cluster_all=False).fit(self.PCA_Data)
+        distances, indices = nbrs.kneighbors(self.PCA_Data)
+        avg_distances = np.mean(distances[:, 1:], axis=1)
 
-        cluster_labels = ms.labels_
-        self.test = ms
-        self.meanshift_labels = cluster_labels
+        max_d = np.percentile(avg_distances, threshold * 100)
+
+        # min_cluster_size는 silhouette score가 가장 높은 것 선정. 2부터 5까지 실험.
+        Hdbscan = HDBSCAN(min_cluster_size=2, cluster_selection_epsilon=max_d).fit(
+            self.PCA_Data)
+        cluster_labels = Hdbscan.labels_
+
+        self.test = Hdbscan
+        self.HDBSCAN_labels = cluster_labels
 
         # Get the unique cluster labels
-        unique_labels = sorted(list(set(self.meanshift_labels)))
+        unique_labels = sorted(list(set(cluster_labels)))
 
-        clusters = [[] for _ in unique_labels]
-        for i, cluster_label in enumerate(self.meanshift_labels):
-            clusters[unique_labels.index(cluster_label)].append(self.index[i])
+        clust = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(cluster_labels):
+            clust[unique_labels.index(cluster_label)].append(self.index[i])
 
-        self.meanshift = clusters
-        return self.meanshift
+        # outlier가 없으면 빈리스트 추가
+        if -1 not in unique_labels:
+            clust.insert(0, [])
+
+        self.HDBSCAN = clust
+        return self.HDBSCAN
+
+    def perform_OPTICS(self, threshold):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
+        ms = int(math.log(len(self.PCA_Data)))
+
+        nbrs = NearestNeighbors(n_neighbors=ms + 1, p=1).fit(self.PCA_Data)
+
+        distances, indices = nbrs.kneighbors(self.PCA_Data)
+        avg_distances = np.mean(distances[:, 1:], axis=1)
+
+        eps = np.percentile(avg_distances, threshold * 100)
+
+        optics = OPTICS(cluster_method='dbscan', min_samples=ms, max_eps=eps, min_cluster_size=0.1, p=1).fit(
+            self.PCA_Data)
+        labels = optics.labels_
+
+        # reachability = optics.reachability_[optics.ordering_]
+        # # Reachability 값이 threshold를 넘는 데이터 포인트 출력
+        # threshold = np.percentile(reachability, alpha)
+        # outliers = np.where(reachability > threshold)[0]
+        self.OPTIC_labels = labels
+
+        # for i, cluster_label in enumerate(labels):
+        #     if i in outliers:
+        #         labels[i] = -1
+
+        unique_labels = sorted(list(set(labels)))
+        clust = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(labels):
+            clust[unique_labels.index(cluster_label)].append(self.index[i])
+
+        # outlier가 없으면 빈리스트 추가
+        if -1 not in unique_labels:
+            clust.insert(0, [])
+
+        self.OPTIC = clust
+
+        return self.OPTIC
 
     def perform_BIRCH(self, threshold):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
@@ -293,9 +276,9 @@ class Clustering:
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         avg_distances = np.mean(distances[:, 1:], axis=1)
 
-        outlier_distance = np.percentile(avg_distances, threshold * 100)
+        max_d = np.percentile(avg_distances, threshold * 100)
 
-        birch = Birch(threshold=outlier_distance, n_clusters=None).fit(self.PCA_Data)
+        birch = Birch(threshold=max_d, n_clusters=None).fit(self.PCA_Data)
         cluster_labels = birch.labels_
 
         self.test = birch
@@ -309,9 +292,9 @@ class Clustering:
         # 아웃라이어 여부 확인
         sorted_distances = np.sort(distances)
 
-        eps = sorted_distances[int(len(sorted_distances) * 0.95)]
+        epsilon = sorted_distances[int(len(sorted_distances) * 0.5)]
 
-        outliers = np.where(eps < sorted_distances)[0]
+        outliers = np.where(sorted_distances > epsilon)[0]
 
         cluster_labels = list(cluster_labels)
 
@@ -335,14 +318,38 @@ class Clustering:
         self.BIRCH = clust
         return self.BIRCH
 
-    def perform_GMM(self, alpha: float):
+    def perform_meanshift(self, quantile):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
+        # The following bandwidth can be automatically detected using
+        bandwidth = estimate_bandwidth(self.PCA_Data, quantile=quantile)
+
+        ms = MeanShift(bandwidth=bandwidth, cluster_all=False).fit(self.PCA_Data)
+
+        cluster_labels = ms.labels_
+        self.test = ms
+        self.meanshift_labels = cluster_labels
+
+        # Get the unique cluster labels
+        unique_labels = sorted(list(set(self.meanshift_labels)))
+
+        clusters = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(self.meanshift_labels):
+            clusters[unique_labels.index(cluster_label)].append(self.index[i])
+
+        self.meanshift = clusters
+        return self.meanshift
+
+    def perform_GMM(self, n_components: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         type = find_optimal_GMM_covariance_type(self.PCA_Data)
 
         # 1. Gaussian Mixture Model
-        gmm = GaussianMixture(n_components=2, init_params='k-means++', covariance_type=type).fit(self.PCA_Data)
+        gmm = GaussianMixture(n_components=n_components, init_params='k-means++', covariance_type=type).fit(
+            self.PCA_Data)
         cluster_labels = gmm.predict(self.PCA_Data)
 
         self.test = gmm
@@ -360,7 +367,7 @@ class Clustering:
         probabilities = gmm.score_samples(self.PCA_Data)
         # 확률 값의 percentiles 계산 (예시로 하위 5% 이하를 outlier로 판단)
 
-        threshold = np.percentile(probabilities, alpha)
+        threshold = np.percentile(probabilities, 5)
 
         outliers = []
         for i, probability in enumerate(probabilities):

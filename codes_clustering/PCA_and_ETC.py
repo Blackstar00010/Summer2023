@@ -189,7 +189,7 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
         plt.xlabel('Date')
         plt.ylabel('cumulative Value')
         # plt.xticks(rotation=45)
-        plt.legend(result_df.index.round())  # Add a legend to distinguish different lines
+        plt.legend(result_df.index)  # Add a legend to distinguish different lines
         plt.tight_layout()
         plt.show()
 
