@@ -2,9 +2,8 @@ import math
 from PCA_and_ETC import *
 from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
-from scipy.cluster.hierarchy import *
-from scipy.spatial.distance import pdist
 from scipy.spatial import distance
+import random
 
 
 class Clustering:
@@ -49,7 +48,7 @@ class Clustering:
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # ToDo: random
-        kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500, random_state=10).fit(self.PCA_Data)
+        kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500, random_state=random.randint(1,1000)).fit(self.PCA_Data)
 
         distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for
                                     i in range(len(self.PCA_Data))]
@@ -59,7 +58,7 @@ class Clustering:
         self.test = kmeans
         self.K_Mean_labels = cluster_labels
 
-        nbrs = NearestNeighbors(n_neighbors=2, algorithm='auto').fit(self.PCA_Data)
+        nbrs = NearestNeighbors(n_neighbors=3, algorithm='auto').fit(self.PCA_Data)
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         nearest_neighbor_distances = distances[:, 1]
 
@@ -140,41 +139,16 @@ class Clustering:
         avg_distances = np.mean(distances[:, 1:], axis=1)
 
         outlier_distance = np.percentile(avg_distances, threshold * 100)
+
+        agglo=AgglomerativeClustering(n_clusters=None,metric='l1',linkage='average',distance_threshold=outlier_distance).fit(self.PCA_Data)
+        cluster_labels=agglo.labels_
+        self.test=agglo
+
         outlier = []
 
         for i, avg_distance in enumerate(avg_distances):
             if avg_distance > outlier_distance:
                 outlier.append(i)
-
-        Z = ward(pdist(self.PCA_Data))
-        '''we adopt the average linkage, which is defined as the average distance between
-        the data points in one cluster and the data points in another cluster
-        논문과는 다른 부분. average method대신 ward method 사용.
-        '''
-
-        # # 덴드로그램 시각화
-        if draw_dendro:
-            dendrogram(Z)
-            plt.title('Dendrogram')
-            plt.xlabel('Samples')
-            plt.ylabel('Distance')
-            plt.show()
-
-        # cophenetic distance 계산
-        coph_dists = Z[:, 2]  # Z의 두 번째 열은 cophenetic distance 값
-
-        # 2. Outlier
-        '''In our empirical study, we specify the maximum distance rather than the number of clusters K,
-        using a method similar to the method adopted for k-means clustering:
-        e is set as an α percentile of the distances between a pair of nearest data points'''
-        # 최대 cophenetic distance의 0.4를 곱한 값을 max_d로 사용
-        max_d = np.average(coph_dists)
-
-        # cophenet: dendrogram과 original data 사이 similarity을 나타내는 correlation coefficient
-        # 숫자가 클 수록 원본데이터와 유사도가 떨어짐. dendrogram에서 distance의미.
-
-        # Cluster k개 생성
-        cluster_labels = fcluster(Z, max_d, criterion='distance')
 
         for i, cluster_label in enumerate(cluster_labels):
             if i in outlier:
@@ -183,6 +157,7 @@ class Clustering:
         self.Agglomerative_labels = cluster_labels
 
         unique_labels = sorted(list(set(cluster_labels)))
+
         clust = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(cluster_labels):
             clust[unique_labels.index(cluster_label)].append(self.index[i])
@@ -355,7 +330,7 @@ class Clustering:
         self.test = gmm
         self.Gaussian_labels = cluster_labels
 
-        clusters = [[] for _ in range(2)]
+        clusters = [[] for _ in range(n_components)]
 
         for i, cluster_num in enumerate(cluster_labels):
             clusters[cluster_num].append(i)
@@ -440,6 +415,10 @@ class ResultCheck:
         clusters.sort_values('Cluster Index', inplace=True)
         clusters = clusters[['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index']]
 
+        if save:
+            clusters.to_csv(os.path.join(output_dir, file), index=False)
+            print(f'Exported to {output_dir}!')
+
         # '''
 
         ls_origin = False
@@ -496,7 +475,7 @@ class ResultCheck:
         """
         LS_table_reversal = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short'])
         firm_lists = data.index
-        firm_sorted = sorted(firm_lists, key=lambda x: data.loc[x, '1'])
+        firm_sorted = sorted(firm_lists, key=lambda x: data.loc[x, self.prefix + '1'])
         long_short = [0] * len(firm_sorted)
         t = int(len(firm_lists) * 0.1)
         for i in range(t):
@@ -504,7 +483,7 @@ class ResultCheck:
             long_short[-i - 1] = -1
 
         for i, firm in enumerate(firm_sorted):
-            LS_table_reversal.loc[len(LS_table_reversal)] = [firm, data.loc[firm, '1'], long_short[i]]
+            LS_table_reversal.loc[len(LS_table_reversal)] = [firm, data.loc[firm, self.prefix + '1'], long_short[i]]
 
         if save:
             # Save the output to a CSV file in the output directory

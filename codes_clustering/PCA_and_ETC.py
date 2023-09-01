@@ -145,7 +145,7 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
     for i in range(len(result_modified.columns)):
         result_modified.iloc[0, i] = len(result_df.columns)
         result_modified.iloc[1, i] = np.mean(result_df.iloc[i, :])*12
-        annual_return = [(np.exp(r) - 1) for r in result_df.iloc[i, :]]
+        annual_return = np.array(result_df.iloc[i,:])*12
         result_modified.iloc[2, i] = np.std(annual_return)
         result_modified.iloc[3, i] = np.min(result_df.iloc[i, :])
         result_modified.iloc[4, i] = np.max(result_df.iloc[i, :])

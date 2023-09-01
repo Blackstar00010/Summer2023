@@ -22,7 +22,7 @@ if K_mean_Save:
     outliers_count = 0
     figure = 0
 
-    for i in [3, 5, 10, 50, 100, 300, 500, 700, 900]:
+    for i in [50,75,100,200,300,400,500,600,700]:
         file_names.append(f'{i}')
         LS_merged_df = pd.DataFrame()
 
@@ -67,7 +67,7 @@ if K_mean_Save:
 
 # Save DBSCAN clutering method result
 # hyper parameter eps percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow)
-dbscan_Save = False
+dbscan_Save = True
 if dbscan_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -183,7 +183,7 @@ if agglomerative_Save:
 
 # Save HDBSCAN clutering method result
 # hyper parameter cluster_selection_epsilon percentile np.range(0.1, 1, 0.1) should be tested manually.(similar with Hirachical Agglomerative)
-hdbscan_Save = True
+hdbscan_Save = False
 if hdbscan_Save:
     file_names = []
     result_df = pd.DataFrame()
