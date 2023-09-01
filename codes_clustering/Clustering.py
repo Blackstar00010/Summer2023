@@ -1,9 +1,9 @@
 import math
+import random
 from PCA_and_ETC import *
 from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial import distance
-import random
 
 
 class Clustering:
@@ -48,7 +48,8 @@ class Clustering:
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         # ToDo: random
-        kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500, random_state=random.randint(1,1000)).fit(self.PCA_Data)
+        kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500, random_state=random.randint(1, 1000)).fit(
+            self.PCA_Data)
 
         distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for
                                     i in range(len(self.PCA_Data))]
@@ -129,7 +130,7 @@ class Clustering:
         self.DBSCAN = clust
         return self.DBSCAN
 
-    def perform_HA(self, threshold: float, draw_dendro=False):
+    def perform_HA(self, threshold: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
@@ -140,9 +141,10 @@ class Clustering:
 
         outlier_distance = np.percentile(avg_distances, threshold * 100)
 
-        agglo=AgglomerativeClustering(n_clusters=None,metric='l1',linkage='average',distance_threshold=outlier_distance).fit(self.PCA_Data)
-        cluster_labels=agglo.labels_
-        self.test=agglo
+        agglo = AgglomerativeClustering(n_clusters=None, metric='l1', linkage='average',
+                                        distance_threshold=outlier_distance).fit(self.PCA_Data)
+        cluster_labels = agglo.labels_
+        self.test = agglo
 
         outlier = []
 
@@ -215,7 +217,7 @@ class Clustering:
 
         eps = np.percentile(avg_distances, threshold * 100)
 
-        optics = OPTICS(cluster_method='dbscan', min_samples=ms, max_eps=eps, min_cluster_size=0.1, p=1).fit(
+        optics = OPTICS(cluster_method='dbscan', min_samples=ms, eps=eps, min_cluster_size=0.1, metric='manhattan').fit(
             self.PCA_Data)
         labels = optics.labels_
 

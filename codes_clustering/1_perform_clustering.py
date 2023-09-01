@@ -1,5 +1,3 @@
-import numpy as np
-
 import Clustering as C
 from PCA_and_ETC import *
 
@@ -8,8 +6,8 @@ MOM_merged_df.set_index('Firm Name', inplace=True)
 MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
 
 # Save K_mean clutering method result
-# hyper parameter K(3,5,10,50,100,300,500,700,900) should be tested manually.(paper follow)
-K_mean_Save = False
+# hyper parameter K(50, 75, 100, 200, 300, 400, 500, 600, 700) should be tested manually.(paper follow)
+K_mean_Save = True
 if K_mean_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -22,7 +20,7 @@ if K_mean_Save:
     outliers_count = 0
     figure = 0
 
-    for i in [50,75,100,200,300,400,500,600,700]:
+    for i in [50, 75, 100, 200, 300, 400, 500, 600, 700]:
         file_names.append(f'{i}')
         LS_merged_df = pd.DataFrame()
 
@@ -125,7 +123,7 @@ if dbscan_Save:
 
 # Save Hirarchical Agglomerative clutering method result
 # hyper parameter average_distances percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow)
-agglomerative_Save = False
+agglomerative_Save = True
 if agglomerative_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -156,7 +154,7 @@ if agglomerative_Save:
             Do_Result_Save = C.ResultCheck(df_combined)
 
             # Do clustering and get 2D list of cluster index
-            Do_Clustering.perform_HA(i, draw_dendro=False)
+            Do_Clustering.perform_HA(i)
 
             Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=False, raw=raw)
 
@@ -183,7 +181,7 @@ if agglomerative_Save:
 
 # Save HDBSCAN clutering method result
 # hyper parameter cluster_selection_epsilon percentile np.range(0.1, 1, 0.1) should be tested manually.(similar with Hirachical Agglomerative)
-hdbscan_Save = False
+hdbscan_Save = True
 if hdbscan_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -241,7 +239,7 @@ if hdbscan_Save:
 
 # Save OPTICS clutering method result
 # hyper parameter eps percentile np.range(0.1, 1, 0.1) should be tested manually.(similar with DBSCAN)
-optics_Save = False
+optics_Save = True
 if optics_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -299,7 +297,7 @@ if optics_Save:
 
 # Save BIRCH clutering method result
 # hyper parameter threshold np.range(0.1, 1, 0.1) should be tested manually.(combined K_mean{epsilon=0.5} and Hirachical Agglomerative{max_d})
-birch_Save = False
+birch_Save = True
 if birch_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -357,7 +355,7 @@ if birch_Save:
 
 # Save Meanshift clutering method result
 # hyper parameter bandwidth quantile np.range(0.1, 1, 0.1) should be tested manually.(arbitrarily)
-meanshift_Save = False
+meanshift_Save = True
 if meanshift_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -416,7 +414,7 @@ if meanshift_Save:
 # Save GaussianMixture clutering method result
 # first hyper parameter n_components [3,5,10,20,30,40,50,60,70] should be tested manually.(followed number of meanshift clusters arbitrarily)
 # second hyper parameter probabilities [50,40,30,20,10,5,1] should be tested manually.(arbitrarily)
-GMM_Save = False
+GMM_Save = True
 if GMM_Save:
     file_names = []
     result_df = pd.DataFrame()

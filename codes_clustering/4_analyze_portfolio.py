@@ -1,23 +1,26 @@
 from PCA_and_ETC import *
 
-FTSE=True
+FTSE = True
 
 if not FTSE:
-    col=['03/1990-12/1991','01/1992-12/1994(Black_Wednesday)','01/1995-12/2001(Dotcom_Bubble)','01/2002-12/2006','01/2007-12/2009(GFC)',
-         '01/2010-12/2013(eurozone_crisis)','01/2014-12/2015','01/2016-12/2019(Brexit)', '01/2020-12/2022(Covid-19)','01/2023-07/2023','Overall']
+    col = ['03/1990-12/1991', '01/1992-12/1994(Black_Wednesday)', '01/1995-12/2001(Dotcom_Bubble)', '01/2002-12/2006',
+           '01/2007-12/2009(GFC)',
+           '01/2010-12/2013(eurozone_crisis)', '01/2014-12/2015', '01/2016-12/2019(Brexit)',
+           '01/2020-12/2022(Covid-19)', '01/2023-07/2023', 'Overall']
 
-    period = [range(1,23), range(23,59), range(59,143), range(143,203), range(203,239), range(239, 287),
-              range(287, 311),range(311,359), range(359,395),range(395,402),range(1,402)]
+    period = [range(1, 23), range(23, 59), range(59, 143), range(143, 203), range(203, 239), range(239, 287),
+              range(287, 311), range(311, 359), range(359, 395), range(395, 402), range(1, 402)]
 
 if FTSE:
-    col=['03/1990-12/1991','01/1992-12/1994(Black_Wednesday)','01/1995-12/2001(Dotcom_Bubble)','01/2002-12/2006','01/2007-12/2009(GFC)',
-         '01/2010-12/2013(eurozone_crisis)','01/2014-12/2015','01/2016-12/2019(Brexit)', '01/2020-12/2022(Covid-19)','Overall']
+    col = ['03/1990-12/1991', '01/1992-12/1994(Black_Wednesday)', '01/1995-12/2001(Dotcom_Bubble)', '01/2002-12/2006',
+           '01/2007-12/2009(GFC)',
+           '01/2010-12/2013(eurozone_crisis)', '01/2014-12/2015', '01/2016-12/2019(Brexit)',
+           '01/2020-12/2022(Covid-19)', 'Overall']
 
-    period = [range(1,23), range(23,59), range(59,143), range(143,203), range(203,239), range(239, 287),
-              range(287, 311),range(311,359), range(359,395),range(1,395)]
+    period = [range(1, 23), range(23, 59), range(59, 143), range(143, 203), range(203, 239), range(239, 287),
+              range(287, 311), range(311, 359), range(359, 395), range(1, 395)]
 
 result = pd.read_csv('../files/result/total_result_modified.csv')
-
 
 print('profit_factor')
 profit_factor = pd.DataFrame(index=col, columns=result.iloc[:, 0])
@@ -36,7 +39,7 @@ sharpe_ratio = pd.DataFrame(index=col, columns=result.iloc[:, 0])
 for i in range(len(result.index)):
     for j in range(len(period)):
         row = result.iloc[i, period[j]]
-        sf = row.mean()*12 / (row*12).std()
+        sf = row.mean() * 12 / (row * 12).std()
         sharpe_ratio.iloc[j, i] = sf
 
 sharpe_ratio['metric'] = 'Sharpe'
@@ -48,7 +51,7 @@ sortino_ratio = pd.DataFrame(index=col, columns=result.iloc[:, 0])
 for i in range(len(result.index)):
     for j in range(len(period)):
         row = result.iloc[i, period[j]]
-        sf = row.mean()*12 / (row*12)[row<0].std()
+        sf = row.mean() * 12 / (row * 12)[row < 0].std()
         sortino_ratio.iloc[j, i] = sf
 
 sortino_ratio['metric'] = 'Sortino'
@@ -79,13 +82,13 @@ for i in range(len(result.index)):
         peak = cumulative_returns.cummax()
         drawdown = (cumulative_returns - peak) / peak
         max_drawdown = drawdown.min()
-        calmar=row.mean()/abs(max_drawdown)
+        calmar = row.mean() / abs(max_drawdown)
         Calmar_ratio.iloc[j, i] = calmar
 
 Calmar_ratio['metric'] = 'Calmar'
 
 print(Calmar_ratio.to_string())
 
-profit_factor=pd.concat([profit_factor,sharpe_ratio, sortino_ratio, MDD, Calmar_ratio],axis=0)
+profit_factor = pd.concat([profit_factor, sharpe_ratio, sortino_ratio, MDD, Calmar_ratio], axis=0)
 
 profit_factor.to_csv('../files/result/total.csv', index=True)
