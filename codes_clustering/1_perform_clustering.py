@@ -123,7 +123,7 @@ if dbscan_Save:
 
 # Save Hirarchical Agglomerative clutering method result
 # hyper parameter average_distances percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow)
-agglomerative_Save = True
+agglomerative_Save = False
 if agglomerative_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -181,7 +181,7 @@ if agglomerative_Save:
 
 # Save HDBSCAN clutering method result
 # hyper parameter cluster_selection_epsilon percentile np.range(0.1, 1, 0.1) should be tested manually.(similar with Hirachical Agglomerative)
-hdbscan_Save = True
+hdbscan_Save = False
 if hdbscan_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -239,7 +239,7 @@ if hdbscan_Save:
 
 # Save OPTICS clutering method result
 # hyper parameter eps percentile np.range(0.1, 1, 0.1) should be tested manually.(similar with DBSCAN)
-optics_Save = True
+optics_Save = False
 if optics_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -297,7 +297,7 @@ if optics_Save:
 
 # Save BIRCH clutering method result
 # hyper parameter threshold np.range(0.1, 1, 0.1) should be tested manually.(combined K_mean{epsilon=0.5} and Hirachical Agglomerative{max_d})
-birch_Save = True
+birch_Save = False
 if birch_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -355,7 +355,7 @@ if birch_Save:
 
 # Save Meanshift clutering method result
 # hyper parameter bandwidth quantile np.range(0.1, 1, 0.1) should be tested manually.(arbitrarily)
-meanshift_Save = True
+meanshift_Save = False
 if meanshift_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -414,7 +414,7 @@ if meanshift_Save:
 # Save GaussianMixture clutering method result
 # first hyper parameter n_components [3,5,10,20,30,40,50,60,70] should be tested manually.(followed number of meanshift clusters arbitrarily)
 # second hyper parameter probabilities [50,40,30,20,10,5,1] should be tested manually.(arbitrarily)
-GMM_Save = True
+GMM_Save = False
 if GMM_Save:
     file_names = []
     result_df = pd.DataFrame()
