@@ -1,4 +1,7 @@
 from PCA_and_ETC import *
+import statsmodels.api as sm
+from itertools import combinations
+from statsmodels.tsa.stattools import coint, kpss
 
 
 class cointegration:
