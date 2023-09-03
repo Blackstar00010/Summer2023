@@ -70,4 +70,13 @@ if MOM_Merge:
 
     merged_df = merged_df.sort_values('Firm Name')
 
+    for col in merged_df.columns:
+        if col=='Firm Name':
+            continue
+        merged_df.loc[merged_df[col] > 1, col] = 1
+        merged_df.loc[merged_df[col]<-0.5,col]=-0.5
+
+
+
+
     merged_df.to_csv('../files/mom1_data_combined_adj_close.csv', index=False)

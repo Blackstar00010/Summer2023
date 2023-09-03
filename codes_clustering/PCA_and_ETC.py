@@ -134,7 +134,7 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
     result_df.iloc[:, 0:] = np.log(result_df.iloc[:, 0:]) if apply_log else result_df.iloc[:, 0:]
 
     # drop irrational data ( larger than criterion )
-    criterion = np.log(2) if apply_log else 2
+    criterion = np.log(1.5) if apply_log else 2
     result_df = result_df.applymap(lambda x: float('NaN') if abs(x) > criterion else x)
     result_df = result_df.applymap(
         lambda x: float('NaN') if x < 1 - 1 / criterion else x) if not apply_log else result_df

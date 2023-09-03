@@ -7,7 +7,7 @@ MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
 
 # Save K_mean clutering method result
 # hyper parameter K(50, 75, 100, 200, 300, 400, 500, 600, 700) should be tested manually.(paper follow)
-K_mean_Save = True
+K_mean_Save = False
 if K_mean_Save:
     file_names = []
     result_df = pd.DataFrame()
