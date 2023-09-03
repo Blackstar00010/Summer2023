@@ -65,7 +65,7 @@ if K_mean_Save:
 
 # Save DBSCAN clutering method result
 # hyper parameter eps percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow)
-dbscan_Save = True
+dbscan_Save = False
 if dbscan_Save:
     file_names = []
     result_df = pd.DataFrame()

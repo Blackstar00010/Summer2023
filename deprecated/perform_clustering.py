@@ -532,3 +532,76 @@ if birch_Save:
     #         LS_table.to_csv(os.path.join(output_dir, file), index=False)
     #         print(f'Exported to {output_dir}!')
 
+def find_cointegrated_pairs_deprecated(data: pd.DataFrame):
+        """
+        Deprecated
+        :param data:
+        :return:
+        """
+        data = data.iloc[1:, :]
+        invest_list = []
+
+        pairs = list(combinations(data.columns, 2))  # 모든 회사 조합
+        print(len(pairs))
+        pairs_len = 1
+
+        count_p = 0
+        count_s = 0
+        count_n = 0
+
+        while len(pairs) != pairs_len:
+            pairs_len = len(pairs)
+
+            for i, pair in enumerate(pairs):
+                pvalue = cointegrate(data, pair[0], pair[1])
+
+                if pvalue > 0.01:
+                    continue
+
+                else:
+                    count_p += 1
+                    spread = data[pair[0]] - data[pair[1]]
+                    adf_result = sm.tsa.adfuller(spread)
+                    kpss_result = kpss(spread)
+
+                    if adf_result[1] > 0.05 or kpss_result[1] < 0.05:
+                        continue
+
+                    else:
+                        count_s += 1
+                        mean_spread = spread.mean()
+                        std_spread = spread.std()
+                        z_score = (spread - mean_spread) / std_spread
+
+                        spread_value = float(z_score[0])
+
+                        if abs(spread_value) <= 2:
+                            continue
+
+
+                        elif spread_value < -2:
+                            pair = (pair[1], pair[0])
+                            # pair = (pair[1], pair[0], pvalue, adf_result[1], kpss_result[1], spread_value)
+                            invest_list.append(pair)
+                            pairs = [p for p in pairs if all(item not in pair for item in p)]
+                            count_n += 1
+
+                            break
+
+                        elif spread_value > 2:
+                            pair = (pair[0], pair[1])
+                            # pair = (pair[0], pair[1], pvalue, adf_result[1], kpss_result[1], spread_value)
+                            invest_list.append(pair)
+                            pairs = [p for p in pairs if all(item not in pair for item in p)]
+                            count_n += 1
+
+                            break
+
+            print(len(pairs))
+            print(len(invest_list))
+
+        print(f'pvalue {count_p}')
+        print(f'stationary {count_s}')
+        print(f'final {count_n}')
+
+        return invest_list

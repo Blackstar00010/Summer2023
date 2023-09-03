@@ -4,15 +4,14 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
-from joblib import Parallel, delayed
 from sklearn import metrics
 from sklearn import manifold
-from itertools import combinations
-from sklearn.cluster import *
-from sklearn.decomposition import PCA
-from statsmodels.tsa.stattools import coint, kpss
-from sklearn.model_selection import GridSearchCV
 from sklearn.mixture import *
+from itertools import combinations
+from joblib import Parallel, delayed
+from sklearn.decomposition import PCA
+from sklearn.model_selection import GridSearchCV
+from statsmodels.tsa.stattools import coint, kpss
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -370,21 +369,7 @@ def find_optimal_GMM_covariance_type(data):
     return best_covariance_type
 
 
-def find_optimal_HDBSCAN_min_cluster_size(data):
-    Hdbscan = HDBSCAN(allow_single_cluster=True)
-    # 탐색할 covariance type과 n_components 설정
-    param_grid = {"min_cluster_size": [2, 3, 4, 5, 6, 7]}
-
-    # BIC score를 평가 지표로 하여 GridSearchCV 실행
-    grid_search = GridSearchCV(Hdbscan, param_grid, scoring='neg_negative_likelihood_ratio')
-    grid_search.fit(data)
-
-    # 최적의 covariance type과 n_components 출력
-    best_min_cluster_size = grid_search.best_params_["min_cluster_size"]
-    return best_min_cluster_size
-
-
-if True:
+if False:
     def read_mom_data(data):
         # mom1 save and data Normalization
         mom1 = data.values.astype(float)[:, 0]

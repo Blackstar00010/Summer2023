@@ -72,7 +72,7 @@ if dbscan_Save:
 
 # Save Hirarchical Agglomerative clutering method LS_Tables
 # hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-Agglormerative_Save = True
+Agglormerative_Save = False
 if Agglormerative_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/Agglomerative'
@@ -99,7 +99,7 @@ if Agglormerative_Save:
 
 # Save HDBSCAN clutering method LS_Tables
 # hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.
-hdbscan_Save = True
+hdbscan_Save = False
 if hdbscan_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/HDBSCAN'
@@ -125,7 +125,7 @@ if hdbscan_Save:
 
 # Save OPTICS clutering method LS_Tables
 # hyper parameter percentile of xi range(0.05, 0.09, 0.01) should be tested manually.
-optics_Save = True
+optics_Save = False
 if optics_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/OPTICS'
@@ -152,7 +152,7 @@ if optics_Save:
 
 # Save BIRCH clutering method LS_Tables
 # hyper parameter percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-birch_Save = True
+birch_Save = False
 if birch_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/BIRCH'
@@ -179,7 +179,7 @@ if birch_Save:
 
 # Save Meanshift clutering method LS_Tables
 # hyper parameter quantile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-meanshift_Save = True
+meanshift_Save = False
 if meanshift_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/Meanshift'
@@ -206,7 +206,7 @@ if meanshift_Save:
 
 # Save GaussianMixture clutering method LS_Tables
 # hyper parameter outlier probability [1, 5, 10, 15, 20] should be tested manually.
-GMM_Save = True
+GMM_Save = False
 if GMM_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/GMM'
