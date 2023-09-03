@@ -3,6 +3,8 @@ import statsmodels.api as sm
 from itertools import combinations
 from statsmodels.tsa.stattools import coint, kpss
 
+# turn off warning
+warnings.filterwarnings("ignore")
 
 class cointegration:
 
@@ -42,10 +44,13 @@ class cointegration:
 
     def kpss_result(self, value):
         try:
-            ret = kpss(value)[1]
-        except:
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore")
+                ret = kpss(value)[1]
+        except Exception:
             ret = 0.04
         return ret
+    
 
     def find_cointegrated_pairs(self) -> list:
         from multiprocessing import Pool
