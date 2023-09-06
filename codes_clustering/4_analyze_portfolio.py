@@ -39,7 +39,7 @@ sharpe_ratio = pd.DataFrame(index=col, columns=result.iloc[:, 0])
 for i in range(len(result.index)):
     for j in range(len(period)):
         row = result.iloc[i, period[j]]
-        sf = row.mean() * 12 / (row * 12).std()
+        sf = (np.exp(row.mean() * 12) - 1)/ (np.exp(row.std() * np.sqrt(12)) - 1)
         sharpe_ratio.iloc[j, i] = sf
 
 sharpe_ratio['metric'] = 'Sharpe'
@@ -51,7 +51,7 @@ sortino_ratio = pd.DataFrame(index=col, columns=result.iloc[:, 0])
 for i in range(len(result.index)):
     for j in range(len(period)):
         row = result.iloc[i, period[j]]
-        sf = row.mean() * 12 / (row * 12)[row < 0].std()
+        sf = (np.exp(row.mean() * 12) - 1) / (np.exp(row[row<0].std() * np.sqrt(12)) - 1)
         sortino_ratio.iloc[j, i] = sf
 
 sortino_ratio['metric'] = 'Sortino'

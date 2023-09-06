@@ -50,7 +50,7 @@ class cointegration:
         except Exception:
             ret = 0.04
         return ret
-    
+
 
     def find_cointegrated_pairs(self) -> list:
         from multiprocessing import Pool
