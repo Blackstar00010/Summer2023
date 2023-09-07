@@ -131,38 +131,34 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
 
     result_df.to_csv('../files/before.csv')
     # drop irrational data ( larger than criterion )
+
     criterion = np.log(1.5) if apply_log else 1.5
     result_df = result_df.applymap(lambda x: float('NaN') if abs(x) > criterion else x)
     result_df = result_df.applymap(
         lambda x: float('NaN') if x < 1 - 1 / criterion else x) if not apply_log else result_df
     result_df = result_df.fillna(method='ffill', axis=1)
 
-<<<<<<< HEAD
     result_df.to_csv('../files/after.csv')
-    # dsjfksdlfjsad
+
     result_modified = pd.DataFrame(
         index=['count', 'annual return mean', 'annual return std', 'monthly return min', 'monthly return max'],
         columns=result_df.index)
     for i in range(len(result_modified.columns)):
         result_modified.iloc[0, i] = len(result_df.columns)
-        result_modified.iloc[1, i] = np.exp(np.mean(result_df.iloc[i, :]) * 12) - 1
-        result_modified.iloc[2, i] = np.exp(np.std(result_df) * np.sqrt(12)) - 1
+        result_modified.iloc[1, i] = np.mean(result_df.iloc[i, :]) * 12
+        annual_return = np.array(result_df.iloc[i, :]) * 12
+        result_modified.iloc[2, i] = np.std(annual_return)
         result_modified.iloc[3, i] = np.min(result_df.iloc[i, :])
         result_modified.iloc[4, i] = np.max(result_df.iloc[i, :])
     # result_modified.iloc[1, :] = result_modified.iloc[1, :] * len(result_df.iloc[1, :]) / 12
-=======
-    sharpe_ratio = pd.DataFrame(index=['Sharpe ratio'], columns=result_df.index)
->>>>>>> parent of 4787a445 (Merge branch 'main' of https://github.com/Blackstar00010/Summer2023)
 
-    for i in range(len(result_df.index)):
-        for j in range(1):
-            row = result_df.iloc[i, :]
-            sf = row.mean() / row.std()
-            sharpe_ratio.iloc[j, i] = sf
+    sharpe_ratio = pd.DataFrame(index=['Sharpe ratio'], columns=result_modified.columns)
 
-    result_modified = pd.concat([result_df.T.describe(), sharpe_ratio], axis=0)
+    for i in range(len(result_modified.columns)):
+        sharpe_ratio.iloc[0, i] = result_modified.iloc[1, i] / result_modified.iloc[2, i]
+    result_modified = pd.concat([result_modified, sharpe_ratio], axis=0)
 
-    MDD = pd.DataFrame(index=['Maximum drawdown'], columns=result_df.index)
+    MDD = pd.DataFrame(index=['Maximum drawdown'], columns=result_modified.columns)
 
     for i in range(len(result_df.index)):
         for j in range(1):
@@ -174,9 +170,6 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
             MDD.iloc[j, i] = max_drawdown
 
     result_modified = pd.concat([result_modified, MDD], axis=0)
-
-    result_modified.iloc[1, :] = (result_modified.iloc[1, :] + 1) ** 12 - 1
-    #ToDo: anual return calculate
 
     result_modified.to_csv(os.path.join('../files/result/', clustering_name + '_statistcs_modified.csv'), index=True)
     result_df.to_csv(os.path.join('../files/result/', clustering_name + '_result_modified.csv'), index=True)
