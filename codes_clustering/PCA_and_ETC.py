@@ -161,7 +161,7 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
     for i in range(len(result_df.index)):
         for j in range(1):
             row = result_df.iloc[i, :]
-            cumulative_returns = (1 + row).cumprod()
+            cumulative_returns = (np.exp(row.astype(float))).cumprod()
             peak = cumulative_returns.cummax()
             drawdown = (cumulative_returns - peak) / peak
             max_drawdown = drawdown.min()

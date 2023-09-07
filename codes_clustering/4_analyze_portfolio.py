@@ -58,15 +58,6 @@ sortino_ratio['metric'] = 'Sortino'
 
 print(sortino_ratio.to_string())
 
-rt = pd.DataFrame(rt)
-ret = rt.cumsum()
-mdd = ret.apply(lambda x: (x.dropna().loc[((np.maximum.accumulate(x.dropna()) - x.dropna()).idxmax())] -
-                           x.dropna().loc[(
-                           x.dropna().loc[:((np.maximum.accumulate(x.dropna()) - x.dropna()).idxmax())]).idxmax()]))
-mdd = np.exp(mdd)
-mdd = 1 - mdd
-
-
 print('Maximum_drawdown(MDD)')
 MDD = pd.DataFrame(index=col, columns=result.iloc[:, 0])
 for i in range(len(result.index)):
@@ -95,7 +86,7 @@ Calmar_ratio = pd.DataFrame(index=col, columns=result.iloc[:, 0])
 for i in range(len(result.index)):
     for j in range(len(period)):
         row = result.iloc[i, period[j]]
-        cumulative_returns = (1 + row).cumprod()
+        cumulative_returns = (np.exp(row.astype(float))).cumprod()
         peak = cumulative_returns.cummax()
         drawdown = (cumulative_returns - peak) / peak
         max_drawdown = drawdown.min()
