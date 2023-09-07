@@ -3,7 +3,6 @@ import warnings
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn import metrics
 from sklearn import manifold
 from sklearn.mixture import *
 from sklearn.decomposition import PCA
@@ -43,23 +42,22 @@ def merge_LS_Table(data, LS_merged_df, file):
     return LS_merged_df
 
 
-def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, result_df: pd.DataFrame, subdir):
+def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, result_df: pd.DataFrame, subdir, save=False):
     # Sort LS_Value according to Firm Name
     LS_merged_df = LS_merged_df.sort_values('Firm Name')
-
-    # I don't know the reason why'''
-    # LS_merged_df = LS_merged_df.drop_duplicates(subset=LS_merged_df.columns[0], keep='first')
 
     # Set Firm Name column into index
     LS_merged_df.set_index('Firm Name', inplace=True)
 
     # 마지막 row 버리면 한칸씩 밀어버리는 것과 동치
     LS_merged_df = LS_merged_df.drop(LS_merged_df.columns[-1], axis=1)
-
     LS_merged_df = LS_merged_df.fillna(0)
     LS_merged_df.columns = MOM_merged_df.columns
+    if save:
+        LS_merged_df2= LS_merged_df[(LS_merged_df != 0).any(axis=1)]
+        firm_list=pd.DataFrame(LS_merged_df2.index)
+        firm_list.to_csv(f'../files/LS_merge_{subdir}.csv',index=False)
 
-    # Multiply only the numeric columns
     prod = MOM_merged_df * LS_merged_df
     prod = pd.DataFrame(prod)
     if subdir == 'Cointegration':
@@ -70,7 +68,16 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     # cumulative return은 1990-02부터 2022-12이기 때문에 prod.columns=df1.columns
     prod.columns = MOM_merged_df.columns
 
-    prod.to_csv(f'../files/prod_{subdir}.csv')
+    if save:
+        # 각 행별로 최대값과 최소값을 저장할 새로운 DataFrame 생성
+        max_values = prod.max(axis=1)
+        min_values = prod.min(axis=1)
+
+        prod2 = pd.DataFrame({'Max': max_values, 'Min': min_values}, index=prod.index)
+        prod2=prod2[prod2.index.isin(LS_merged_df2.index)]
+        prod2 = prod2[(prod2['Max'] > 1) | (prod2['Min'] < -0.5)]
+
+        prod2.to_csv(f'../files/prod_{subdir}.csv')
 
     # Count the non-zero LS that is the number of total firm invested(395 by 1 matrix/index=Date)
     non_zero_count = LS_merged_df.astype(bool).sum()
@@ -157,7 +164,7 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
         peak = np.maximum.accumulate(cumulative_returns)
         drawdown = (cumulative_returns - peak) / (peak + 1)
         max_drawdown = drawdown.min()
-        MDD.iloc[1, i] = max_drawdown
+        MDD.iloc[0, i] = max_drawdown
 
     result_modified = pd.concat([result_modified, MDD], axis=0)
 

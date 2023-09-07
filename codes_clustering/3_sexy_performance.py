@@ -30,6 +30,6 @@ for subdir in subdirectories:
         data = pd.read_csv(os.path.join(directory, file))
         LS_merged_df = merge_LS_Table(data, LS_merged_df, file)
 
-    result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, subdir)
+    result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, subdir, save=True)
 
 save_and_plot_result('total', result_df, file_names, FTSE=True, apply_log=True)

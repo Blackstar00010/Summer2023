@@ -49,7 +49,7 @@ if K_mean_Save:
 
             print("Number of clusters is:", len(set(Do_Clustering.K_Mean_labels)))
 
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, "_", save=False)
         cl = int(cl / len(files))
         outliers_count = outliers_count / len(files)
         figure = figure / len(files)
@@ -106,7 +106,7 @@ if dbscan_Save:
 
             print("Number of clusters is:", len(set(Do_Clustering.DBSCAN_labels)))
 
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df,"_", save=False)
         cl = int(cl / len(files))
         outliers_count = outliers_count / len(files)
         figure = figure / len(files)
@@ -163,7 +163,7 @@ if optics_Save:
 
             print("Number of clusters is:", len(set(Do_Clustering.OPTIC_labels)))
 
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df,"_", save=False)
         cl = int(cl / len(files))
         outliers_count = outliers_count / len(files)
         figure = figure / len(files)
@@ -220,7 +220,7 @@ if agglomerative_Save:
 
             print("Number of clusters is:", len(set(Do_Clustering.Agglomerative_labels)))
 
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df,"_", save=False)
         cl = int(cl / len(files))
         outliers_count = outliers_count / len(files)
         figure = figure / len(files)
@@ -277,7 +277,7 @@ if hdbscan_Save:
 
             print("Number of clusters is:", len(set(Do_Clustering.HDBSCAN_labels)))
 
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df,"_", save=False)
         cl = int(cl / len(files))
         outliers_count = outliers_count / len(files)
         figure = figure / len(files)
@@ -334,7 +334,7 @@ if birch_Save:
 
             print("Number of clusters is:", len(set(Do_Clustering.BIRCH_labels)))
 
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df,"_", save=False)
         cl = int(cl / len(files))
         outliers_count = outliers_count / len(files)
         figure = figure / len(files)
@@ -391,7 +391,7 @@ if meanshift_Save:
 
             print("Number of clusters is:", len(set(Do_Clustering.meanshift_labels)))
 
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df,"_", save=False)
         cl = int(cl / len(files))
         outliers_count = outliers_count / len(files)
         figure = figure / len(files)
@@ -448,7 +448,7 @@ if GMM_Save:
 
             print("Number of clusters is:", len(set(Do_Clustering.Gaussian_labels)))
 
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df,"_", save=False)
         cl = int(cl / len(files))
         outliers_count = outliers_count / len(files)
         figure = figure / len(files)
