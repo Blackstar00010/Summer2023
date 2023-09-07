@@ -68,6 +68,8 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     # cumulative return은 1990-02부터 2022-12이기 때문에 prod.columns=df1.columns
     prod.columns = MOM_merged_df.columns
 
+    prod.to_csv('../files/prod.csv')
+
     # Count the non-zero LS that is the number of total firm invested(395 by 1 matrix/index=Date)
     non_zero_count = LS_merged_df.astype(bool).sum()
 
@@ -129,7 +131,6 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
     # transform into log scale
     result_df.iloc[:, 0:] = np.log(result_df.iloc[:, 0:]) if apply_log else result_df.iloc[:, 0:]
 
-    result_df.to_csv('../files/before.csv')
     # drop irrational data ( larger than criterion )
 
     criterion = np.log(1.5) if apply_log else 1.5
@@ -138,7 +139,6 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
         lambda x: float('NaN') if x < 1 - 1 / criterion else x) if not apply_log else result_df
     result_df = result_df.fillna(method='ffill', axis=1)
 
-    result_df.to_csv('../files/after.csv')
 
     result_modified = pd.DataFrame(
         index=['count', 'annual return mean', 'annual return std', 'monthly return min', 'monthly return max'],
