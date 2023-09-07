@@ -1,3 +1,5 @@
+import pandas as pd
+
 from PCA_and_ETC import *
 import statsmodels.api as sm
 from itertools import combinations
@@ -6,10 +8,11 @@ from statsmodels.tsa.stattools import coint, kpss
 # turn off warning
 warnings.filterwarnings("ignore")
 
+
 class cointegration:
 
     def __init__(self, x, y):
-        self.data = []
+        self.data = pd.DataFrame()
         self.invest_list = []
         self.output_dir = x
         self.file = y
@@ -51,8 +54,7 @@ class cointegration:
             ret = 0.04
         return ret
 
-
-    def find_cointegrated_pairs(self) -> list:
+    def find_cointegrated_pairs(self):
         from multiprocessing import Pool
         data = self.data.iloc[1:, :]
         pairs = pd.DataFrame(combinations(data.columns, 2))  # 모든 회사 조합

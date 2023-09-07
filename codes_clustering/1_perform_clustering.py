@@ -1,396 +1,462 @@
 import Clustering as C
 from PCA_and_ETC import *
-from sklearn.metrics import silhouette_score
 
-# Save Reversal method LS_Tables
-Reversal_Save = False
-if Reversal_Save:
-    # input_dir = '../files/momentum_adj'
-    # output_dir ='../files/Clustering_adj/Reversal'
+MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
+MOM_merged_df.set_index('Firm Name', inplace=True)
+MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
 
-    input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/Reversal'
-    files = sorted(filename for filename in os.listdir(input_dir))
-
-    for file in files:
-        print(file)
-
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        Do_Result_Save = C.ResultCheck(data)
-
-        # Save LS_Table CSV File
-        Do_Result_Save.reversal_table(data, output_dir, file)
-
-# Save K_mean clutering method LS_Tables
-# hyper parameter K(1,2,3,4,5,10,50,100,500,1000) should be tested manually.(paper follow)
-K_mean_Save = True
+# hyper parameter K(50,75,100,200,300,400,500,600,700) should be tested manually.(paper follow)
+K_mean_Save = False
 if K_mean_Save:
+    file_names = []
+    result_df = pd.DataFrame()
+    stat_lists = []
+
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/K_Means_outlier'
     files = sorted(filename for filename in os.listdir(input_dir))
-    outliers_count = 0
-    sil = 0
     cl = 0
-    for file in files:
-        print(file)
+    outliers_count = 0
+    figure = 0
 
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        df_combined = generate_PCA_Data(data)
+    for i in [50, 75, 100, 200, 300, 400, 500, 600, 700]:
+        file_names.append(f'{i}')
+        LS_merged_df = pd.DataFrame()
 
-        # Call initial method
-        Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.ResultCheck(df_combined)
+        for file in files:
+            print(file)
+            # convert mom_data into PCA_data
+            data = read_and_preprocess_data(input_dir, file)
+            raw = False
+            if not raw:
+                df_combined = generate_PCA_Data(data)
+            else:
+                df_combined = data
+            # Call initial method
+            Do_Clustering = C.Clustering(df_combined)
+            Do_Result_Save = C.ResultCheck(df_combined)
 
-        # Do clustering and get 2D list of cluster index
-        Do_Clustering.K_Mean = Do_Clustering.perform_kmeans(50)
+            # Do clustering and get 2D list of cluster index
+            Do_Clustering.perform_kmeans(i, 0.5)
 
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0])
+            Do_Result_Save.ls_table(Do_Clustering.K_Mean[0], output_dir, file, save=False, raw=raw)
 
-        # Save LS_Table CSV File
-        for i, cluster in enumerate(Do_Clustering.K_Mean):
-            Do_Result_Save.ls_table(cluster, output_dir, file, save=True, raw=False)
+            LS_merged_df = merge_LS_Table(Do_Result_Save.table, LS_merged_df, file)
 
-        silhouette_avg = silhouette_score(df_combined, Do_Clustering.K_Mean_labels)
-        sil += silhouette_avg
-        cl += len(sorted(list(set(Do_Clustering.K_Mean_labels))))
-        print("The average silhouette score is:", silhouette_avg)
-        print("Number of clusters is:", len(set(Do_Clustering.K_Mean_labels)))
+            cl += len((set(Do_Clustering.K_Mean_labels)))
+            outliers_count += Do_Result_Save.count_outlier(Do_Clustering.K_Mean[0])
+            figure += Do_Result_Save.count_stock_of_traded()
 
-    sil = sil / len(files)
-    cl = cl / len(files)
-    print('average number of clusters:', cl)
-    print('silhouette score:', sil)
-    print(f'total outliers: {outliers_count}')
+            print("Number of clusters is:", len(set(Do_Clustering.K_Mean_labels)))
 
-# Save DBSCAN clutering method LS_Tables
-# hyper parameter eps percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-dbscan_Save = False
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        cl = int(cl / len(files))
+        outliers_count = outliers_count / len(files)
+        figure = figure / len(files)
+        stat_list = [cl, 1 - outliers_count, outliers_count, figure]
+        stat_lists.append(stat_list)
+        print(f'avg of clusters: {cl}')
+        print(f'total outliers: {outliers_count}')
+        print(f'number of stock traded: {figure}')
+
+    save_and_plot_result('K_mean', result_df, file_names, FTSE=True, apply_log=True)
+    save_cluster_info('K_mean', stat_lists, file_names)
+
+# hyper parameter eps percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow)
+dbscan_Save = True
 if dbscan_Save:
-    # input_dir = '../files/momentum_adj'
-    # output_dir ='../files/Clustering_adj/DBSCAN'
+    file_names = []
+    result_df = pd.DataFrame()
+    stat_lists = []
 
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/DBSCAN'
     files = sorted(filename for filename in os.listdir(input_dir))
-    outliers_count = 0
-    sil = 0
     cl = 0
-    for file in files:
-        print(file)
-
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        df_combined = generate_PCA_Data(data)
-
-        # Call initial method
-        Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.ResultCheck(df_combined)
-
-        # Do clustering and get 2D list of cluster index
-        Do_Clustering.DBSCAN = Do_Clustering.perform_DBSCAN(0.6)
-
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
-
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.DBSCAN, output_dir, file)
-
-        silhouette_avg = silhouette_score(df_combined, Do_Clustering.DBSCAN_labels)
-        sil += silhouette_avg
-        cl += len(set(Do_Clustering.DBSCAN_labels))
-        print("The average silhouette score is:", silhouette_avg)
-        print("Number of clusters is:", len(set(Do_Clustering.DBSCAN_labels)))
-
-    sil = sil / len(files)
-    cl = cl / len(files)
-    print('average number of clusters:', cl)
-    print('silhouette score:', sil)
-    print(f'total outliers: {outliers_count}')
-
-# Save HDBSCAN clutering method LS_Tables
-# hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.
-hdbscan_Save = False
-if hdbscan_Save:
-    # input_dir = '../files/momentum_adj'
-    # output_dir ='../files/Clustering_adj/HDBSCAN'
-
-    input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/HDBSCAN'
-    files = sorted(filename for filename in os.listdir(input_dir))
     outliers_count = 0
-    sil = 0
-    cl = 0
-    for file in files:
-        print(file)
+    figure = 0
 
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        df_combined = generate_PCA_Data(data)
+    for i in np.arange(0.9, 1, 0.1):
+        file_names.append(f'{i}')
+        LS_merged_df = pd.DataFrame()
 
-        # Call initial method
-        Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.ResultCheck(df_combined)
+        for file in files:
+            print(file)
+            # convert mom_data into PCA_data
+            data = read_and_preprocess_data(input_dir, file)
+            raw = False
+            if not raw:
+                df_combined = generate_PCA_Data(data)
+            else:
+                df_combined = data
+            # Call initial method
+            Do_Clustering = C.Clustering(df_combined)
+            Do_Result_Save = C.ResultCheck(df_combined)
 
-        # Do clustering and get 2D list of cluster index
-        Do_Clustering.HDBSCAN = Do_Clustering.perform_HDBSCAN(0.5)
+            # Do clustering and get 2D list of cluster index
+            Do_Clustering.perform_DBSCAN(i)
 
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
+            Do_Result_Save.ls_table(Do_Clustering.DBSCAN, output_dir, file, save=False, raw=raw)
 
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.HDBSCAN, output_dir, file)
+            LS_merged_df = merge_LS_Table(Do_Result_Save.table, LS_merged_df, file)
 
-        if len(set(Do_Clustering.HDBSCAN_labels)) != 1:
-            silhouette_avg = silhouette_score(df_combined, Do_Clustering.HDBSCAN_labels)
-            sil += silhouette_avg
-            print("The average silhouette score is:", silhouette_avg)
-        cl += len(set(Do_Clustering.HDBSCAN_labels))
+            cl += len((set(Do_Clustering.DBSCAN_labels)))
+            outliers_count += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
+            figure += Do_Result_Save.count_stock_of_traded()
 
-        print("Number of clusters is:", len(set(Do_Clustering.HDBSCAN_labels)))
+            print("Number of clusters is:", len(set(Do_Clustering.DBSCAN_labels)))
 
-    sil = sil / len(files)
-    cl = cl / len(files)
-    print('average number of clusters:', cl)
-    print('silhouette score:', sil)
-    print(f'total outliers: {outliers_count}')
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        cl = int(cl / len(files))
+        outliers_count = outliers_count / len(files)
+        figure = figure / len(files)
+        stat_list = [cl, 1 - outliers_count, outliers_count, figure]
+        stat_lists.append(stat_list)
+        print(f'avg of clusters: {cl}')
+        print(f'total outliers: {outliers_count}')
+        print(f'number of stock traded: {figure}')
 
-# Save Hirarchical Agglomerative clutering method LS_Tables
-# hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-Agglormerative_Save = False
-if Agglormerative_Save:
-    # input_dir = '../files/momentum_adj'
-    # output_dir ='../files/Clustering_adj/Hierarchical_Agglomerative'
+    save_and_plot_result('DBSCAN', result_df, file_names, FTSE=True, apply_log=True)
+    save_cluster_info('DBSCAN', stat_lists, file_names)
 
-    input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/Hierarchical_Agglomerative'
-    files = sorted(filename for filename in os.listdir(input_dir))
-    outliers_count = 0
-    sil = 0
-    cl = 0
-    for file in files:
-        print(file)
-
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        raw = False
-        if not raw:
-            df_combined = generate_PCA_Data(data)
-        else:
-            df_combined = data
-        # Call initial method
-        Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.ResultCheck(df_combined)
-
-        # Do clustering and get 2D list of cluster index
-        Do_Clustering.Agglomerative = Do_Clustering.perform_HA(0.5, draw_dendro=False)
-
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
-
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=False, raw=raw)
-
-        if len(sorted(list(set(Do_Clustering.Agglomerative_labels)))) != 1:
-            silhouette_avg = silhouette_score(df_combined, Do_Clustering.Agglomerative_labels)
-            sil += silhouette_avg
-            print("The average silhouette score is:", silhouette_avg)
-        cl += len(sorted(list(set(Do_Clustering.Agglomerative_labels))))
-
-        print("Number of clusters is:", len(sorted(list(set(Do_Clustering.Agglomerative_labels)))))
-
-    sil = sil / len(files)
-    cl = cl / len(files)
-    print('average number of clusters:', cl)
-    print('silhouette score:', sil)
-    print(f'total outliers: {outliers_count}')
-
-# Save GaussianMixture clutering method LS_Tables
-# hyper parameter outlier probability [1, 5, 10, 15, 20] should be tested manually.
-GMM_Save = False
-if GMM_Save:
-    # input_dir = '../files/momentum_adj'
-    # output_dir ='../files/Clustering_adj/Gaussian_Mixture_Model'
-
-    input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/Gaussian_Mixture_Model'
-    files = sorted(filename for filename in os.listdir(input_dir))
-    outliers_count = 0
-    sil = 0
-    cl = 0
-    for file in files:
-        print(file)
-
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        df_combined = generate_PCA_Data(data)
-
-        # Call initial method
-        Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.ResultCheck(df_combined)
-
-        # Do clustering and get 2D list of cluster index
-        Do_Clustering.Gaussian = Do_Clustering.perform_GMM(1)
-
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Gaussian)
-
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.Gaussian, output_dir, file)
-
-        if len(sorted(list(set(Do_Clustering.Gaussian_labels)))) != 1:
-            silhouette_avg = silhouette_score(df_combined, Do_Clustering.Gaussian_labels)
-            sil += silhouette_avg
-            print("The average silhouette score is:", silhouette_avg)
-        cl += len(sorted(list(set(Do_Clustering.Gaussian_labels))))
-
-        print("Number of clusters is:", len(sorted(list(set(Do_Clustering.Gaussian_labels)))))
-    sil = sil / len(files)
-    cl = cl / len(files)
-    print('average number of clusters:', cl)
-    print('silhouette score:', sil)
-    print(f'total outliers: {outliers_count}')
-
-# Save OPTICS clutering method LS_Tables
-# hyper parameter percentile of xi range(0.05, 0.09, 0.01) should be tested manually.
+# hyper parameter eps percentile np.arange(0.1, 1, 0.1) should be tested manually.(DBSCAN)
 optics_Save = False
 if optics_Save:
-    # input_dir = '../files/momentum_adj'
-    # output_dir ='../files/Clustering_adj/OPTICS'
+    file_names = []
+    result_df = pd.DataFrame()
+    stat_lists = []
 
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/OPTICS'
     files = sorted(filename for filename in os.listdir(input_dir))
-    outliers_count = 0
-    sil = 0
     cl = 0
-    for file in files:
-        print(file)
+    outliers_count = 0
+    figure = 0
 
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        df_combined = generate_PCA_Data(data)
+    for i in np.arange(0.1, 1, 0.1):
+        file_names.append(f'{i}')
+        LS_merged_df = pd.DataFrame()
 
-        # Call initial method
-        Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.ResultCheck(df_combined)
+        for file in files:
+            print(file)
+            # convert mom_data into PCA_data
+            data = read_and_preprocess_data(input_dir, file)
+            raw = False
+            if not raw:
+                df_combined = generate_PCA_Data(data)
+            else:
+                df_combined = data
+            # Call initial method
+            Do_Clustering = C.Clustering(df_combined)
+            Do_Result_Save = C.ResultCheck(df_combined)
 
-        # Do clustering and get 2D list of cluster index
-        Do_Clustering.OPTIC = Do_Clustering.perform_OPTICS(0.7)
+            # Do clustering and get 2D list of cluster index
+            Do_Clustering.perform_OPTICS(i)
 
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
+            Do_Result_Save.ls_table(Do_Clustering.OPTIC, output_dir, file, save=False, raw=raw)
 
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.OPTIC, output_dir, file)
+            LS_merged_df = merge_LS_Table(Do_Result_Save.table, LS_merged_df, file)
 
-        if len(sorted(list(set(Do_Clustering.OPTIC_labels)))) != 1:
-            silhouette_avg = silhouette_score(df_combined, Do_Clustering.OPTIC_labels)
-            sil += silhouette_avg
-            print("The average silhouette score is:", silhouette_avg)
+            cl += len((set(Do_Clustering.OPTIC_labels)))
+            outliers_count += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
+            figure += Do_Result_Save.count_stock_of_traded()
 
-        cl += len(sorted(list(set(Do_Clustering.OPTIC_labels))))
+            print("Number of clusters is:", len(set(Do_Clustering.OPTIC_labels)))
 
-        print("Number of clusters is:", len(sorted(list(set(Do_Clustering.OPTIC_labels)))))
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        cl = int(cl / len(files))
+        outliers_count = outliers_count / len(files)
+        figure = figure / len(files)
+        stat_list = [cl, 1 - outliers_count, outliers_count, figure]
+        stat_lists.append(stat_list)
+        print(f'avg of clusters: {cl}')
+        print(f'total outliers: {outliers_count}')
+        print(f'number of stock traded: {figure}')
 
-    sil = sil / len(files)
-    cl = cl / len(files)
-    print('average number of clusters:', cl)
-    print('silhouette score:', sil)
-    print(f'total outliers: {outliers_count}')
+    save_and_plot_result('OPTICS', result_df, file_names, FTSE=True, apply_log=True)
+    save_cluster_info('OPTICS', stat_lists, file_names)
 
-# Save Meanshift clutering method LS_Tables
-# hyper parameter quantile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-meanshift_Save = False
-if meanshift_Save:
-    # input_dir = '../files/momentum_adj'
-    # output_dir ='../files/Clustering_adj/Meanshift'
+# hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow)
+agglomerative_Save = False
+if agglomerative_Save:
+    file_names = []
+    result_df = pd.DataFrame()
+    stat_lists = []
 
     input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/Meanshift'
+    output_dir = '../files/clustering_result/Hierarchical_Agglomerative'
     files = sorted(filename for filename in os.listdir(input_dir))
-    outliers_count = 0
-    sil = 0
     cl = 0
-    sil_num = 0
-    for file in files:
-        print(file)
-        # if (int(file[:4]) < 2017):
-        #     continue
+    outliers_count = 0
+    figure = 0
 
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        df_combined = generate_PCA_Data(data)
+    for i in np.arange(0.1, 1, 0.1):
+        file_names.append(f'{i}')
+        LS_merged_df = pd.DataFrame()
 
-        # Call initial method
-        Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.ResultCheck(df_combined)
+        for file in files:
+            print(file)
+            # convert mom_data into PCA_data
+            data = read_and_preprocess_data(input_dir, file)
+            raw = False
+            if not raw:
+                df_combined = generate_PCA_Data(data)
+            else:
+                df_combined = data
+            # Call initial method
+            Do_Clustering = C.Clustering(df_combined)
+            Do_Result_Save = C.ResultCheck(df_combined)
 
-        # Do clustering and get 2D list of cluster index
-        Do_Clustering.menshift = Do_Clustering.perform_meanshift(0.9)
+            # Do clustering and get 2D list of cluster index
+            Do_Clustering.perform_HA(i)
 
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.meanshift)
+            Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=False, raw=raw)
 
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.meanshift, output_dir, file)
+            LS_merged_df = merge_LS_Table(Do_Result_Save.table, LS_merged_df, file)
 
-        if len(sorted(list(set(Do_Clustering.meanshift_labels)))) != 1:
-            silhouette_avg = silhouette_score(df_combined, Do_Clustering.meanshift_labels)
-            sil += silhouette_avg
-            sil_num += 1
-            print("The average silhouette score is:", silhouette_avg)
+            cl += len((set(Do_Clustering.Agglomerative_labels)))
+            outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
+            figure += Do_Result_Save.count_stock_of_traded()
 
-        cl += len(sorted(list(set(Do_Clustering.meanshift_labels))))
+            print("Number of clusters is:", len(set(Do_Clustering.Agglomerative_labels)))
 
-        print("Number of clusters is:", len(sorted(list(set(Do_Clustering.meanshift_labels)))))
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        cl = int(cl / len(files))
+        outliers_count = outliers_count / len(files)
+        figure = figure / len(files)
+        stat_list = [cl, 1 - outliers_count, outliers_count, figure]
+        stat_lists.append(stat_list)
+        print(f'avg of clusters: {cl}')
+        print(f'total outliers: {outliers_count}')
+        print(f'number of stock traded: {figure}')
 
-    sil = sil / sil_num
-    cl = cl / len(files)
-    print('average number of clusters:', cl)
-    print('silhouette score:', sil)
-    print(f'total outliers: {outliers_count}')
+    save_and_plot_result('Agglomerative', result_df, file_names, FTSE=True, apply_log=True)
+    save_cluster_info('Agglomerative', stat_lists, file_names)
 
-# Save BIRCH clutering method LS_Tables
-# hyper parameter percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
+# hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(agglomerative)
+hdbscan_Save = False
+if hdbscan_Save:
+    file_names = []
+    result_df = pd.DataFrame()
+    stat_lists = []
+
+    input_dir = '../files/characteristics'
+    output_dir = '../files/clustering_result/HDBSCAN'
+    files = sorted(filename for filename in os.listdir(input_dir))
+    cl = 0
+    outliers_count = 0
+    figure = 0
+
+    for i in np.arange(0.1, 1, 0.1):
+        file_names.append(f'{i}')
+        LS_merged_df = pd.DataFrame()
+
+        for file in files:
+            print(file)
+            # convert mom_data into PCA_data
+            data = read_and_preprocess_data(input_dir, file)
+            raw = False
+            if not raw:
+                df_combined = generate_PCA_Data(data)
+            else:
+                df_combined = data
+            # Call initial method
+            Do_Clustering = C.Clustering(df_combined)
+            Do_Result_Save = C.ResultCheck(df_combined)
+
+            # Do clustering and get 2D list of cluster index
+            Do_Clustering.perform_HDBSCAN(i)
+
+            Do_Result_Save.ls_table(Do_Clustering.HDBSCAN, output_dir, file, save=False, raw=raw)
+
+            LS_merged_df = merge_LS_Table(Do_Result_Save.table, LS_merged_df, file)
+
+            cl += len((set(Do_Clustering.HDBSCAN_labels)))
+            outliers_count += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
+            figure += Do_Result_Save.count_stock_of_traded()
+
+            print("Number of clusters is:", len(set(Do_Clustering.HDBSCAN_labels)))
+
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        cl = int(cl / len(files))
+        outliers_count = outliers_count / len(files)
+        figure = figure / len(files)
+        stat_list = [cl, 1 - outliers_count, outliers_count, figure]
+        stat_lists.append(stat_list)
+        print(f'avg of clusters: {cl}')
+        print(f'total outliers: {outliers_count}')
+        print(f'number of stock traded: {figure}')
+
+    save_and_plot_result('HDBSCAN', result_df, file_names, FTSE=True, apply_log=True)
+    save_cluster_info('HDBSCAN', stat_lists, file_names)
+
+# hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(K_mean/agglomerative)
 birch_Save = False
 if birch_Save:
-    # input_dir = '../files/momentum_adj'
-    # output_dir ='../files/Clustering_adj/HDBSCAN'
+    file_names = []
+    result_df = pd.DataFrame()
+    stat_lists = []
+
+    input_dir = '../files/characteristics'
+    output_dir = '../files/clustering_result/BIRCH'
+    files = sorted(filename for filename in os.listdir(input_dir))
+    cl = 0
+    outliers_count = 0
+    figure = 0
+
+    for i in np.arange(0.1, 1, 0.1):
+        file_names.append(f'{i}')
+        LS_merged_df = pd.DataFrame()
+
+        for file in files:
+            print(file)
+            # convert mom_data into PCA_data
+            data = read_and_preprocess_data(input_dir, file)
+            raw = False
+            if not raw:
+                df_combined = generate_PCA_Data(data)
+            else:
+                df_combined = data
+            # Call initial method
+            Do_Clustering = C.Clustering(df_combined)
+            Do_Result_Save = C.ResultCheck(df_combined)
+
+            # Do clustering and get 2D list of cluster index
+            Do_Clustering.perform_BIRCH(i)
+
+            Do_Result_Save.ls_table(Do_Clustering.BIRCH, output_dir, file, save=False, raw=raw)
+
+            LS_merged_df = merge_LS_Table(Do_Result_Save.table, LS_merged_df, file)
+
+            cl += len((set(Do_Clustering.BIRCH_labels)))
+            outliers_count += Do_Result_Save.count_outlier(Do_Clustering.BIRCH)
+            figure += Do_Result_Save.count_stock_of_traded()
+
+            print("Number of clusters is:", len(set(Do_Clustering.BIRCH_labels)))
+
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        cl = int(cl / len(files))
+        outliers_count = outliers_count / len(files)
+        figure = figure / len(files)
+        stat_list = [cl, 1 - outliers_count, outliers_count, figure]
+        stat_lists.append(stat_list)
+        print(f'avg of clusters: {cl}')
+        print(f'total outliers: {outliers_count}')
+        print(f'number of stock traded: {figure}')
+
+    save_and_plot_result('BIRCH', result_df, file_names, FTSE=True, apply_log=True)
+    save_cluster_info('BIRCH', stat_lists, file_names)
+
+# hyper parameter bandwidth percentile np.range(0.1, 1, 0.1) should be tested manually.(arbitrarily)
+meanshift_Save = False
+if meanshift_Save:
+    file_names = []
+    result_df = pd.DataFrame()
+    stat_lists = []
+
+    input_dir = '../files/characteristics'
+    output_dir = '../files/clustering_result/meanshift'
+    files = sorted(filename for filename in os.listdir(input_dir))
+    cl = 0
+    outliers_count = 0
+    figure = 0
+
+    for i in np.arange(0.1, 1, 0.1):
+        file_names.append(f'{i}')
+        LS_merged_df = pd.DataFrame()
+
+        for file in files:
+            print(file)
+            # convert mom_data into PCA_data
+            data = read_and_preprocess_data(input_dir, file)
+            raw = False
+            if not raw:
+                df_combined = generate_PCA_Data(data)
+            else:
+                df_combined = data
+            # Call initial method
+            Do_Clustering = C.Clustering(df_combined)
+            Do_Result_Save = C.ResultCheck(df_combined)
+
+            # Do clustering and get 2D list of cluster index
+            Do_Clustering.perform_meanshift(i)
+
+            Do_Result_Save.ls_table(Do_Clustering.meanshift, output_dir, file, save=False, raw=raw)
+
+            LS_merged_df = merge_LS_Table(Do_Result_Save.table, LS_merged_df, file)
+
+            cl += len((set(Do_Clustering.meanshift_labels)))
+            outliers_count += Do_Result_Save.count_outlier(Do_Clustering.meanshift)
+            figure += Do_Result_Save.count_stock_of_traded()
+
+            print("Number of clusters is:", len(set(Do_Clustering.meanshift_labels)))
+
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        cl = int(cl / len(files))
+        outliers_count = outliers_count / len(files)
+        figure = figure / len(files)
+        stat_list = [cl, 1 - outliers_count, outliers_count, figure]
+        stat_lists.append(stat_list)
+        print(f'avg of clusters: {cl}')
+        print(f'total outliers: {outliers_count}')
+        print(f'number of stock traded: {figure}')
+
+    save_and_plot_result('meanshift', result_df, file_names, FTSE=True, apply_log=True)
+    save_cluster_info('meanshift', stat_lists, file_names)
+
+# hyper parameter n components [3,5,10,20,30,40,50,60,70] should be tested manually.(arbitrarily)
+GMM_Save = False
+if GMM_Save:
+    file_names = []
+    result_df = pd.DataFrame()
+    stat_lists = []
 
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/GMM'
     files = sorted(filename for filename in os.listdir(input_dir))
-    outliers_count = 0
-    sil = 0
     cl = 0
-    sil_num = 0
-    for file in files:
-        print(file)
+    outliers_count = 0
+    figure = 0
 
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        df_combined = generate_PCA_Data(data)
+    for i in [3, 5, 10, 20, 30, 40, 50, 60, 70]:
+        file_names.append(f'{i}')
+        LS_merged_df = pd.DataFrame()
 
-        # Call initial method
-        Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.ResultCheck(df_combined)
+        for file in files:
+            print(file)
+            # convert mom_data into PCA_data
+            data = read_and_preprocess_data(input_dir, file)
+            raw = False
+            if not raw:
+                df_combined = generate_PCA_Data(data)
+            else:
+                df_combined = data
+            # Call initial method
+            Do_Clustering = C.Clustering(df_combined)
+            Do_Result_Save = C.ResultCheck(df_combined)
 
-        # Do clustering and get 2D list of cluster index
-        Do_Clustering.BIRCH = Do_Clustering.perform_BIRCH(0.7)
+            # Do clustering and get 2D list of cluster index
+            Do_Clustering.perform_GMM(i)
 
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.BIRCH)
+            Do_Result_Save.ls_table(Do_Clustering.Gaussian, output_dir, file, save=False, raw=raw)
 
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.BIRCH, output_dir, file)
+            LS_merged_df = merge_LS_Table(Do_Result_Save.table, LS_merged_df, file)
 
-        if len(sorted(list(set(Do_Clustering.BIRCH_labels)))) != 1:
-            silhouette_avg = silhouette_score(df_combined, Do_Clustering.BIRCH_labels)
-            sil += silhouette_avg
-            sil_num += 1
-            print("The average silhouette score is:", silhouette_avg)
+            cl += len((set(Do_Clustering.Gaussian_labels)))
+            outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Gaussian)
+            figure += Do_Result_Save.count_stock_of_traded()
 
-        cl += len(sorted(list(set(Do_Clustering.BIRCH_labels))))
+            print("Number of clusters is:", len(set(Do_Clustering.Gaussian_labels)))
 
-        print("Number of clusters is:", len(sorted(list(set(Do_Clustering.BIRCH_labels)))))
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df)
+        cl = int(cl / len(files))
+        outliers_count = outliers_count / len(files)
+        figure = figure / len(files)
+        stat_list = [cl, 1 - outliers_count, outliers_count, figure]
+        stat_lists.append(stat_list)
+        print(f'avg of clusters: {cl}')
+        print(f'total outliers: {outliers_count}')
+        print(f'number of stock traded: {figure}')
 
-    sil = sil / sil_num
-    cl = cl / len(files)
-    print('average number of clusters:', cl)
-    print('silhouette score:', sil)
-    print(f'total outliers: {outliers_count}')
+    save_and_plot_result('GMM', result_df, file_names, FTSE=True, apply_log=True)
+    save_cluster_info('GMM', stat_lists, file_names)

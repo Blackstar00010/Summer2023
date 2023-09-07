@@ -31,7 +31,6 @@ for i in range(len(result.index)):
         profit_factor.iloc[j, i] = pf
 
 profit_factor['metric'] = 'Profit_factor'
-
 print(profit_factor.to_string())
 
 print('sharpe_ratio')
@@ -43,7 +42,6 @@ for i in range(len(result.index)):
         sharpe_ratio.iloc[j, i] = sf
 
 sharpe_ratio['metric'] = 'Sharpe'
-
 print(sharpe_ratio.to_string())
 
 print('sortino_ratio')
@@ -55,30 +53,21 @@ for i in range(len(result.index)):
         sortino_ratio.iloc[j, i] = sf
 
 sortino_ratio['metric'] = 'Sortino'
-
 print(sortino_ratio.to_string())
 
 print('Maximum_drawdown(MDD)')
 MDD = pd.DataFrame(index=col, columns=result.iloc[:, 0])
 for i in range(len(result.index)):
     for j in range(len(period)):
-        # row = result.iloc[i, period[j]]
-        # ret = row.cumsum()
-        # mdd = ret.apply(lambda x: (x.dropna().loc[((np.maximum.accumulate(x.dropna()) - x.dropna()).idxmax())] -
-        #                            x.dropna().loc[(
-        #                            x.dropna().loc[:((np.maximum.accumulate(x.dropna()) - x.dropna()).idxmax())]).idxmax()]))
-        # mdd = np.exp(mdd)
-        # mdd = 1 - mdd
-        # MDD.iloc[j, i] = mdd
         row = result.iloc[i, period[j]]
-        cumulative_returns = (np.exp(row.astype(float))).cumprod()
-        peak = cumulative_returns.cummax()
-        drawdown = (cumulative_returns - peak) / peak
+        row2=np.exp(row.astype(float))-1
+        cumulative_returns=np.cumprod(1+row2)-1
+        peak = np.maximum.accumulate(cumulative_returns)
+        drawdown = (cumulative_returns - peak) / (peak+1)
         max_drawdown = drawdown.min()
         MDD.iloc[j, i] = max_drawdown
 
 MDD['metric'] = 'MDD'
-
 print(MDD.to_string())
 
 print('Calmar_ratio')
@@ -86,17 +75,16 @@ Calmar_ratio = pd.DataFrame(index=col, columns=result.iloc[:, 0])
 for i in range(len(result.index)):
     for j in range(len(period)):
         row = result.iloc[i, period[j]]
-        cumulative_returns = (np.exp(row.astype(float))).cumprod()
-        peak = cumulative_returns.cummax()
-        drawdown = (cumulative_returns - peak) / peak
+        row2=np.exp(row.astype(float))-1
+        cumulative_returns=np.cumprod(1+row2)-1
+        peak = np.maximum.accumulate(cumulative_returns)
+        drawdown = (cumulative_returns - peak) / (peak+1)
         max_drawdown = drawdown.min()
         calmar = (np.exp(row.mean() * 12) - 1) / abs(max_drawdown)
         Calmar_ratio.iloc[j, i] = calmar
 
 Calmar_ratio['metric'] = 'Calmar'
-
 print(Calmar_ratio.to_string())
 
 profit_factor = pd.concat([profit_factor, sharpe_ratio, sortino_ratio, MDD, Calmar_ratio], axis=0)
-
 profit_factor.to_csv('../files/result/total.csv', index=True)

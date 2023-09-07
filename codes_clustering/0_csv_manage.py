@@ -42,8 +42,8 @@ if momentum:
         print('-', end='')
         if int(current_date.strftime('%m')) == 12:
             print(f'] {current_date.strftime("%Y")} done!\n[')
-    if int(current_date.strftime('%m')) != 12:
-        print(f'] {current_date.strftime("%Y-%m")} done!\n[')
+        if int(current_date.strftime('%m')) != 12:
+            print(f'] {current_date.strftime("%Y-%m")} done!\n[')
 
 MOM_Merge = True
 if MOM_Merge:
