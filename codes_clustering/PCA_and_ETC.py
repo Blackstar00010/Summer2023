@@ -135,8 +135,7 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
 
     criterion = np.log(1.5) if apply_log else 1.5
     result_df = result_df.applymap(lambda x: float('NaN') if abs(x) > criterion else x)
-    result_df = result_df.applymap(
-        lambda x: float('NaN') if x < 1 - 1 / criterion else x) if not apply_log else result_df
+    result_df = result_df.applymap(lambda x: float('NaN') if x < 1 - 1 / criterion else x) if not apply_log else result_df
     result_df = result_df.fillna(method='ffill', axis=1)
 
 
@@ -145,9 +144,8 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
         columns=result_df.index)
     for i in range(len(result_modified.columns)):
         result_modified.iloc[0, i] = len(result_df.columns)
-        result_modified.iloc[1, i] = np.mean(result_df.iloc[i, :]) * 12
-        annual_return = np.array(result_df.iloc[i, :]) * 12
-        result_modified.iloc[2, i] = np.std(annual_return)
+        result_modified.iloc[1, i] = np.exp(np.mean(result_df.iloc[i, :]) * 12) - 1
+        result_modified.iloc[2, i] = np.exp(np.std(result_df) * np.sqrt(12)) - 1
         result_modified.iloc[3, i] = np.min(result_df.iloc[i, :])
         result_modified.iloc[4, i] = np.max(result_df.iloc[i, :])
     # result_modified.iloc[1, :] = result_modified.iloc[1, :] * len(result_df.iloc[1, :]) / 12

@@ -39,7 +39,7 @@ sharpe_ratio = pd.DataFrame(index=col, columns=result.iloc[:, 0])
 for i in range(len(result.index)):
     for j in range(len(period)):
         row = result.iloc[i, period[j]]
-        sf = (np.exp(row.mean() * 12) - 1)/ (np.exp(row.std() * np.sqrt(12)) - 1)
+        sf = (np.exp(row.mean() * 12) - 1) / (np.exp(row.std() * np.sqrt(12)) - 1)
         sharpe_ratio.iloc[j, i] = sf
 
 sharpe_ratio['metric'] = 'Sharpe'
@@ -51,17 +51,34 @@ sortino_ratio = pd.DataFrame(index=col, columns=result.iloc[:, 0])
 for i in range(len(result.index)):
     for j in range(len(period)):
         row = result.iloc[i, period[j]]
-        sf = (np.exp(row.mean() * 12) - 1) / (np.exp(row[row<0].std() * np.sqrt(12)) - 1)
+        sf = (np.exp(row.mean() * 12) - 1) / (np.exp(row[row < 0].std() * np.sqrt(12)) - 1)
         sortino_ratio.iloc[j, i] = sf
 
 sortino_ratio['metric'] = 'Sortino'
 
 print(sortino_ratio.to_string())
 
+rt = pd.DataFrame(rt)
+ret = rt.cumsum()
+mdd = ret.apply(lambda x: (x.dropna().loc[((np.maximum.accumulate(x.dropna()) - x.dropna()).idxmax())] -
+                           x.dropna().loc[(
+                           x.dropna().loc[:((np.maximum.accumulate(x.dropna()) - x.dropna()).idxmax())]).idxmax()]))
+mdd = np.exp(mdd)
+mdd = 1 - mdd
+
+
 print('Maximum_drawdown(MDD)')
 MDD = pd.DataFrame(index=col, columns=result.iloc[:, 0])
 for i in range(len(result.index)):
     for j in range(len(period)):
+        # row = result.iloc[i, period[j]]
+        # ret = row.cumsum()
+        # mdd = ret.apply(lambda x: (x.dropna().loc[((np.maximum.accumulate(x.dropna()) - x.dropna()).idxmax())] -
+        #                            x.dropna().loc[(
+        #                            x.dropna().loc[:((np.maximum.accumulate(x.dropna()) - x.dropna()).idxmax())]).idxmax()]))
+        # mdd = np.exp(mdd)
+        # mdd = 1 - mdd
+        # MDD.iloc[j, i] = mdd
         row = result.iloc[i, period[j]]
         cumulative_returns = (np.exp(row.astype(float))).cumprod()
         peak = cumulative_returns.cummax()
@@ -82,7 +99,7 @@ for i in range(len(result.index)):
         peak = cumulative_returns.cummax()
         drawdown = (cumulative_returns - peak) / peak
         max_drawdown = drawdown.min()
-        calmar = row.mean() / abs(max_drawdown)
+        calmar = (np.exp(row.mean() * 12) - 1) / abs(max_drawdown)
         Calmar_ratio.iloc[j, i] = calmar
 
 Calmar_ratio['metric'] = 'Calmar'
