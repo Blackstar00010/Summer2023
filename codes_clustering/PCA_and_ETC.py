@@ -174,35 +174,35 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
     new_plot = True
     if new_plot:
         result_df.iloc[:, :] = result_df.iloc[:, :].cumsum(axis=1) if apply_log else result_df.iloc[:, :].cumprod(axis=1)
-        # color_dict = {
-        #     'Cointegration': 'lightcoral',  # Lighter shade of red
-        #     'K_mean': 'red',  # Standard red
-        #     'DBSCAN': 'firebrick',  # Darker shade of red
-        #     'Agglomerative': 'darkred',  # Darkest shade of red
-        #
-        #     'HDBSCAN': 'lightskyblue',  # Lighter shade of blue
-        #     'OPTICS': 'deepskyblue',  # Bright blue
-        #     'BIRCH': 'royalblue',  # Standard blue
-        #     'Meanshift': 'blue',  # Darker shade of blue
-        #     'GMM': 'midnightblue',  # Darkest shade of blue
-        #
-        #     'Reversal': 'lightgrey',  # Lighter shade of grey
-        #     'FTSE 100': 'grey'  # Standard grey
-        # }
-
         color_dict = {
-            'Cointegration': 'brown',
-            'K_mean': 'red',
-            'DBSCAN': 'magenta',
-            'Agglomerative': 'crimson',
-            'HDBSCAN': 'rebeccapurple',
-            'OPTICS': 'darkcyan',
-            'BIRCH': 'navy',
-            'Meanshift': 'blue',
-            'GMM': 'royalblue',
-            'Reversal': 'dimgrey',
-            'FTSE 100': 'black'
+            'Cointegration': 'lightcoral',  # Lighter shade of red
+            'K_mean': 'red',  # Standard red
+            'DBSCAN': 'firebrick',  # Darker shade of red
+            'Agglomerative': 'darkred',  # Darkest shade of red
+
+            'HDBSCAN': 'lightskyblue',  # Lighter shade of blue
+            'OPTICS': 'deepskyblue',  # Bright blue
+            'BIRCH': 'royalblue',  # Standard blue
+            'Meanshift': 'blue',  # Darker shade of blue
+            'GMM': 'midnightblue',  # Darkest shade of blue
+
+            'Reversal': 'lightgrey',  # Lighter shade of grey
+            'FTSE 100': 'grey'  # Standard grey
         }
+
+        # color_dict = {
+        #     'Cointegration': 'brown',
+        #     'K_mean': 'red',
+        #     'DBSCAN': 'magenta',
+        #     'Agglomerative': 'crimson',
+        #     'HDBSCAN': 'rebeccapurple',
+        #     'OPTICS': 'darkcyan',
+        #     'BIRCH': 'navy',
+        #     'Meanshift': 'blue',
+        #     'GMM': 'royalblue',
+        #     'Reversal': 'dimgrey',
+        #     'FTSE 100': 'black'
+        # }
 
         plt.figure(figsize=(10, 6))
         handles = []  # List to store the line handles for the legend
