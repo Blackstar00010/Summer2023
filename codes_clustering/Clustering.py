@@ -1,5 +1,4 @@
 import math
-import numpy as np
 from PCA_and_ETC import *
 from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
@@ -46,29 +45,23 @@ class Clustering:
         # ToDo: random
         kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500, random_state=0).fit(
             self.PCA_Data)
-
-        distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[kmeans.labels_[i]]) for
-                                    i in range(len(self.PCA_Data))]
-
         cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
-
         self.test = kmeans
         self.K_Mean_labels = cluster_labels
+
+        distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[cluster_labels[i]]) for
+                                    i in range(len(self.PCA_Data))]
 
         nbrs = NearestNeighbors(n_neighbors=3, p=2).fit(self.PCA_Data)
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         nearest_neighbor_distances = distances[:, 1]
 
         sorted_nearest_neighbor_distances = sorted(nearest_neighbor_distances)
-
         epsilon = sorted_nearest_neighbor_distances[int(len(sorted_nearest_neighbor_distances) * alpha)]
-
-        # outliers = np.where(distance_to_own_centroid > epsilon)[0]
-
         outliers = [i for i, dist in enumerate(distance_to_own_centroid) if dist > epsilon]
 
         clusters_indices = [[] for _ in range(k_value)]
-        for i, label in enumerate(kmeans.labels_):
+        for i, label in enumerate(cluster_labels):
             if i in outliers:
                 continue
             clusters_indices[label].append(i)
@@ -93,15 +86,12 @@ class Clustering:
         # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
         # 1번째는 자기자신이니까 +1
         nbrs = NearestNeighbors(n_neighbors=ms + 1, p=1).fit(self.PCA_Data)
-
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         avg_distances = np.mean(distances[:, 1:], axis=1)
-
         eps = np.percentile(avg_distances, threshold * 100)
 
         dbscan = DBSCAN(min_samples=ms, eps=eps, metric='l1').fit(self.PCA_Data)
         cluster_labels = dbscan.labels_
-
         self.test = dbscan
         self.DBSCAN_labels = cluster_labels
 
@@ -123,16 +113,15 @@ class Clustering:
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         nbrs = NearestNeighbors(n_neighbors=3, p=1).fit(self.PCA_Data)
-
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         avg_distances = np.mean(distances[:, 1:], axis=1)
-
         outlier_distance = np.percentile(avg_distances, threshold * 100)
 
         agglo = AgglomerativeClustering(n_clusters=None, metric='l1', linkage='average',
                                         distance_threshold=outlier_distance).fit(self.PCA_Data)
         cluster_labels = agglo.labels_
         self.test = agglo
+        self.Agglomerative_labels = cluster_labels
 
         outlier = []
 
@@ -143,8 +132,6 @@ class Clustering:
         for i, cluster_label in enumerate(cluster_labels):
             if i in outlier:
                 cluster_labels[i] = -1
-
-        self.Agglomerative_labels = cluster_labels
 
         unique_labels = sorted(list(set(cluster_labels)))
 
@@ -163,16 +150,13 @@ class Clustering:
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         nbrs = NearestNeighbors(n_neighbors=3, p=1).fit(self.PCA_Data)
-
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         avg_distances = np.mean(distances[:, 1:], axis=1)
-
         max_d = np.percentile(avg_distances, threshold * 100)
 
         # min_cluster_size는 silhouette score가 가장 높은 것 선정. 2부터 5까지 실험.
         Hdbscan = HDBSCAN(min_cluster_size=2, cluster_selection_epsilon=max_d).fit(self.PCA_Data)
         cluster_labels = Hdbscan.labels_
-
         self.test = Hdbscan
         self.HDBSCAN_labels = cluster_labels
 
@@ -196,28 +180,18 @@ class Clustering:
         ms = int(math.log(len(self.PCA_Data)))
 
         nbrs = NearestNeighbors(n_neighbors=ms + 1, p=1).fit(self.PCA_Data)
-
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         avg_distances = np.mean(distances[:, 1:], axis=1)
-
         eps = np.percentile(avg_distances, threshold * 100)
 
         optics = OPTICS(cluster_method='dbscan', min_samples=ms, eps=eps, min_cluster_size=0.1, metric='manhattan').fit(
             self.PCA_Data)
         labels = optics.labels_
-
-        # reachability = optics.reachability_[optics.ordering_]
-        # # Reachability 값이 threshold를 넘는 데이터 포인트 출력
-        # threshold = np.percentile(reachability, alpha)
-        # outliers = np.where(reachability > threshold)[0]
         self.test = optics
         self.OPTIC_labels = labels
 
-        # for i, cluster_label in enumerate(labels):
-        #     if i in outliers:
-        #         labels[i] = -1
-
         unique_labels = sorted(list(set(labels)))
+
         clust = [[] for _ in unique_labels]
         for i, cluster_label in enumerate(labels):
             clust[unique_labels.index(cluster_label)].append(self.index[i])
@@ -233,16 +207,14 @@ class Clustering:
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         nbrs = NearestNeighbors(n_neighbors=3, p=1).fit(self.PCA_Data)
-
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         avg_distances = np.mean(distances[:, 1:], axis=1)
-
         max_d = np.percentile(avg_distances, threshold * 100)
 
         birch = Birch(threshold=max_d, n_clusters=None).fit(self.PCA_Data)
         cluster_labels = birch.labels_
-
         self.test = birch
+        self.BIRCH_labels = cluster_labels
 
         # 클러스터의 중심
         cluster_centers = birch.subcluster_centers_
@@ -252,18 +224,13 @@ class Clustering:
 
         # 아웃라이어 여부 확인
         sorted_distances = np.sort(distances)
-
         epsilon = sorted_distances[int(len(sorted_distances) * 0.5)]
-
         outliers = np.where(sorted_distances > epsilon)[0]
-
         cluster_labels = list(cluster_labels)
 
         for i, cluster_label in enumerate(cluster_labels):
             if i in outliers:
                 cluster_labels[i] = -1
-
-        self.BIRCH_labels = cluster_labels
 
         # Get the unique cluster labels
         unique_labels = sorted(list(set(cluster_labels)))
@@ -284,9 +251,7 @@ class Clustering:
 
         # The following bandwidth can be automatically detected using
         bandwidth = estimate_bandwidth(self.PCA_Data, quantile=quantile)
-
         ms = MeanShift(bandwidth=bandwidth, cluster_all=False).fit(self.PCA_Data)
-
         cluster_labels = ms.labels_
         self.test = ms
         self.meanshift_labels = cluster_labels
@@ -314,7 +279,6 @@ class Clustering:
         gmm = GaussianMixture(n_components=n_components, init_params='k-means++', covariance_type=type).fit(
             self.PCA_Data)
         cluster_labels = gmm.predict(self.PCA_Data)
-
         self.test = gmm
         self.Gaussian_labels = cluster_labels
 
@@ -327,9 +291,8 @@ class Clustering:
 
         # Outliers
         # 각 데이터 포인트의 확률 값 계산
-        probabilities = gmm.score_samples(self.PCA_Data)
         # 확률 값의 percentiles 계산 (예시로 하위 5% 이하를 outlier로 판단)
-
+        probabilities = gmm.score_samples(self.PCA_Data)
         threshold = np.percentile(probabilities, 5)
 
         outliers = []
@@ -370,15 +333,11 @@ class ResultCheck:
         :param raw:
         :return:
         """
-        # New table with firm name, mom_1, long and short index, cluster index
-        LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
-
         if raw:
             mom1_col_name = self.prefix + '1'
         else:
             mom1_col_name = '0'
 
-        # consider using this
         # '''
         clusters = []
         for i in range(len(cluster)):
@@ -388,9 +347,9 @@ class ResultCheck:
         clusters = clusters.set_index('Firm Name')
         clusters['Momentum_1'] = self.PCA_Data[mom1_col_name]
         clusters = clusters.sort_values(by=['Cluster Index', 'Momentum_1'], ascending=[True, False])
-        spread_vec = (clusters.reset_index()['Momentum_1'] - clusters.sort_values(by=['Cluster Index', 'Momentum_1'], \
-                                                                                  ascending=[True, True]).reset_index()[
-            'Momentum_1'])
+        spread_vec = (clusters.reset_index()['Momentum_1'] -
+                      clusters.sort_values(by=['Cluster Index', 'Momentum_1'],
+                                           ascending=[True, True]).reset_index()['Momentum_1'])
         clusters = clusters.reset_index()
         clusters['spread'] = spread_vec
         clusters['in_portfolio'] = (clusters['spread'].abs() > clusters['spread'].std()) * 1
