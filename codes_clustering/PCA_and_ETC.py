@@ -171,7 +171,58 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
     result_modified.to_csv(os.path.join('../files/result/', clustering_name + '_statistcs_modified.csv'), index=True)
     result_df.to_csv(os.path.join('../files/result/', clustering_name + '_result_modified.csv'), index=True)
 
-    Plot = True
+    new_plot = True
+    if new_plot:
+        result_df.iloc[:, :] = result_df.iloc[:, :].cumsum(axis=1) if apply_log else result_df.iloc[:, :].cumprod(axis=1)
+        # color_dict = {
+        #     'Cointegration': 'lightcoral',  # Lighter shade of red
+        #     'K_mean': 'red',  # Standard red
+        #     'DBSCAN': 'firebrick',  # Darker shade of red
+        #     'Agglomerative': 'darkred',  # Darkest shade of red
+        #
+        #     'HDBSCAN': 'lightskyblue',  # Lighter shade of blue
+        #     'OPTICS': 'deepskyblue',  # Bright blue
+        #     'BIRCH': 'royalblue',  # Standard blue
+        #     'Meanshift': 'blue',  # Darker shade of blue
+        #     'GMM': 'midnightblue',  # Darkest shade of blue
+        #
+        #     'Reversal': 'lightgrey',  # Lighter shade of grey
+        #     'FTSE 100': 'grey'  # Standard grey
+        # }
+
+        color_dict = {
+            'Cointegration': 'brown',
+            'K_mean': 'red',
+            'DBSCAN': 'magenta',
+            'Agglomerative': 'crimson',
+            'HDBSCAN': 'rebeccapurple',
+            'OPTICS': 'darkcyan',
+            'BIRCH': 'navy',
+            'Meanshift': 'blue',
+            'GMM': 'royalblue',
+            'Reversal': 'dimgrey',
+            'FTSE 100': 'black'
+        }
+
+        plt.figure(figsize=(10, 6))
+        handles = []  # List to store the line handles for the legend
+        for key in color_dict:
+            if key in result_df.index:
+                idx = result_df.index.get_loc(key)
+                line, = plt.plot(result_df.columns, result_df.iloc[idx].fillna(method='ffill'),
+                                 label=key, color=color_dict[key])
+                handles.append(line)
+
+        plt.title('RETURN')
+        plt.xlabel('Date')
+        plt.ylabel('Cumulative Value')
+
+        plt.xticks(rotation=45)
+        plt.legend(handles=handles)  # Use the handles list to order the legend
+        plt.tight_layout()
+        plt.show()
+
+    Plot = False
     if Plot:
         # Calculate the cumulative product
         result_df.iloc[:, :] = result_df.iloc[:, :].cumsum(axis=1) if apply_log else result_df.iloc[:, :].cumprod(
@@ -184,7 +235,7 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
 
         plt.title('RETURN')
         plt.xlabel('Date')
-        plt.ylabel('cumulative Value')
+        plt.ylabel('Cumulative Value')
 
         plt.xticks(rotation=45)
         plt.legend(result_df.index)  # Add a legend to distinguish different lines
