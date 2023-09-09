@@ -1248,7 +1248,7 @@ I finally download and save the data here,
 
 ==============================================================================;  
 /*    Save data   */
-libname p '\\smeal.psu.edu\data\Users\Faculty\jrg28\My Documents\_ResearchAndTeaching\_research\_papers';
+libname p '\\smeal.psu.edu\data\Users\김주환\Documents';
 data p.RPSdata_RFS;
 	set RPSdata_RFS;
 	run;			
