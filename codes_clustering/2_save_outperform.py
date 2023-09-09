@@ -35,7 +35,7 @@ if K_mean_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_kmeans(200)
+        Do_Clustering.perform_kmeans(300)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.K_Mean)
 
         # Save LS_Table CSV File
@@ -59,7 +59,7 @@ if dbscan_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_DBSCAN(0.8)
+        Do_Clustering.perform_DBSCAN(0.9)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
 
         # Save LS_Table CSV File
@@ -208,7 +208,7 @@ if GMM_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_GMM(30)
+        Do_Clustering.perform_GMM(3)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Gaussian)
 
         # Save LS_Table CSV File
