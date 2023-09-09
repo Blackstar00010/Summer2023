@@ -39,6 +39,7 @@ def merge_LS_Table(data, LS_merged_df, file):
     else:
         LS_merged_df = pd.merge(LS_merged_df, data, on='Firm Name', how='outer')
 
+
     return LS_merged_df
 
 
@@ -53,6 +54,8 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     LS_merged_df = LS_merged_df.drop(LS_merged_df.columns[-1], axis=1)
     LS_merged_df = LS_merged_df.fillna(0)
     LS_merged_df.columns = MOM_merged_df.columns
+
+    LS_merged_df.to_csv('../files/LS_merged.csv')
     if save:
         LS_merged_df2= LS_merged_df[(LS_merged_df != 0).any(axis=1)]
         firm_list=pd.DataFrame(LS_merged_df2.index)
@@ -96,7 +99,7 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     return result_df
 
 
-def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, FTSE=False, apply_log=True):
+def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, FTSE=False, apply_log=True, new_Plot=False):
     # Add a new column to the result DataFrame with the file names
     result_df['Clustering Method'] = file_names
 
@@ -145,7 +148,7 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
     for i in range(len(result_modified.columns)):
         result_modified.iloc[0, i] = len(result_df.columns)
         result_modified.iloc[1, i] = np.exp(np.mean(result_df.iloc[i, :]) * 12) - 1
-        result_modified.iloc[2, i] = np.exp(np.std(result_df) * np.sqrt(12)) - 1
+        result_modified.iloc[2, i] = np.exp(np.std(result_df.iloc[i, :]) * np.sqrt(12)) - 1
         result_modified.iloc[3, i] = np.min(result_df.iloc[i, :])
         result_modified.iloc[4, i] = np.max(result_df.iloc[i, :])
     # result_modified.iloc[1, :] = result_modified.iloc[1, :] * len(result_df.iloc[1, :]) / 12
@@ -171,9 +174,11 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
     result_modified.to_csv(os.path.join('../files/result/', clustering_name + '_statistcs_modified.csv'), index=True)
     result_df.to_csv(os.path.join('../files/result/', clustering_name + '_result_modified.csv'), index=True)
 
-    new_plot = True
-    if new_plot:
+
+    if new_Plot:
         result_df.iloc[:, :] = result_df.iloc[:, :].cumsum(axis=1) if apply_log else result_df.iloc[:, :].cumprod(axis=1)
+
+
         color_dict = {
             'Cointegration': 'lightcoral',  # Lighter shade of red
             'K_mean': 'red',  # Standard red
@@ -222,8 +227,8 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
         plt.tight_layout()
         plt.show()
 
-    Plot = False
-    if Plot:
+
+    if not new_Plot:
         # Calculate the cumulative product
         result_df.iloc[:, :] = result_df.iloc[:, :].cumsum(axis=1) if apply_log else result_df.iloc[:, :].cumprod(
             axis=1)

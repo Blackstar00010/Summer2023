@@ -1,7 +1,6 @@
 import Clustering as C
 from PCA_and_ETC import *
 
-# Save Reversal method LS_Tables
 Reversal_Save = False
 if Reversal_Save:
     input_dir = '../files/characteristics'
@@ -18,8 +17,6 @@ if Reversal_Save:
         # Save LS_Table CSV File
         Do_Result_Save.reversal_table(data, output_dir, file)
 
-# Save K_mean clutering method LS_Tables
-# hyper parameter K(1,2,3,4,5,10,50,100,500,1000) should be tested manually.(paper follow)
 K_mean_Save = False
 if K_mean_Save:
     input_dir = '../files/characteristics'
@@ -44,9 +41,7 @@ if K_mean_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.K_Mean, output_dir, file, save=True, raw=False)
 
-# Save DBSCAN clutering method LS_Tables
-# hyper parameter eps percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-dbscan_Save = False
+dbscan_Save = True
 if dbscan_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/DBSCAN'
@@ -70,9 +65,7 @@ if dbscan_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.DBSCAN, output_dir, file, save=True, raw=False)
 
-# Save Hirarchical Agglomerative clutering method LS_Tables
-# hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-Agglormerative_Save = False
+Agglormerative_Save = True
 if Agglormerative_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/Agglomerative'
@@ -97,9 +90,7 @@ if Agglormerative_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=True, raw=False)
 
-# Save HDBSCAN clutering method LS_Tables
-# hyper parameter distance percentile range(0.1, 0.9, 0.1) should be tested manually.
-hdbscan_Save = False
+hdbscan_Save = True
 if hdbscan_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/HDBSCAN'
@@ -123,9 +114,7 @@ if hdbscan_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.HDBSCAN, output_dir, file, save=True, raw=False)
 
-# Save OPTICS clutering method LS_Tables
-# hyper parameter percentile of xi range(0.05, 0.09, 0.01) should be tested manually.
-optics_Save = False
+optics_Save = True
 if optics_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/OPTICS'
@@ -150,9 +139,7 @@ if optics_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.OPTIC, output_dir, file, save=True, raw=False)
 
-# Save BIRCH clutering method LS_Tables
-# hyper parameter percentile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-birch_Save = False
+birch_Save = True
 if birch_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/BIRCH'
@@ -177,9 +164,7 @@ if birch_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.BIRCH, output_dir, file, save=True, raw=False)
 
-# Save Meanshift clutering method LS_Tables
-# hyper parameter quantile range(0.1, 0.9, 0.1) should be tested manually.(paper follow)
-meanshift_Save = False
+meanshift_Save = True
 if meanshift_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/Meanshift'
@@ -204,9 +189,7 @@ if meanshift_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.meanshift, output_dir, file, save=True, raw=False)
 
-# Save GaussianMixture clutering method LS_Tables
-# hyper parameter outlier probability [1, 5, 10, 15, 20] should be tested manually.
-GMM_Save = False
+GMM_Save = True
 if GMM_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/GMM'
