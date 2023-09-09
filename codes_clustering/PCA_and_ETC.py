@@ -55,7 +55,6 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     LS_merged_df = LS_merged_df.fillna(0)
     LS_merged_df.columns = MOM_merged_df.columns
 
-    LS_merged_df.to_csv('../files/LS_merged.csv')
     if save:
         LS_merged_df2= LS_merged_df[(LS_merged_df != 0).any(axis=1)]
         firm_list=pd.DataFrame(LS_merged_df2.index)
