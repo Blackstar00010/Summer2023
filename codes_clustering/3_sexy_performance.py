@@ -25,6 +25,7 @@ for subdir in subdirectories:
     directory = os.path.join(base_directory, subdir)
 
     LS_merged_df = pd.DataFrame()
+
     files = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
     for file in files:
         data = pd.read_csv(os.path.join(directory, file))
