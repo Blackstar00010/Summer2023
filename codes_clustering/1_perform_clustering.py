@@ -6,7 +6,7 @@ MOM_merged_df.set_index('Firm Name', inplace=True)
 MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
 
 # hyper parameter K(50,75,100,200,300,400,500,600,700) should be tested manually.(paper follow)
-K_mean_Save = False
+K_mean_Save = True
 if K_mean_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -63,7 +63,7 @@ if K_mean_Save:
     save_cluster_info('K_mean', stat_lists, file_names)
 
 # hyper parameter eps percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow)
-dbscan_Save = False
+dbscan_Save = True
 if dbscan_Save:
     file_names = []
     result_df = pd.DataFrame()

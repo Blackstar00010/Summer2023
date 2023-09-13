@@ -58,7 +58,7 @@ class Clustering:
 
         sorted_nearest_neighbor_distances = sorted(nearest_neighbor_distances)
         epsilon = sorted_nearest_neighbor_distances[int(len(sorted_nearest_neighbor_distances) * alpha)]
-        outliers = [i for i, dist in enumerate(distance_to_own_centroid) if dist > epsilon]
+        outliers = [i for i, dist in enumerate(distance_to_own_centroid) if dist < epsilon]
 
         clusters_indices = [[] for _ in range(k_value)]
         for i, label in enumerate(cluster_labels):
@@ -151,7 +151,7 @@ class Clustering:
 
         nbrs = NearestNeighbors(n_neighbors=3, p=1).fit(self.PCA_Data)
         distances, indices = nbrs.kneighbors(self.PCA_Data)
-        avg_distances = np.mean(distances[:, 1:], axis=1)
+        avg_distances = np.max(distances[:, 1:], axis=1)
         max_d = np.percentile(avg_distances, threshold * 100)
 
         # min_cluster_size는 silhouette score가 가장 높은 것 선정. 2부터 5까지 실험.
@@ -224,7 +224,7 @@ class Clustering:
 
         # 아웃라이어 여부 확인
         sorted_distances = np.sort(distances)
-        epsilon = sorted_distances[int(len(sorted_distances) * 0.5)]
+        epsilon = sorted_distances[int(len(sorted_distances) * 0.7)]
         outliers = np.where(sorted_distances > epsilon)[0]
         cluster_labels = list(cluster_labels)
 

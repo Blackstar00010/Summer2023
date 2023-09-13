@@ -1,21 +1,12 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-import copy
-import statistics as sc
-import os
-
-from datetime import datetime, timedelta
 from sklearn.metrics.pairwise import manhattan_distances
 from sklearn.metrics.pairwise import euclidean_distances
 from sklearn.cluster import KMeans
 from sklearn.cluster import AgglomerativeClustering
-from sklearn_extra.cluster import KMedoids
 from scipy.spatial.distance import cdist
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-
 
 
 def MDD(rt):
@@ -24,7 +15,8 @@ def MDD(rt):
 
     mdd = ret.apply(lambda x: (x.dropna().loc[((np.maximum.accumulate(x.dropna()) - x.dropna()).idxmax())] -
                                x.dropna().loc[(
-                               x.dropna().loc[:((np.maximum.accumulate(x.dropna()) - x.dropna()).idxmax())]).idxmax()]))
+                                   x.dropna().loc[
+                                   :((np.maximum.accumulate(x.dropna()) - x.dropna()).idxmax())]).idxmax()]))
 
     mdd = np.exp(mdd)
     mdd = 1 - mdd
@@ -52,6 +44,7 @@ def calmar_ratio_(rt_, num):
 
     return calmar
 
+
 def momentum(ret, max_momentum):
     if ret.shape[0] < max_momentum:
         return 'The length of data is shorter than max_momentum'
@@ -68,7 +61,6 @@ def momentum(ret, max_momentum):
                 mom = 'mom' + str(j)
                 momentem_df.loc[etf, mom] = ret[etf].iloc[-j:-1].sum()
         return momentem_df
-
 
 
 def PCA_df(df):
@@ -106,25 +98,26 @@ def kmeans_w_pct_ol(dataframe, K, percentile):
 
     return result[['label', 'OL']]
 
-def Kmedoid_o(dataframe, K, percentile):
 
-    km = KMedoids(n_clusters = K, max_iter = 1000)
+def Kmedoid_o(dataframe, K, percentile):
+    km = KMedoids(n_clusters=K, max_iter=1000)
     km = km.fit(dataframe)
 
-    result = pd.DataFrame(index = dataframe.index)
+    result = pd.DataFrame(index=dataframe.index)
     result['label'] = km.labels_
 
-    nearest_dis = pd.DataFrame(euclidean_distances(dataframe)).apply(lambda x: x[x>0].min())
+    nearest_dis = pd.DataFrame(euclidean_distances(dataframe)).apply(lambda x: x[x > 0].min())
     eps = np.percentile(nearest_dis.sort_values(), percentile)
     centroids = km.cluster_centers_
 
     for i in range(K):
-        result.loc[result['label'] == i,'central_dis'] = cdist(dataframe.iloc[km.labels_==i].astype(float),
-                                                             centroids[i].reshape(1,centroids.shape[1]),'euclidean')
-    result['OL'] = ((result['central_dis']-eps)>=0).astype(float)
+        result.loc[result['label'] == i, 'central_dis'] = cdist(dataframe.iloc[km.labels_ == i].astype(float),
+                                                                centroids[i].reshape(1, centroids.shape[1]),
+                                                                'euclidean')
+    result['OL'] = ((result['central_dis'] - eps) >= 0).astype(float)
 
+    return result[['label', 'OL']]
 
-    return result[['label','OL']]
 
 def AG_cluster(dataframe, percentile):
     dis = pd.DataFrame(manhattan_distances(dataframe)).apply(lambda x: x[x > 0].min()).sort_values()
@@ -135,6 +128,7 @@ def AG_cluster(dataframe, percentile):
     result = pd.DataFrame(ag_cluster.labels_, index=dataframe.index, columns=['label'])
 
     return result
+
 
 def portfolio_generation(momentum_df, cluster_df):
     if cluster_df.shape[1] == 2:
@@ -171,7 +165,6 @@ def portfolio_generation(momentum_df, cluster_df):
     else:
         diff_.sort()
 
-
     diff_cut = pd.Series(diff_).std()
 
     for i in range(K):
@@ -190,15 +183,11 @@ def portfolio_generation(momentum_df, cluster_df):
                 LONG = LONG + [temp_long.index[j]]
                 SHORT = SHORT + [temp_short.index[-(j + 1)]]
 
-
     return LONG, SHORT
-
-
 
 
 def daily_performance(price_data, reb_time, max_momentum, ub, K, percentile, cluster):
     performance_df = pd.DataFrame()
-
 
     week_price = price_data[price_data.index.hour == reb_time]
 
@@ -209,7 +198,7 @@ def daily_performance(price_data, reb_time, max_momentum, ub, K, percentile, clu
         next_reb_date = reb_date[i + 1]
 
         mom_ret = week_price[week_price.index <= cur_reb]
-        mom_ret = np.log(mom_ret/mom_ret.shift(1)).iloc[1:]
+        mom_ret = np.log(mom_ret / mom_ret.shift(1)).iloc[1:]
 
         momentum_df = momentum(mom_ret, max_momentum)
         final_df = PCA_df(momentum_df)
@@ -225,19 +214,15 @@ def daily_performance(price_data, reb_time, max_momentum, ub, K, percentile, clu
         else:
             cluster_df = AG_cluster(final_df, percentile)
 
-
-
         long_short = portfolio_generation(momentum_df, cluster_df)
         long = long_short[0]
         short = long_short[1]
 
-
         temp_return = price_data[price_data.index <= next_reb_date]
         temp_return = temp_return[temp_return.index >= cur_reb]
-        temp_return = temp_return.fillna(method = 'ffill', limit =4)
-        temp_return = (temp_return/temp_return.shift(1))
+        temp_return = temp_return.fillna(method='ffill', limit=4)
+        temp_return = (temp_return / temp_return.shift(1))
         temp_return.iloc[0] = 1
-
 
         temp_cum = temp_return.cumprod()
 
@@ -249,8 +234,6 @@ def daily_performance(price_data, reb_time, max_momentum, ub, K, percentile, clu
                     close_index = temp_short.index[0]
                     temp_return.loc[temp_return.index >= close_index, s_l] = 1
 
-
-
             temp_per = pd.DataFrame()
             for pset in range(len(long)):
 
@@ -258,24 +241,22 @@ def daily_performance(price_data, reb_time, max_momentum, ub, K, percentile, clu
 
                 edidx = pper[pper > ub]
 
-                if len(edidx)>0:
+                if len(edidx) > 0:
                     edidx = edidx.index[0]
                     pper.loc[pper.index > edidx] = pper.loc[edidx]
 
-                temp_per = pd.concat([temp_per, pper],axis=1)
+                temp_per = pd.concat([temp_per, pper], axis=1)
 
             temp_per = temp_per.mean(axis=1)
-            temp_per = (temp_per/temp_per.shift(1)).iloc[1:]
+            temp_per = (temp_per / temp_per.shift(1)).iloc[1:]
             temp_per = np.log(temp_per)
-            temp_per = temp_per/2
+            temp_per = temp_per / 2
             temp_per.iloc[0] = temp_per.iloc[0] + np.log(0.9986)
 
 
 
         else:
             temp_per = temp_return[long].sum(axis=1)
-
-
 
         performance_df = pd.concat([performance_df, temp_per])
 

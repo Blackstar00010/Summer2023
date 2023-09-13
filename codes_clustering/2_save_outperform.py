@@ -17,7 +17,7 @@ if Reversal_Save:
         # Save LS_Table CSV File
         Do_Result_Save.reversal_table(data, output_dir, file)
 
-K_mean_Save = False
+K_mean_Save = True
 if K_mean_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/K_mean'
@@ -35,7 +35,7 @@ if K_mean_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_kmeans(300)
+        Do_Clustering.perform_kmeans(500)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.K_Mean)
 
         # Save LS_Table CSV File
@@ -84,7 +84,7 @@ if Agglormerative_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_HA(0.9)
+        Do_Clustering.perform_HA(0.8)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
         # Save LS_Table CSV File
@@ -108,7 +108,7 @@ if hdbscan_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_HDBSCAN(0.9)
+        Do_Clustering.perform_HDBSCAN(0.6)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.HDBSCAN)
 
         # Save LS_Table CSV File
@@ -208,7 +208,7 @@ if GMM_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_GMM(3)
+        Do_Clustering.perform_GMM(10)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Gaussian)
 
         # Save LS_Table CSV File
