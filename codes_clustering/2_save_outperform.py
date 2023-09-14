@@ -17,7 +17,7 @@ if Reversal_Save:
         # Save LS_Table CSV File
         Do_Result_Save.reversal_table(data, output_dir, file)
 
-K_mean_Save = True
+K_mean_Save = False
 if K_mean_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/K_mean'
@@ -158,7 +158,7 @@ if birch_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_BIRCH(0.9)
+        Do_Clustering.perform_BIRCH(0.2)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.BIRCH)
 
         # Save LS_Table CSV File
