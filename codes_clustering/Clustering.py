@@ -224,7 +224,7 @@ class Clustering:
 
         # 아웃라이어 여부 확인
         sorted_distances = np.sort(distances)
-        epsilon = sorted_distances[int(len(sorted_distances) * 0.7)]
+        epsilon = sorted_distances[int(len(sorted_distances) * 0.9)]
         outliers = np.where(sorted_distances > epsilon)[0]
         cluster_labels = list(cluster_labels)
 

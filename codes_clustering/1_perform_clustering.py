@@ -5,8 +5,8 @@ MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
 MOM_merged_df.set_index('Firm Name', inplace=True)
 MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
 
-# hyper parameter K(50,75,100,200,300,400,500,600,700) should be tested manually.(paper follow)
-K_mean_Save = True
+# hyper parameter K(3, 5, 10, 25, 50, 75, 100, 200, 300) should be tested manually.(paper follow) Done!
+K_mean_Save = False
 if K_mean_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -19,7 +19,7 @@ if K_mean_Save:
     outliers_count = 0
     figure = 0
 
-    for i in [50, 75, 100, 200, 300, 400, 500, 600, 700]:
+    for i in [3, 5, 10, 25, 50, 75, 100, 200, 300]:
         file_names.append(f'{i}')
         LS_merged_df = pd.DataFrame()
 
@@ -62,8 +62,8 @@ if K_mean_Save:
     save_and_plot_result('K_mean', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('K_mean', stat_lists, file_names)
 
-# hyper parameter eps percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow)
-dbscan_Save = True
+# hyper parameter eps percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow) Done!
+dbscan_Save = False
 if dbscan_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -106,7 +106,7 @@ if dbscan_Save:
 
             print("Number of clusters is:", len(set(Do_Clustering.DBSCAN_labels)))
 
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df,"_", save=False)
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, "_", save=False)
         cl = int(cl / len(files))
         outliers_count = outliers_count / len(files)
         figure = figure / len(files)
@@ -119,65 +119,8 @@ if dbscan_Save:
     save_and_plot_result('DBSCAN', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('DBSCAN', stat_lists, file_names)
 
-# hyper parameter eps percentile np.arange(0.1, 1, 0.1) should be tested manually.(DBSCAN)
-optics_Save = True
-if optics_Save:
-    file_names = []
-    result_df = pd.DataFrame()
-    stat_lists = []
-
-    input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/OPTICS'
-    files = sorted(filename for filename in os.listdir(input_dir))
-    cl = 0
-    outliers_count = 0
-    figure = 0
-
-    for i in np.arange(0.1, 1, 0.1):
-        file_names.append(f'{i}')
-        LS_merged_df = pd.DataFrame()
-
-        for file in files:
-            print(file)
-            # convert mom_data into PCA_data
-            data = read_and_preprocess_data(input_dir, file)
-            raw = False
-            if not raw:
-                df_combined = generate_PCA_Data(data)
-            else:
-                df_combined = data
-            # Call initial method
-            Do_Clustering = C.Clustering(df_combined)
-            Do_Result_Save = C.ResultCheck(df_combined)
-
-            # Do clustering and get 2D list of cluster index
-            Do_Clustering.perform_OPTICS(i)
-
-            Do_Result_Save.ls_table(Do_Clustering.OPTIC, output_dir, file, save=False, raw=raw)
-
-            LS_merged_df = merge_LS_Table(Do_Result_Save.table, LS_merged_df, file)
-
-            cl += len((set(Do_Clustering.OPTIC_labels)))
-            outliers_count += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
-            figure += Do_Result_Save.count_stock_of_traded()
-
-            print("Number of clusters is:", len(set(Do_Clustering.OPTIC_labels)))
-
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df,"_", save=False)
-        cl = int(cl / len(files))
-        outliers_count = outliers_count / len(files)
-        figure = figure / len(files)
-        stat_list = [cl, 1 - outliers_count, outliers_count, figure]
-        stat_lists.append(stat_list)
-        print(f'avg of clusters: {cl}')
-        print(f'total outliers: {outliers_count}')
-        print(f'number of stock traded: {figure}')
-
-    save_and_plot_result('OPTICS', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
-    save_cluster_info('OPTICS', stat_lists, file_names)
-
-# hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow)
-agglomerative_Save = True
+# hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow) Done!
+agglomerative_Save = False
 if agglomerative_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -220,7 +163,7 @@ if agglomerative_Save:
 
             print("Number of clusters is:", len(set(Do_Clustering.Agglomerative_labels)))
 
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df,"_", save=False)
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, "_", save=False)
         cl = int(cl / len(files))
         outliers_count = outliers_count / len(files)
         figure = figure / len(files)
@@ -233,8 +176,65 @@ if agglomerative_Save:
     save_and_plot_result('Agglomerative', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('Agglomerative', stat_lists, file_names)
 
-# hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(agglomerative)
-hdbscan_Save = True
+# hyper parameter eps percentile np.arange(0.1, 1, 0.1) should be tested manually.(DBSCAN) Done!
+optics_Save = False
+if optics_Save:
+    file_names = []
+    result_df = pd.DataFrame()
+    stat_lists = []
+
+    input_dir = '../files/characteristics'
+    output_dir = '../files/clustering_result/OPTICS'
+    files = sorted(filename for filename in os.listdir(input_dir))
+    cl = 0
+    outliers_count = 0
+    figure = 0
+
+    for i in np.arange(0.1, 1, 0.1):
+        file_names.append(f'{i}')
+        LS_merged_df = pd.DataFrame()
+
+        for file in files:
+            print(file)
+            # convert mom_data into PCA_data
+            data = read_and_preprocess_data(input_dir, file)
+            raw = False
+            if not raw:
+                df_combined = generate_PCA_Data(data)
+            else:
+                df_combined = data
+            # Call initial method
+            Do_Clustering = C.Clustering(df_combined)
+            Do_Result_Save = C.ResultCheck(df_combined)
+
+            # Do clustering and get 2D list of cluster index
+            Do_Clustering.perform_OPTICS(i)
+
+            Do_Result_Save.ls_table(Do_Clustering.OPTIC, output_dir, file, save=False, raw=raw)
+
+            LS_merged_df = merge_LS_Table(Do_Result_Save.table, LS_merged_df, file)
+
+            cl += len((set(Do_Clustering.OPTIC_labels)))
+            outliers_count += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
+            figure += Do_Result_Save.count_stock_of_traded()
+
+            print("Number of clusters is:", len(set(Do_Clustering.OPTIC_labels)))
+
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, "_", save=False)
+        cl = int(cl / len(files))
+        outliers_count = outliers_count / len(files)
+        figure = figure / len(files)
+        stat_list = [cl, 1 - outliers_count, outliers_count, figure]
+        stat_lists.append(stat_list)
+        print(f'avg of clusters: {cl}')
+        print(f'total outliers: {outliers_count}')
+        print(f'number of stock traded: {figure}')
+
+    save_and_plot_result('OPTICS', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
+    save_cluster_info('OPTICS', stat_lists, file_names)
+
+# hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(agglomerative) Done!
+hdbscan_Save = False
 if hdbscan_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -277,7 +277,7 @@ if hdbscan_Save:
 
             print("Number of clusters is:", len(set(Do_Clustering.HDBSCAN_labels)))
 
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df,"_", save=False)
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, "_", save=False)
         cl = int(cl / len(files))
         outliers_count = outliers_count / len(files)
         figure = figure / len(files)
@@ -290,7 +290,7 @@ if hdbscan_Save:
     save_and_plot_result('HDBSCAN', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('HDBSCAN', stat_lists, file_names)
 
-# hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(K_mean/agglomerative)
+# hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(K_mean/agglomerative) more..
 birch_Save = True
 if birch_Save:
     file_names = []
@@ -334,7 +334,7 @@ if birch_Save:
 
             print("Number of clusters is:", len(set(Do_Clustering.BIRCH_labels)))
 
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df,"_", save=False)
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, "_", save=False)
         cl = int(cl / len(files))
         outliers_count = outliers_count / len(files)
         figure = figure / len(files)
@@ -347,8 +347,8 @@ if birch_Save:
     save_and_plot_result('BIRCH', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('BIRCH', stat_lists, file_names)
 
-# hyper parameter bandwidth percentile np.range(0.1, 1, 0.1) should be tested manually.(arbitrarily)
-meanshift_Save = True
+# hyper parameter bandwidth percentile np.range(0.1, 1, 0.1) should be tested manually.(arbitrarily) Done!
+meanshift_Save = False
 if meanshift_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -391,7 +391,7 @@ if meanshift_Save:
 
             print("Number of clusters is:", len(set(Do_Clustering.meanshift_labels)))
 
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df,"_", save=False)
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, "_", save=False)
         cl = int(cl / len(files))
         outliers_count = outliers_count / len(files)
         figure = figure / len(files)
@@ -404,8 +404,8 @@ if meanshift_Save:
     save_and_plot_result('meanshift', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('meanshift', stat_lists, file_names)
 
-# hyper parameter n components [3,5,10,20,30,40,50,60,70] should be tested manually.(arbitrarily)
-GMM_Save = True
+# hyper parameter n components [3,5,10,20,30,40,50,60,70] should be tested manually.(arbitrarily) more..
+GMM_Save = False
 if GMM_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -448,7 +448,7 @@ if GMM_Save:
 
             print("Number of clusters is:", len(set(Do_Clustering.Gaussian_labels)))
 
-        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df,"_", save=False)
+        result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, "_", save=False)
         cl = int(cl / len(files))
         outliers_count = outliers_count / len(files)
         figure = figure / len(files)

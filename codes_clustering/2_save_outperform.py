@@ -35,13 +35,13 @@ if K_mean_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_kmeans(500)
+        Do_Clustering.perform_kmeans(25)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.K_Mean)
 
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.K_Mean, output_dir, file, save=True, raw=False)
 
-dbscan_Save = True
+dbscan_Save = False
 if dbscan_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/DBSCAN'
@@ -65,7 +65,7 @@ if dbscan_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.DBSCAN, output_dir, file, save=True, raw=False)
 
-Agglormerative_Save = True
+Agglormerative_Save = False
 if Agglormerative_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/Agglomerative'
@@ -90,7 +90,7 @@ if Agglormerative_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=True, raw=False)
 
-hdbscan_Save = True
+hdbscan_Save = False
 if hdbscan_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/HDBSCAN'
@@ -114,7 +114,7 @@ if hdbscan_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.HDBSCAN, output_dir, file, save=True, raw=False)
 
-optics_Save = True
+optics_Save = False
 if optics_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/OPTICS'
@@ -164,7 +164,7 @@ if birch_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.BIRCH, output_dir, file, save=True, raw=False)
 
-meanshift_Save = True
+meanshift_Save = False
 if meanshift_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/Meanshift'
@@ -183,13 +183,13 @@ if meanshift_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_meanshift(0.9)
+        Do_Clustering.perform_meanshift(0.8)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.meanshift)
 
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.meanshift, output_dir, file, save=True, raw=False)
 
-GMM_Save = True
+GMM_Save = False
 if GMM_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/GMM'
@@ -208,7 +208,7 @@ if GMM_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_GMM(10)
+        Do_Clustering.perform_GMM(50)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Gaussian)
 
         # Save LS_Table CSV File
