@@ -1,11 +1,9 @@
-import pandas as pd
-
 from PCA_and_ETC import *
 
 # turn off warning
 warnings.filterwarnings("ignore")
 
-abnormal = False
+abnormal = True
 if abnormal:
     MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
     MOM_merged_df.set_index('Firm Name', inplace=True)
@@ -57,7 +55,7 @@ if abnormal:
 
         count_numeric_df.T.to_csv(f'../files/abnormal_count_{subdir}.csv')
 
-min_max = False
+min_max = True
 if min_max:
     df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
 
@@ -101,7 +99,6 @@ traded = True
 if traded:
     traded_df = pd.read_csv('../files/traded_DBSCAN.csv')
     traded_df.columns = pd.to_datetime(traded_df.columns, errors='coerce')
-
 
     traded_df.T.plot(kind='bar', figsize=(12, 6))
     plt.xlabel('Date')

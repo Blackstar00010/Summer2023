@@ -147,11 +147,11 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
     result_df.to_csv(os.path.join('../files/result/', f'{clustering_name}_result_original.csv'), index=True)
 
     # drop irrational data (larger than criterion)
-    criterion = np.log(1.5) if apply_log else 1.5
-    result_df = result_df.applymap(lambda x: float('NaN') if abs(x) > criterion else x)
-    result_df = result_df.applymap(
-        lambda x: float('NaN') if x < 1 - 1 / criterion else x) if not apply_log else result_df
-    result_df = result_df.fillna(method='ffill', axis=1)
+    # criterion = np.log(1.5) if apply_log else 1.5
+    # result_df = result_df.applymap(lambda x: float('NaN') if abs(x) > criterion else x)
+    # result_df = result_df.applymap(
+    #     lambda x: float('NaN') if x < 1 - 1 / criterion else x) if not apply_log else result_df
+    # result_df = result_df.fillna(method='ffill', axis=1)
 
     result_modified = pd.DataFrame(
         index=['count', 'annual return mean', 'annual return std', 'monthly return min', 'monthly return max'],
