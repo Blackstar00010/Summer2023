@@ -59,19 +59,19 @@ class cointegration:
         data = self.data.iloc[1:, :]
         pairs = pd.DataFrame(combinations(data.columns, 2))  # 모든 회사 조합
 
-        with Pool(processes=6) as pool:
+        with Pool(processes=5) as pool:
             pairs['pvalue'] = pool.map(self.cointegrate, pairs.values)
         pairs = pd.DataFrame(pairs.loc[pairs.index[pairs['pvalue'] < 0.01], :])
         print('Finished filtering pairs using pvalue!')
 
         spread_df: pd.DataFrame = pairs.apply(lambda x: data[x[0]] - data[x[1]], axis=1)
 
-        with Pool(processes=6) as pool:
+        with Pool(processes=5) as pool:
             spread_df['adf_result'] = pool.map(self.adf_result, spread_df.values)
         spread_df = pd.DataFrame(spread_df.loc[spread_df.index[spread_df['adf_result'] < 0.05], :])
         print('Finished filtering pairs using adf_result!')
 
-        with Pool(processes=6) as pool:
+        with Pool(processes=5) as pool:
             spread_df['kpss_result'] = pool.map(self.kpss_result, spread_df.values)
         spread_df = spread_df.loc[spread_df.index[spread_df['kpss_result'] > 0.05], :]
         print('Finished filtering pairs using kpss_result!')
