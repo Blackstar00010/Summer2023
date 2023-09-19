@@ -30,6 +30,7 @@ for subdir in subdirectories:
     for file in files:
         data = pd.read_csv(os.path.join(directory, file))
         LS_merged_df = merge_LS_Table(data, LS_merged_df, file)
+        LS_merged_df = LS_merged_df[~LS_merged_df.iloc[:,0].duplicated(keep='first')]
 
     result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, subdir, save=False)
 

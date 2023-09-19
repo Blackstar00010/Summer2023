@@ -56,14 +56,10 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     LS_merged_df.columns = MOM_merged_df.columns
 
     if save:
-        # LS_merged_df2= LS_merged_df[(LS_merged_df != 0).any(axis=1)]
-        # firm_list=pd.DataFrame(LS_merged_df2.index)
         LS_merged_df.to_csv(f'../files/LS_merge_{subdir}.csv',index=False)
 
     prod = MOM_merged_df * LS_merged_df
     prod = pd.DataFrame(prod)
-    if subdir == 'Cointegration':
-        prod = prod[~prod.index.duplicated(keep='first')]
 
     # prod index set to df1.index
     prod.set_index(MOM_merged_df.index, inplace=True)
@@ -71,14 +67,6 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     prod.columns = MOM_merged_df.columns
 
     if save:
-        # 각 행별로 최대값과 최소값을 저장할 새로운 DataFrame 생성
-        # max_values = prod.max(axis=1)
-        # min_values = prod.min(axis=1)
-        #
-        # prod2 = pd.DataFrame({'Max': max_values, 'Min': min_values}, index=prod.index)
-        # prod2=prod2[prod2.index.isin(LS_merged_df2.index)]
-        # prod2 = prod2[(prod2['Max'] > 1) | (prod2['Min'] < -0.5)]
-
         prod.to_csv(f'../files/prod_{subdir}.csv')
 
     if True:
@@ -92,7 +80,6 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     non_zero_count = LS_merged_df.astype(bool).sum()
 
     non_zero_count2=pd.DataFrame(non_zero_count).T
-
     non_zero_count2.to_csv(f'../files/traded_{subdir}.csv')
 
 
