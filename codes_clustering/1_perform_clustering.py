@@ -263,13 +263,13 @@ if hdbscan_Save:
             # convert mom_data into PCA_data
             data = read_and_preprocess_data(input_dir, file)
 
-            fundamental=False
+            fundamental=True
             if not fundamental:
                 a=momentum_prefix_finder(data)
                 columns_to_drop = [col for col in data.columns if a not in col]
                 data = data.drop(columns=columns_to_drop)
 
-            raw = True
+            raw = False
             if not raw:
                 df_combined = generate_PCA_Data(data)
             else:
