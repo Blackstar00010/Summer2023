@@ -63,7 +63,7 @@ if K_mean_Save:
     save_cluster_info('K_mean', stat_lists, file_names)
 
 # hyper parameter eps percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow) Done!
-dbscan_Save = True
+dbscan_Save = False
 if dbscan_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -85,13 +85,13 @@ if dbscan_Save:
             # convert mom_data into PCA_data
             data = read_and_preprocess_data(input_dir, file)
 
-            fundamental=False
+            fundamental=True
             if not fundamental:
                 a=momentum_prefix_finder(data)
                 columns_to_drop = [col for col in data.columns if a not in col]
                 data = data.drop(columns=columns_to_drop)
 
-            raw = True
+            raw = False
             if not raw:
                 df_combined = generate_PCA_Data(data)
             else:
@@ -241,7 +241,7 @@ if optics_Save:
     save_cluster_info('OPTICS', stat_lists, file_names)
 
 # hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(agglomerative) Done!
-hdbscan_Save = False
+hdbscan_Save = True
 if hdbscan_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -262,7 +262,14 @@ if hdbscan_Save:
             print(file)
             # convert mom_data into PCA_data
             data = read_and_preprocess_data(input_dir, file)
-            raw = False
+
+            fundamental=False
+            if not fundamental:
+                a=momentum_prefix_finder(data)
+                columns_to_drop = [col for col in data.columns if a not in col]
+                data = data.drop(columns=columns_to_drop)
+
+            raw = True
             if not raw:
                 df_combined = generate_PCA_Data(data)
             else:

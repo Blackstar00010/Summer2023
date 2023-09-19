@@ -22,7 +22,7 @@ if FTSE:
 
 result = pd.read_csv('../files/result/total_result_modified.csv')
 
-new_order=[5,2,0,7,4,6,1,3,8,9]
+new_order=[6,3,0,8,5,7,1,4,2,9,10]
 result=result.reindex(new_order).reset_index(drop=True)
 
 print('profit_factor')
@@ -89,5 +89,18 @@ for i in range(len(result.index)):
 Calmar_ratio['metric'] = 'Calmar'
 print(Calmar_ratio.to_string())
 
-profit_factor = pd.concat([profit_factor, sharpe_ratio, sortino_ratio, MDD, Calmar_ratio], axis=0)
+print('annual mean return')
+mean_return = pd.DataFrame(index=col, columns=result.iloc[:, 0])
+for i in range(len(result.index)):
+    for j in range(len(period)):
+        row = result.iloc[i, period[j]]
+
+        returns=np.exp(np.mean(row) * 12) - 1
+
+        mean_return.iloc[j, i] = returns
+
+mean_return['metric'] = 'return'
+print(mean_return.to_string())
+
+profit_factor = pd.concat([profit_factor, sharpe_ratio, sortino_ratio, MDD, Calmar_ratio,mean_return], axis=0)
 profit_factor.to_csv('../files/result/total.csv', index=True)
