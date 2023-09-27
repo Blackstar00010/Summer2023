@@ -1,7 +1,7 @@
 import Clustering as C
 from PCA_and_ETC import *
 
-Reversal_Save = True
+Reversal_Save = False
 if Reversal_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/Reversal'
@@ -17,7 +17,7 @@ if Reversal_Save:
         # Save LS_Table CSV File
         Do_Result_Save.reversal_table(data, output_dir, file)
 
-K_mean_Save = True
+K_mean_Save = False
 if K_mean_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/K_mean'
@@ -41,7 +41,7 @@ if K_mean_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.K_Mean, output_dir, file, save=True, raw=False)
 
-dbscan_Save = True
+dbscan_Save = False
 if dbscan_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/DBSCAN'
@@ -65,7 +65,7 @@ if dbscan_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.DBSCAN, output_dir, file, save=True, raw=False)
 
-Agglormerative_Save = True
+Agglormerative_Save = False
 if Agglormerative_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/Agglomerative'
@@ -90,7 +90,7 @@ if Agglormerative_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=True, raw=False)
 
-optics_Save = True
+optics_Save = False
 if optics_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/OPTICS'
@@ -115,7 +115,7 @@ if optics_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.OPTIC, output_dir, file, save=True, raw=False)
 
-hdbscan_Save = True
+hdbscan_Save = False
 if hdbscan_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/HDBSCAN'
@@ -139,7 +139,7 @@ if hdbscan_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.HDBSCAN, output_dir, file, save=True, raw=False)
 
-meanshift_Save = True
+meanshift_Save = False
 if meanshift_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/Meanshift'

@@ -3,7 +3,7 @@ from PCA_and_ETC import *
 from sklearn.cluster import *
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial import distance
-
+import random
 
 class Clustering:
     def __init__(self, data: pd.DataFrame):
@@ -42,8 +42,7 @@ class Clustering:
 
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
-        # ToDo: random
-        kmeans = KMeans(n_clusters=k_value, n_init=10, max_iter=500, random_state=0).fit(
+        kmeans = KMeans(init='k-means++', n_clusters=k_value, n_init=10, max_iter=500, random_state=random.randint(1,100)).fit(
             self.PCA_Data)
         cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
         self.test = kmeans
@@ -85,12 +84,12 @@ class Clustering:
 
         # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
         # 1번째는 자기자신이니까 +1
-        nbrs = NearestNeighbors(n_neighbors=ms + 1, p=2).fit(self.PCA_Data)
+        nbrs = NearestNeighbors(n_neighbors=ms + 1, p=1).fit(self.PCA_Data)
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         avg_distances = np.mean(distances[:, 1:], axis=1)
         eps = np.percentile(avg_distances, threshold * 100)
 
-        dbscan = DBSCAN(min_samples=ms, eps=eps, metric='l2').fit(self.PCA_Data)
+        dbscan = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(self.PCA_Data)
         cluster_labels = dbscan.labels_
         self.test = dbscan
         self.DBSCAN_labels = cluster_labels
@@ -112,12 +111,12 @@ class Clustering:
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
-        nbrs = NearestNeighbors(n_neighbors=3, p=2).fit(self.PCA_Data)
+        nbrs = NearestNeighbors(n_neighbors=3, p=1).fit(self.PCA_Data)
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         avg_distances = np.mean(distances[:, 1:], axis=1)
         outlier_distance = np.percentile(avg_distances, threshold * 100)
 
-        agglo = AgglomerativeClustering(n_clusters=None, metric='euclidean', linkage='average',
+        agglo = AgglomerativeClustering(n_clusters=None, metric='manhattan', linkage='average',
                                         distance_threshold=outlier_distance).fit(self.PCA_Data)
         cluster_labels = agglo.labels_
         self.test = agglo
@@ -149,13 +148,20 @@ class Clustering:
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
+        ms = int(math.log(len(self.PCA_Data)))
+
+        nbrs = NearestNeighbors(n_neighbors=ms + 1, p=1).fit(self.PCA_Data)
+        distances, indices = nbrs.kneighbors(self.PCA_Data)
+        avg_distances = np.mean(distances[:, 1:], axis=1)
+        eps = np.percentile(avg_distances, threshold * 100)
+
         nbrs = NearestNeighbors(n_neighbors=3, p=1).fit(self.PCA_Data)
         distances, indices = nbrs.kneighbors(self.PCA_Data)
-        avg_distances = np.max(distances[:, 1:], axis=1)
+        avg_distances = np.mean(distances[:, 1:], axis=1)
         max_d = np.percentile(avg_distances, threshold * 100)
 
         # min_cluster_size는 silhouette score가 가장 높은 것 선정. 2부터 5까지 실험.
-        Hdbscan = HDBSCAN(min_cluster_size=2, cluster_selection_epsilon=max_d).fit(self.PCA_Data)
+        Hdbscan = HDBSCAN(min_cluster_size=ms, cluster_selection_epsilon=eps).fit(self.PCA_Data)
         cluster_labels = Hdbscan.labels_
         self.test = Hdbscan
         self.HDBSCAN_labels = cluster_labels
@@ -224,7 +230,7 @@ class Clustering:
 
         # 아웃라이어 여부 확인
         sorted_distances = np.sort(distances)
-        epsilon = sorted_distances[int(len(sorted_distances) * 0.5)]
+        epsilon = sorted_distances[int(len(sorted_distances) * 0.3)]
         outliers = np.where(sorted_distances > epsilon)[0]
         cluster_labels = list(cluster_labels)
 
@@ -251,7 +257,7 @@ class Clustering:
 
         # The following bandwidth can be automatically detected using
         bandwidth = estimate_bandwidth(self.PCA_Data, quantile=quantile)
-        ms = MeanShift(bandwidth=bandwidth, cluster_all=False).fit(self.PCA_Data)
+        ms = MeanShift(bandwidth=bandwidth, bin_seeding=True, cluster_all=False).fit(self.PCA_Data)
         cluster_labels = ms.labels_
         self.test = ms
         self.meanshift_labels = cluster_labels
@@ -293,7 +299,7 @@ class Clustering:
         # 각 데이터 포인트의 확률 값 계산
         # 확률 값의 percentiles 계산 (예시로 하위 5% 이하를 outlier로 판단)
         probabilities = gmm.score_samples(self.PCA_Data)
-        threshold = np.percentile(probabilities, 65)
+        threshold = np.percentile(probabilities, 60)
 
         outliers = []
         for i, probability in enumerate(probabilities):

@@ -228,33 +228,33 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
 
     if not new_Plot:
         # Calculate the cumulative product
-        # result_df.iloc[:, :] = result_df.iloc[:, :].cumsum(axis=1) if apply_log else result_df.iloc[:, :].cumprod(
-        #     axis=1)
-        #
-        # plt.figure(figsize=(10, 6))
-        # for i in range(len(result_df)):
-        #     plt.plot(result_df.columns[1:-7], result_df.iloc[i, 1:-7].fillna(method='ffill'),
-        #              label=result_df.iloc[i, 0])
-        #
-        # plt.title('RETURN')
-        # plt.xlabel('Date')
-        # plt.ylabel('Cumulative Value')
-        #
-        # plt.xticks(rotation=45)
-        # plt.legend(result_df.index)  # Add a legend to distinguish different lines
-        # plt.tight_layout()
-        # plt.show()
+        result_df.iloc[:, :] = result_df.iloc[:, :].cumsum(axis=1) if apply_log else result_df.iloc[:, :].cumprod(
+            axis=1)
 
-        # Plot a graph for each row
+        plt.figure(figsize=(10, 6))
         for i in range(len(result_df)):
-            plt.figure(figsize=(10, 6))
-            plt.plot(result_df.columns[1:-7], result_df.iloc[i, 1:-7].fillna(method='ffill'))
-            plt.title(result_df.index[i])
-            plt.xlabel('Date')
-            plt.ylabel('Average Value')
-            plt.xticks(rotation=45)
-            plt.tight_layout()
-            plt.show()
+            plt.plot(result_df.columns[1:-7], result_df.iloc[i, 1:-7].fillna(method='ffill'),
+                     label=result_df.iloc[i, 0])
+
+        plt.title('RETURN')
+        plt.xlabel('Date')
+        plt.ylabel('Cumulative Value')
+
+        plt.xticks(rotation=45)
+        plt.legend(result_df.index)  # Add a legend to distinguish different lines
+        plt.tight_layout()
+        plt.show()
+
+        # # Plot a graph for each row
+        # for i in range(len(result_df)):
+        #     plt.figure(figsize=(10, 6))
+        #     plt.plot(result_df.columns[1:-7], result_df.iloc[i, 1:-7].fillna(method='ffill'))
+        #     plt.title(result_df.index[i])
+        #     plt.xlabel('Date')
+        #     plt.ylabel('Average Value')
+        #     plt.xticks(rotation=45)
+        #     plt.tight_layout()
+        #     plt.show()
 
 
 def save_cluster_info(clustering_name, stat_list: list, file_names):
