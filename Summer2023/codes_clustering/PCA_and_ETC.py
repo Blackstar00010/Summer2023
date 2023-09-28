@@ -178,17 +178,19 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
 
 
         color_dict = {
-            'Cointegration': 'lightcoral',  # Lighter shade of red
+            'Cointegration': 'green',  # Standard green
+
             'K_mean': 'red',  # Standard red
             'DBSCAN': 'firebrick',  # Darker shade of red
             'Agglomerative': 'darkred',  # Darkest shade of red
 
-            'HDBSCAN': 'lightskyblue',  # Lighter shade of blue
+            'MiniBatch_K_mean': 'blue',   # Standard blue
+            'HDBSCAN': 'mediumblue',  # Darker shade of blue
+            'BIRCH': 'navy',  # Darkest shade blue
+
             'OPTICS': 'deepskyblue',  # Bright blue
-            'BIRCH': 'royalblue',  # Standard blue
-            'Meanshift': 'blue',  # Darker shade of blue
-            'GMM': 'midnightblue',  # Darkest shade of blue
-            'Bisecting': 'cyan',
+            'Meanshift': 'royalblue',  # Darker shade of skyblue
+            'GMM': 'midnightblue',  # Darkest shade of skyblue
 
             'Reversal': 'lightgrey',  # Lighter shade of grey
             'FTSE 100': 'grey'  # Standard grey

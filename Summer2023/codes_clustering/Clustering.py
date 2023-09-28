@@ -5,6 +5,7 @@ from sklearn.neighbors import NearestNeighbors
 from scipy.spatial import distance
 import random
 
+
 class Clustering:
     def __init__(self, data: pd.DataFrame):
         self.test = None
@@ -14,44 +15,51 @@ class Clustering:
         self.K_Mean = []
         self.DBSCAN = []
         self.Agglomerative = []
-        self.Gaussian = []
-        self.OPTIC = []
+
+        self.minibatch_K_mean = []
         self.HDBSCAN = []
-        self.meanshift = []
         self.BIRCH = []
-        self.Bisecting=[]
+
+        self.OPTIC = []
+        self.Gaussian = []
+        self.meanshift = []
 
         self.K_Mean_labels = []
         self.DBSCAN_labels = []
         self.Agglomerative_labels = []
-        self.Gaussian_labels = []
-        self.OPTIC_labels = []
+
+        self.minibatch_K_mean_labels = []
         self.HDBSCAN_labels = []
-        self.meanshift_labels = []
         self.BIRCH_labels = []
-        self.Bisecting_labels=[]
+
+        self.OPTIC_labels = []
+        self.Gaussian_labels = []
+        self.meanshift_labels = []
 
     def perform_kmeans(self, k_value: int, alpha: float = 0.5):
         """
-        :param k_value: Number of Cluster
-        :param alpha:
-        :return:
+        :param k_value: Number of Clusters
+        :param alpha: outlier threshold
+        :return: clustering result
         """
-        n_sample = self.PCA_Data.shape[0]  # number of values in the file
-        # Skip if the number of values are less than k
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
+        # sample 갯수가 K보다 작은 경우 k_value = n_sample
+        n_sample = self.PCA_Data.shape[0]
         if n_sample <= k_value:
             k_value = n_sample
 
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
-
-        kmeans = KMeans(init='k-means++', n_clusters=k_value, n_init=10, max_iter=500, random_state=random.randint(1,100)).fit(
-            self.PCA_Data)
-        cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
+        # Clustering
+        kmeans = KMeans(init='k-means++', n_clusters=k_value, n_init=10, max_iter=500,
+                        random_state=random.randint(1, 100)).fit(self.PCA_Data)
+        cluster_labels = kmeans.labels_
         self.test = kmeans
         self.K_Mean_labels = cluster_labels
 
-        distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[cluster_labels[i]]) for
-                                    i in range(len(self.PCA_Data))]
+        # Outlier Detection
+        distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[cluster_labels[i]])
+                                    for i in range(len(self.PCA_Data))]
 
         nbrs = NearestNeighbors(n_neighbors=3, p=2).fit(self.PCA_Data)
         distances, indices = nbrs.kneighbors(self.PCA_Data)
@@ -69,6 +77,7 @@ class Clustering:
 
         clusters_indices.insert(0, list(outliers))
 
+        # number index를 firm name으로 바꾸어 2차원 리스트로 저장.
         final_cluster = [[] for _ in clusters_indices]
         for i, num in enumerate(clusters_indices):
             for j in num:
@@ -77,66 +86,23 @@ class Clustering:
         final_cluster = [cluster for cluster in final_cluster if cluster]
         self.K_Mean = final_cluster
 
-    def perform_Bisectingkmeans(self, k_value: int, alpha: float = 0.5):
-        """
-        :param k_value: Number of Cluster
-        :param alpha:
-        :return:
-        """
-        n_sample = self.PCA_Data.shape[0]  # number of values in the file
-        # Skip if the number of values are less than k
-        if n_sample <= k_value:
-            k_value = n_sample
-
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
-
-        kmeans = BisectingKMeans(init='k-means++', n_clusters=k_value, n_init=10, max_iter=500, random_state=random.randint(1,100)).fit(
-            self.PCA_Data)
-        cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
-        self.test = kmeans
-        self.Bisecting_labels = cluster_labels
-
-        distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[cluster_labels[i]]) for
-                                    i in range(len(self.PCA_Data))]
-
-        nbrs = NearestNeighbors(n_neighbors=3, p=2).fit(self.PCA_Data)
-        distances, indices = nbrs.kneighbors(self.PCA_Data)
-        nearest_neighbor_distances = distances[:, 1]
-
-        sorted_nearest_neighbor_distances = sorted(nearest_neighbor_distances)
-        epsilon = sorted_nearest_neighbor_distances[int(len(sorted_nearest_neighbor_distances) * alpha)]
-        outliers = [i for i, dist in enumerate(distance_to_own_centroid) if dist < epsilon]
-
-        clusters_indices = [[] for _ in range(k_value)]
-        for i, label in enumerate(cluster_labels):
-            if i in outliers:
-                continue
-            clusters_indices[label].append(i)
-
-        clusters_indices.insert(0, list(outliers))
-
-        final_cluster = [[] for _ in clusters_indices]
-        for i, num in enumerate(clusters_indices):
-            for j in num:
-                final_cluster[i].append(self.index[j])
-
-        final_cluster = [cluster for cluster in final_cluster if cluster]
-        self.Bisecting = final_cluster
-
     def perform_DBSCAN(self, threshold: float):
+        """
+        :param threshold: outlier threshold
+        :return: clustering result
+        """
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
-        # Exclude the first column (firm names) & Exclude MOM_1
-
-        ms = int(math.log(len(self.PCA_Data)))
 
         # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
-        # 1번째는 자기자신이니까 +1
+        # 1번째는 자기자신이니까 ms+1
+        ms = int(math.log(len(self.PCA_Data)))
         nbrs = NearestNeighbors(n_neighbors=ms + 1, p=1).fit(self.PCA_Data)
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         avg_distances = np.mean(distances[:, 1:], axis=1)
         eps = np.percentile(avg_distances, threshold * 100)
 
+        # Clustering
         dbscan = DBSCAN(min_samples=ms, eps=eps, metric='manhattan').fit(self.PCA_Data)
         cluster_labels = dbscan.labels_
         self.test = dbscan
@@ -156,22 +122,28 @@ class Clustering:
         self.DBSCAN = clust
 
     def perform_HA(self, threshold: float):
+        """
+        :param threshold: outlier threshold
+        :return: clustering result
+        """
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
+        # 이웃한 두 개 점 사이 거리의 평균 계산
         nbrs = NearestNeighbors(n_neighbors=3, p=1).fit(self.PCA_Data)
         distances, indices = nbrs.kneighbors(self.PCA_Data)
         avg_distances = np.mean(distances[:, 1:], axis=1)
         outlier_distance = np.percentile(avg_distances, threshold * 100)
 
+        # Clustering
         agglo = AgglomerativeClustering(n_clusters=None, metric='manhattan', linkage='average',
                                         distance_threshold=outlier_distance).fit(self.PCA_Data)
         cluster_labels = agglo.labels_
         self.test = agglo
         self.Agglomerative_labels = cluster_labels
 
+        # Outlier Detection
         outlier = []
-
         for i, avg_distance in enumerate(avg_distances):
             if avg_distance > outlier_distance:
                 outlier.append(i)
@@ -192,23 +164,72 @@ class Clustering:
 
         self.Agglomerative = clust
 
-    def perform_HDBSCAN(self, threshold):
+    def perform_minibatchkmeans(self, k_value: int, alpha: float = 0.5):
+        """
+        :param k_value: Number of Cluster
+        :param alpha: Outlier threshold
+        :return: clustering result
+        """
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
-        ms = int(math.log(len(self.PCA_Data)))
+        # sample 갯수가 K보다 작은 경우 k_value = n_sample
+        n_sample = self.PCA_Data.shape[0]
+        if n_sample <= k_value:
+            k_value = n_sample
 
+
+        # Clustering
+        kmeans = MiniBatchKMeans(init='k-means++', n_clusters=k_value, n_init=10, max_iter=500,
+                                 random_state=random.randint(1, 100)).fit(self.PCA_Data)
+        cluster_labels = kmeans.labels_
+        self.test = kmeans
+        self.minibatch_K_mean_labels = cluster_labels
+
+        # Outlier Detection
+        distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[cluster_labels[i]])
+                                    for i in range(len(self.PCA_Data))]
+
+        nbrs = NearestNeighbors(n_neighbors=3, p=2).fit(self.PCA_Data)
+        distances, indices = nbrs.kneighbors(self.PCA_Data)
+        nearest_neighbor_distances = distances[:, 1]
+
+        sorted_nearest_neighbor_distances = sorted(nearest_neighbor_distances)
+        epsilon = sorted_nearest_neighbor_distances[int(len(sorted_nearest_neighbor_distances) * alpha)]
+        outliers = [i for i, dist in enumerate(distance_to_own_centroid) if dist < epsilon]
+
+        clusters_indices = [[] for _ in range(k_value)]
+        for i, label in enumerate(cluster_labels):
+            if i in outliers:
+                continue
+            clusters_indices[label].append(i)
+        clusters_indices.insert(0, list(outliers))
+
+        # number index를 firm name으로 바꾸어 2차원 리스트로 저장.
+        final_cluster = [[] for _ in clusters_indices]
+        for i, num in enumerate(clusters_indices):
+            for j in num:
+                final_cluster[i].append(self.index[j])
+
+        final_cluster = [cluster for cluster in final_cluster if cluster]
+        self.minibatch_K_mean = final_cluster
+
+    def perform_HDBSCAN(self, threshold):
+        """
+        :param threshold: Outlier threshold
+        :return: clustering result
+        """
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
+        # 각 데이터 포인트의 MinPts 개수의 최근접 이웃들의 거리의 평균 계산
+        ms = int(math.log(len(self.PCA_Data)))
         nbrs = NearestNeighbors(n_neighbors=ms + 1, p=1).fit(self.PCA_Data)
         distances, indices = nbrs.kneighbors(self.PCA_Data)
-        avg_distances = np.mean(distances[:, 1:], axis=1)
+        avg_distances = np.max(distances[:, 1:], axis=1)
         eps = np.percentile(avg_distances, threshold * 100)
 
-        nbrs = NearestNeighbors(n_neighbors=3, p=1).fit(self.PCA_Data)
-        distances, indices = nbrs.kneighbors(self.PCA_Data)
-        avg_distances = np.mean(distances[:, 1:], axis=1)
-        max_d = np.percentile(avg_distances, threshold * 100)
-
-        # min_cluster_size는 silhouette score가 가장 높은 것 선정. 2부터 5까지 실험.
+        # Clustering
         Hdbscan = HDBSCAN(min_cluster_size=ms, cluster_selection_epsilon=eps).fit(self.PCA_Data)
         cluster_labels = Hdbscan.labels_
         self.test = Hdbscan
@@ -227,18 +248,60 @@ class Clustering:
 
         self.HDBSCAN = clust
 
+    def perform_BIRCH(self, threshold):
+        """
+        :param threshold: Outlier threshold
+        :return: clustering result
+        """
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
+        # 이웃한 두 개 점 사이 거리의 평균 계산
+        nbrs = NearestNeighbors(n_neighbors=3, p=1).fit(self.PCA_Data)
+        distances, indices = nbrs.kneighbors(self.PCA_Data)
+        avg_distances = np.mean(distances[:, 1:], axis=1)
+        outlier_distance = np.percentile(avg_distances, threshold * 100)
+
+        # Clustering
+        birch = Birch(threshold=outlier_distance, n_clusters=None).fit(self.PCA_Data)
+        cluster_labels = birch.labels_
+        self.test = birch
+        self.BIRCH_labels = cluster_labels
+
+        # Outlier Detection
+        outlier = []
+        for i, avg_distance in enumerate(avg_distances):
+            if avg_distance > outlier_distance:
+                outlier.append(i)
+
+        for i, cluster_label in enumerate(cluster_labels):
+            if i in outlier:
+                cluster_labels[i] = -1
+
+        unique_labels = sorted(list(set(cluster_labels)))
+
+        clust = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(cluster_labels):
+            clust[unique_labels.index(cluster_label)].append(self.index[i])
+
+        # outlier가 없으면 빈리스트 추가
+        if -1 not in unique_labels:
+            clust.insert(0, [])
+
+        self.BIRCH = clust
+
     def perform_OPTICS(self, threshold):
+        """
+        :param threshold: outlier threshold
+        :return: clustering result
+        """
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
         ms = int(math.log(len(self.PCA_Data)))
 
-        nbrs = NearestNeighbors(n_neighbors=ms + 1, p=1).fit(self.PCA_Data)
-        distances, indices = nbrs.kneighbors(self.PCA_Data)
-        avg_distances = np.mean(distances[:, 1:], axis=1)
-        eps = np.percentile(avg_distances, threshold * 100)
-
-        optics = OPTICS(cluster_method='dbscan', min_samples=ms, eps=eps, min_cluster_size=0.1, metric='manhattan').fit(
+        # Clustering
+        optics = OPTICS(cluster_method='xi', xi=threshold, min_cluster_size=ms, metric='manhattan').fit(
             self.PCA_Data)
         labels = optics.labels_
         self.test = optics
@@ -256,58 +319,11 @@ class Clustering:
 
         self.OPTIC = clust
 
-    def perform_BIRCH(self, threshold):
-        self.PCA_Data = pd.DataFrame(self.PCA_Data)
-        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
-
-        nbrs = NearestNeighbors(n_neighbors=3, p=1).fit(self.PCA_Data)
-        distances, indices = nbrs.kneighbors(self.PCA_Data)
-        avg_distances = np.mean(distances[:, 1:], axis=1)
-        max_d = np.percentile(avg_distances, threshold * 100)
-
-        ms = int(math.log(len(self.PCA_Data)))
-
-        nbrs = NearestNeighbors(n_neighbors=ms + 1, p=1).fit(self.PCA_Data)
-        distances, indices = nbrs.kneighbors(self.PCA_Data)
-        avg_distances = np.mean(distances[:, 1:], axis=1)
-        eps = np.percentile(avg_distances, threshold * 100)
-
-
-        birch = Birch(threshold=eps, n_clusters=None).fit(self.PCA_Data)
-        cluster_labels = birch.labels_
-        self.test = birch
-        self.BIRCH_labels = cluster_labels
-
-        # # 클러스터의 중심
-        # cluster_centers = birch.subcluster_centers_
-        #
-        # # 클러스터 중심과의 거리 계산
-        # distances = np.linalg.norm(self.PCA_Data - cluster_centers[cluster_labels], axis=1)
-        #
-        # # 아웃라이어 여부 확인
-        # sorted_distances = np.sort(distances)
-        # epsilon = sorted_distances[int(len(sorted_distances) * 0)]
-        # outliers = np.where(sorted_distances > epsilon)[0]
-        # cluster_labels = list(cluster_labels)
-        #
-        # for i, cluster_label in enumerate(cluster_labels):
-        #     if i in outliers:
-        #         cluster_labels[i] = -1
-
-        # Get the unique cluster labels
-        unique_labels = sorted(list(set(cluster_labels)))
-
-        clust = [[] for _ in unique_labels]
-        for i, cluster_label in enumerate(cluster_labels):
-            clust[unique_labels.index(cluster_label)].append(self.index[i])
-
-        # outlier가 없으면 빈리스트 추가
-        if -1 not in unique_labels:
-            clust.insert(0, [])
-
-        self.BIRCH = clust
-
     def perform_meanshift(self, quantile):
+        """
+        :param quantile: outlier threshold
+        :return: clustering result
+        """
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
@@ -332,13 +348,15 @@ class Clustering:
         self.meanshift = clusters
 
     def perform_GMM(self, n_components: float):
+        """
+        :param n_components: Number of clusters
+        :return: clustering result
+        """
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
-        type = find_optimal_GMM_covariance_type(self.PCA_Data)
-
         # 1. Gaussian Mixture Model
-        gmm = GaussianMixture(n_components=n_components, init_params='k-means++', covariance_type=type).fit(
+        gmm = GaussianMixture(n_components=n_components, init_params='k-means++', covariance_type='full').fit(
             self.PCA_Data)
         cluster_labels = gmm.predict(self.PCA_Data)
         self.test = gmm
@@ -352,8 +370,6 @@ class Clustering:
         clusters = [sublist for sublist in clusters if sublist]
 
         # Outliers
-        # 각 데이터 포인트의 확률 값 계산
-        # 확률 값의 percentiles 계산 (예시로 하위 5% 이하를 outlier로 판단)
         probabilities = gmm.score_samples(self.PCA_Data)
         threshold = np.percentile(probabilities, 60)
 

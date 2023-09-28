@@ -41,30 +41,6 @@ if K_mean_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.K_Mean, output_dir, file, save=True, raw=False)
 
-Bisecting_Save = False
-if Bisecting_Save:
-    input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/Bisecting'
-    files = sorted(filename for filename in os.listdir(input_dir))
-    outliers_count = 0
-    for file in files:
-        print(file)
-
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        df_combined = generate_PCA_Data(data)
-
-        # Call initial method
-        Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.ResultCheck(df_combined)
-
-        # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_Bisectingkmeans(25)
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Bisecting)
-
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.Bisecting, output_dir, file, save=True, raw=False)
-
 dbscan_Save = False
 if dbscan_Save:
     input_dir = '../files/characteristics'
@@ -114,13 +90,12 @@ if Agglormerative_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=True, raw=False)
 
-optics_Save = False
-if optics_Save:
+MiniBatch_Save = True
+if MiniBatch_Save:
     input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/OPTICS'
+    output_dir = '../files/clustering_result/MiniBatch_K_mean'
     files = sorted(filename for filename in os.listdir(input_dir))
     outliers_count = 0
-
     for file in files:
         print(file)
 
@@ -133,13 +108,13 @@ if optics_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_OPTICS(0.9)
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
+        Do_Clustering.perform_minibatchkmeans(75)
+        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.minibatch_K_mean)
 
         # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.OPTIC, output_dir, file, save=True, raw=False)
+        Do_Result_Save.ls_table(Do_Clustering.minibatch_K_mean, output_dir, file, save=True, raw=False)
 
-hdbscan_Save = False
+hdbscan_Save = True
 if hdbscan_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/HDBSCAN'
@@ -163,7 +138,57 @@ if hdbscan_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.HDBSCAN, output_dir, file, save=True, raw=False)
 
-meanshift_Save = False
+birch_Save = True
+if birch_Save:
+    input_dir = '../files/characteristics'
+    output_dir = '../files/clustering_result/BIRCH'
+    files = sorted(filename for filename in os.listdir(input_dir))
+    outliers_count = 0
+
+    for file in files:
+        print(file)
+
+        # convert mom_data into PCA_data
+        data = read_and_preprocess_data(input_dir, file)
+        df_combined = generate_PCA_Data(data)
+
+        # Call initial method
+        Do_Clustering = C.Clustering(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
+
+        # Do clustering and get 2D list of cluster index
+        Do_Clustering.perform_BIRCH(0.9)
+        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.BIRCH)
+
+        # Save LS_Table CSV File
+        Do_Result_Save.ls_table(Do_Clustering.BIRCH, output_dir, file, save=True, raw=False)
+
+optics_Save = True
+if optics_Save:
+    input_dir = '../files/characteristics'
+    output_dir = '../files/clustering_result/OPTICS'
+    files = sorted(filename for filename in os.listdir(input_dir))
+    outliers_count = 0
+
+    for file in files:
+        print(file)
+
+        # convert mom_data into PCA_data
+        data = read_and_preprocess_data(input_dir, file)
+        df_combined = generate_PCA_Data(data)
+
+        # Call initial method
+        Do_Clustering = C.Clustering(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
+
+        # Do clustering and get 2D list of cluster index
+        Do_Clustering.perform_OPTICS(0.02)
+        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
+
+        # Save LS_Table CSV File
+        Do_Result_Save.ls_table(Do_Clustering.OPTIC, output_dir, file, save=True, raw=False)
+
+meanshift_Save = True
 if meanshift_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/Meanshift'
@@ -188,32 +213,7 @@ if meanshift_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.meanshift, output_dir, file, save=True, raw=False)
 
-birch_Save = True
-if birch_Save:
-    input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/BIRCH'
-    files = sorted(filename for filename in os.listdir(input_dir))
-    outliers_count = 0
-
-    for file in files:
-        print(file)
-
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
-        df_combined = generate_PCA_Data(data)
-
-        # Call initial method
-        Do_Clustering = C.Clustering(df_combined)
-        Do_Result_Save = C.ResultCheck(df_combined)
-
-        # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_BIRCH(0.2)
-        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.BIRCH)
-
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(Do_Clustering.BIRCH, output_dir, file, save=True, raw=False)
-
-GMM_Save = False
+GMM_Save = True
 if GMM_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/GMM'
