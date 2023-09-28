@@ -188,6 +188,7 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
             'BIRCH': 'royalblue',  # Standard blue
             'Meanshift': 'blue',  # Darker shade of blue
             'GMM': 'midnightblue',  # Darkest shade of blue
+            'Bisecting': 'cyan',
 
             'Reversal': 'lightgrey',  # Lighter shade of grey
             'FTSE 100': 'grey'  # Standard grey

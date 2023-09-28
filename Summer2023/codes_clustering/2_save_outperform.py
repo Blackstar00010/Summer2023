@@ -41,6 +41,30 @@ if K_mean_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.K_Mean, output_dir, file, save=True, raw=False)
 
+Bisecting_Save = False
+if Bisecting_Save:
+    input_dir = '../files/characteristics'
+    output_dir = '../files/clustering_result/Bisecting'
+    files = sorted(filename for filename in os.listdir(input_dir))
+    outliers_count = 0
+    for file in files:
+        print(file)
+
+        # convert mom_data into PCA_data
+        data = read_and_preprocess_data(input_dir, file)
+        df_combined = generate_PCA_Data(data)
+
+        # Call initial method
+        Do_Clustering = C.Clustering(df_combined)
+        Do_Result_Save = C.ResultCheck(df_combined)
+
+        # Do clustering and get 2D list of cluster index
+        Do_Clustering.perform_Bisectingkmeans(25)
+        outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Bisecting)
+
+        # Save LS_Table CSV File
+        Do_Result_Save.ls_table(Do_Clustering.Bisecting, output_dir, file, save=True, raw=False)
+
 dbscan_Save = False
 if dbscan_Save:
     input_dir = '../files/characteristics'
@@ -189,7 +213,7 @@ if birch_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.BIRCH, output_dir, file, save=True, raw=False)
 
-GMM_Save = True
+GMM_Save = False
 if GMM_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/GMM'

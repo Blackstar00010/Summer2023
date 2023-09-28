@@ -108,3 +108,94 @@ if traded:
     plt.xticks([])
     plt.legend().set_visible(False)
     plt.show()
+
+
+ def perform_kmeans(self, k_value: int, alpha: float = 0.5):
+
+
+
+        distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[cluster_labels[i]]) for
+                                    i in range(len(self.PCA_Data))]
+
+        nbrs = NearestNeighbors(n_neighbors=3, p=2).fit(self.PCA_Data)
+        distances, indices = nbrs.kneighbors(self.PCA_Data)
+        nearest_neighbor_distances = distances[:, 1]
+
+        sorted_nearest_neighbor_distances = sorted(nearest_neighbor_distances)
+        epsilon = sorted_nearest_neighbor_distances[int(len(sorted_nearest_neighbor_distances) * alpha)]
+        outliers = [i for i, dist in enumerate(distance_to_own_centroid) if dist < epsilon]
+
+        clusters_indices = [[] for _ in range(k_value)]
+        for i, label in enumerate(cluster_labels):
+            if i in outliers:
+                continue
+            clusters_indices[label].append(i)
+
+        clusters_indices.insert(0, list(outliers))
+
+        final_cluster = [[] for _ in clusters_indices]
+        for i, num in enumerate(clusters_indices):
+            for j in num:
+                final_cluster[i].append(self.index[j])
+
+        final_cluster = [cluster for cluster in final_cluster if cluster]
+        self.K_Mean = final_cluster
+
+    def perform_BIRCH(self, threshold):
+        self.PCA_Data = pd.DataFrame(self.PCA_Data)
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
+        nbrs = NearestNeighbors(n_neighbors=3, p=2).fit(self.PCA_Data)
+        distances, indices = nbrs.kneighbors(self.PCA_Data)
+        avg_distances = np.mean(distances[:, 1:], axis=1)
+        max_d = np.percentile(avg_distances, threshold * 100)
+
+        birch = Birch(threshold=max_d, n_clusters=None).fit(self.PCA_Data)
+        cluster_labels = birch.labels_
+        self.test = birch
+        self.BIRCH_labels = cluster_labels
+
+        distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], birch.cluster_centers_[cluster_labels[i]]) for
+                                    i in range(len(self.PCA_Data))]
+
+        nbrs = NearestNeighbors(n_neighbors=3, p=2).fit(self.PCA_Data)
+        distances, indices = nbrs.kneighbors(self.PCA_Data)
+        nearest_neighbor_distances = distances[:, 1]
+
+        sorted_nearest_neighbor_distances = sorted(nearest_neighbor_distances)
+        epsilon = sorted_nearest_neighbor_distances[int(len(sorted_nearest_neighbor_distances) * 0.5)]
+        outliers = [i for i, dist in enumerate(distance_to_own_centroid) if dist < epsilon]
+
+        unique_labels = sorted(list(set(cluster_labels)))
+
+        clusters_indices = [[] for _ in range(len(unique_labels))]
+        for i, label in enumerate(cluster_labels):
+            if i in outliers:
+                continue
+            clusters_indices[label].append(i)
+
+        clusters_indices.insert(0, list(outliers))
+
+        final_cluster = [[] for _ in clusters_indices]
+        for i, num in enumerate(clusters_indices):
+            for j in num:
+                final_cluster[i].append(self.index[j])
+
+        final_cluster = [cluster for cluster in final_cluster if cluster]
+        self.BIRCH = final_cluster
+
+
+
+
+        # Get the unique cluster labels
+
+
+        clust = [[] for _ in unique_labels]
+        for i, cluster_label in enumerate(cluster_labels):
+            clust[unique_labels.index(cluster_label)].append(self.index[i])
+
+        # outlier가 없으면 빈리스트 추가
+        if -1 not in unique_labels:
+            clust.insert(0, [])
+
+

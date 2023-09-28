@@ -19,6 +19,7 @@ class Clustering:
         self.HDBSCAN = []
         self.meanshift = []
         self.BIRCH = []
+        self.Bisecting=[]
 
         self.K_Mean_labels = []
         self.DBSCAN_labels = []
@@ -28,6 +29,7 @@ class Clustering:
         self.HDBSCAN_labels = []
         self.meanshift_labels = []
         self.BIRCH_labels = []
+        self.Bisecting_labels=[]
 
     def perform_kmeans(self, k_value: int, alpha: float = 0.5):
         """
@@ -74,6 +76,52 @@ class Clustering:
 
         final_cluster = [cluster for cluster in final_cluster if cluster]
         self.K_Mean = final_cluster
+
+    def perform_Bisectingkmeans(self, k_value: int, alpha: float = 0.5):
+        """
+        :param k_value: Number of Cluster
+        :param alpha:
+        :return:
+        """
+        n_sample = self.PCA_Data.shape[0]  # number of values in the file
+        # Skip if the number of values are less than k
+        if n_sample <= k_value:
+            k_value = n_sample
+
+        self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
+
+        kmeans = BisectingKMeans(init='k-means++', n_clusters=k_value, n_init=10, max_iter=500, random_state=random.randint(1,100)).fit(
+            self.PCA_Data)
+        cluster_labels = kmeans.labels_  # Label of each point(ndarray of shape)
+        self.test = kmeans
+        self.Bisecting_labels = cluster_labels
+
+        distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[cluster_labels[i]]) for
+                                    i in range(len(self.PCA_Data))]
+
+        nbrs = NearestNeighbors(n_neighbors=3, p=2).fit(self.PCA_Data)
+        distances, indices = nbrs.kneighbors(self.PCA_Data)
+        nearest_neighbor_distances = distances[:, 1]
+
+        sorted_nearest_neighbor_distances = sorted(nearest_neighbor_distances)
+        epsilon = sorted_nearest_neighbor_distances[int(len(sorted_nearest_neighbor_distances) * alpha)]
+        outliers = [i for i, dist in enumerate(distance_to_own_centroid) if dist < epsilon]
+
+        clusters_indices = [[] for _ in range(k_value)]
+        for i, label in enumerate(cluster_labels):
+            if i in outliers:
+                continue
+            clusters_indices[label].append(i)
+
+        clusters_indices.insert(0, list(outliers))
+
+        final_cluster = [[] for _ in clusters_indices]
+        for i, num in enumerate(clusters_indices):
+            for j in num:
+                final_cluster[i].append(self.index[j])
+
+        final_cluster = [cluster for cluster in final_cluster if cluster]
+        self.Bisecting = final_cluster
 
     def perform_DBSCAN(self, threshold: float):
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
@@ -217,26 +265,34 @@ class Clustering:
         avg_distances = np.mean(distances[:, 1:], axis=1)
         max_d = np.percentile(avg_distances, threshold * 100)
 
-        birch = Birch(threshold=max_d, n_clusters=None).fit(self.PCA_Data)
+        ms = int(math.log(len(self.PCA_Data)))
+
+        nbrs = NearestNeighbors(n_neighbors=ms + 1, p=1).fit(self.PCA_Data)
+        distances, indices = nbrs.kneighbors(self.PCA_Data)
+        avg_distances = np.mean(distances[:, 1:], axis=1)
+        eps = np.percentile(avg_distances, threshold * 100)
+
+
+        birch = Birch(threshold=eps, n_clusters=None).fit(self.PCA_Data)
         cluster_labels = birch.labels_
         self.test = birch
         self.BIRCH_labels = cluster_labels
 
-        # 클러스터의 중심
-        cluster_centers = birch.subcluster_centers_
-
-        # 클러스터 중심과의 거리 계산
-        distances = np.linalg.norm(self.PCA_Data - cluster_centers[cluster_labels], axis=1)
-
-        # 아웃라이어 여부 확인
-        sorted_distances = np.sort(distances)
-        epsilon = sorted_distances[int(len(sorted_distances) * 0.3)]
-        outliers = np.where(sorted_distances > epsilon)[0]
-        cluster_labels = list(cluster_labels)
-
-        for i, cluster_label in enumerate(cluster_labels):
-            if i in outliers:
-                cluster_labels[i] = -1
+        # # 클러스터의 중심
+        # cluster_centers = birch.subcluster_centers_
+        #
+        # # 클러스터 중심과의 거리 계산
+        # distances = np.linalg.norm(self.PCA_Data - cluster_centers[cluster_labels], axis=1)
+        #
+        # # 아웃라이어 여부 확인
+        # sorted_distances = np.sort(distances)
+        # epsilon = sorted_distances[int(len(sorted_distances) * 0)]
+        # outliers = np.where(sorted_distances > epsilon)[0]
+        # cluster_labels = list(cluster_labels)
+        #
+        # for i, cluster_label in enumerate(cluster_labels):
+        #     if i in outliers:
+        #         cluster_labels[i] = -1
 
         # Get the unique cluster labels
         unique_labels = sorted(list(set(cluster_labels)))
