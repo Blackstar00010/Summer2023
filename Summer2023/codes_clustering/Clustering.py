@@ -180,7 +180,7 @@ class Clustering:
 
 
         # Clustering
-        kmeans = MiniBatchKMeans(init='k-means++', n_clusters=k_value, n_init=10, max_iter=500,
+        kmeans = BisectingKMeans(init='k-means++', n_clusters=k_value, n_init=10, max_iter=500,
                                  random_state=random.randint(1, 100)).fit(self.PCA_Data)
         cluster_labels = kmeans.labels_
         self.test = kmeans
@@ -298,10 +298,8 @@ class Clustering:
         self.PCA_Data = pd.DataFrame(self.PCA_Data)
         self.PCA_Data = self.PCA_Data.values[:, 1:].astype(float)
 
-        ms = int(math.log(len(self.PCA_Data)))
-
         # Clustering
-        optics = OPTICS(cluster_method='xi', xi=threshold, min_cluster_size=ms, metric='manhattan').fit(
+        optics = OPTICS(cluster_method='xi', xi=threshold, min_cluster_size=0.1, metric='manhattan').fit(
             self.PCA_Data)
         labels = optics.labels_
         self.test = optics

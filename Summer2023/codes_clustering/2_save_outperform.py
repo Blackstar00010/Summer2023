@@ -108,13 +108,13 @@ if MiniBatch_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_minibatchkmeans(75)
+        Do_Clustering.perform_minibatchkmeans(25)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.minibatch_K_mean)
 
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.minibatch_K_mean, output_dir, file, save=True, raw=False)
 
-hdbscan_Save = True
+hdbscan_Save = False
 if hdbscan_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/HDBSCAN'
@@ -138,7 +138,7 @@ if hdbscan_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.HDBSCAN, output_dir, file, save=True, raw=False)
 
-birch_Save = True
+birch_Save = False
 if birch_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/BIRCH'
@@ -163,7 +163,7 @@ if birch_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.BIRCH, output_dir, file, save=True, raw=False)
 
-optics_Save = True
+optics_Save = False
 if optics_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/OPTICS'
@@ -182,13 +182,13 @@ if optics_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_OPTICS(0.02)
+        Do_Clustering.perform_OPTICS(0.01)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.OPTIC)
 
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.OPTIC, output_dir, file, save=True, raw=False)
 
-meanshift_Save = True
+meanshift_Save = False
 if meanshift_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/Meanshift'
@@ -213,7 +213,7 @@ if meanshift_Save:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.meanshift, output_dir, file, save=True, raw=False)
 
-GMM_Save = True
+GMM_Save = False
 if GMM_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/GMM'

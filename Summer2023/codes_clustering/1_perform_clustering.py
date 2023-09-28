@@ -127,7 +127,7 @@ if dbscan_Save:
     save_cluster_info('DBSCAN', stat_lists, file_names)
 
 # hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow) Done!
-agglomerative_Save = True
+agglomerative_Save = False
 if agglomerative_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -241,7 +241,7 @@ if minibatch_Save:
     save_cluster_info('MiniBatch', stat_lists, file_names)
 
 # hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(agglomerative) Done!
-hdbscan_Save = True
+hdbscan_Save = False
 if hdbscan_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -305,7 +305,7 @@ if hdbscan_Save:
     save_cluster_info('HDBSCAN', stat_lists, file_names)
 
 # hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(K_mean/agglomerative) more..
-birch_Save = True
+birch_Save = False
 if birch_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -362,7 +362,7 @@ if birch_Save:
     save_cluster_info('BIRCH', stat_lists, file_names)
 
 # hyper parameter eps percentile np.arange(0.01, 0.1, 0.01) should be tested manually.(DBSCAN) Done!
-optics_Save = True
+optics_Save = False
 if optics_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -419,7 +419,7 @@ if optics_Save:
     save_cluster_info('OPTICS', stat_lists, file_names)
 
 # hyper parameter bandwidth percentile np.range(0.1, 1, 0.1) should be tested manually.(arbitrarily) Done!
-meanshift_Save = True
+meanshift_Save = False
 if meanshift_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -476,7 +476,7 @@ if meanshift_Save:
     save_cluster_info('meanshift', stat_lists, file_names)
 
 # hyper parameter n components [3,5,10,20,30,40,50,60,70] should be tested manually.(arbitrarily) more..
-GMM_Save = True
+GMM_Save = False
 if GMM_Save:
     file_names = []
     result_df = pd.DataFrame()
