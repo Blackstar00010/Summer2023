@@ -377,23 +377,6 @@ def t_SNE(title, data, cluster_labels):
         plt.show()
         print()
 
-
-def find_optimal_GMM_covariance_type(data):
-    bgm = GaussianMixture()
-    # 탐색할 covariance type과 n_components 설정
-    param_grid = {
-        "covariance_type": ["spherical", "tied", "diag", "full"]
-    }
-
-    # BIC score를 평가 지표로 하여 GridSearchCV 실행
-    grid_search = GridSearchCV(bgm, param_grid=param_grid, scoring='neg_negative_likelihood_ratio')
-    grid_search.fit(data)
-
-    # 최적의 covariance type과 n_components 출력
-    best_covariance_type = grid_search.best_params_["covariance_type"]
-    return best_covariance_type
-
-
 # PCA_Result Check
 if __name__ == "__main__":
     # 파일 불러오기 및 PCA함수
