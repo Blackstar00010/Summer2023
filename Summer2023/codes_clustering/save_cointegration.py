@@ -1,9 +1,9 @@
-import pandas as pd
-
 from PCA_and_ETC import *
 import statsmodels.api as sm
 from itertools import combinations
 from statsmodels.tsa.stattools import coint, kpss
+from multiprocessing import Pool
+import Clustering as C
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -54,10 +54,15 @@ class cointegration:
             ret = 0.04
         return ret
 
-    def find_cointegrated_pairs(self):
-        from multiprocessing import Pool
+    def find_cointegrated_pairs(self, lst: list, ML: bool):
+
         data = self.data.iloc[1:, :]
-        pairs = pd.DataFrame(combinations(data.columns, 2))  # 모든 회사 조합
+
+        if not ML:
+            pairs = pd.DataFrame(combinations(data.columns, 2))  # 모든 회사 조합
+
+        if ML:
+            pairs = pd.DataFrame(combinations(lst, 2))
 
         with Pool(processes=5) as pool:
             pairs['pvalue'] = pool.map(self.cointegrate, pairs.values)
@@ -99,7 +104,9 @@ class cointegration:
 
     def save_cointegrated_LS(self):
         LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
-        name = momentum_prefix_finder(self.data.T) + '1'
+        # name = momentum_prefix_finder(self.data.T) + '1'
+
+        name='0'
 
         for cluster_num, firms in enumerate(self.invest_list):
             # Sort firms based on momentum_1
@@ -126,16 +133,50 @@ class cointegration:
 
 # Save Cointegration method LS_Tables
 if __name__ == '__main__':
-    input_dir = '../files/characteristics'
-    output_dir = '../files/Cointegration'
-    files = sorted(filename for filename in os.listdir(input_dir))
+    # input_dir = '../files/characteristics'
+    # output_dir = '../files/Cointegration'
+    # files = sorted(filename for filename in os.listdir(input_dir))
+    #
+    # for file in files:
+    #     print(file)
+    #     if file in os.listdir(output_dir):
+    #         continue
+    #     data = read_and_preprocess_data(input_dir, file)
+    #     Coin = cointegration(output_dir, file)
+    #     Coin.read_mom_data(data)
+    #     Coin.find_cointegrated_pairs([], False)
+    #     print(Coin.invest_list)
+    #     Coin.save_cointegrated_LS()
 
-    for file in files:
-        print(file)
-        if file in os.listdir(output_dir):
-            continue
-        data = read_and_preprocess_data(input_dir, file)
-        Coin = cointegration(output_dir, file)
-        Coin.read_mom_data(data)
-        Coin.find_cointegrated_pairs()
-        Coin.save_cointegrated_LS()
+    mix = True
+    if mix:
+        input_dir = '../files/characteristics'
+        output_dir = '../files/Cointegration'
+        files = sorted(filename for filename in os.listdir(input_dir))
+
+        for file in files:
+            print(file)
+            if file in os.listdir(output_dir):
+                continue
+            data = read_and_preprocess_data(input_dir, file)
+            df_combined = generate_PCA_Data(data)
+
+            Coin = cointegration(output_dir, file)
+            Coin.data = df_combined.T
+
+            Do_Clustering = C.Clustering(df_combined)
+            Do_Clustering.perform_HDBSCAN(0.6)
+
+            total_invest_list = []
+
+            for i, lst in enumerate(Do_Clustering.HDBSCAN):
+                print(i)
+                if i == 0:
+                    continue
+
+                Coin.find_cointegrated_pairs(lst, True)
+                total_invest_list.append(Coin.invest_list)
+
+            total_invest_list = [p for sublist in total_invest_list for p in sublist]
+            Coin.invest_list=total_invest_list
+            Coin.save_cointegrated_LS()
