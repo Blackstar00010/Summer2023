@@ -84,8 +84,7 @@ class cointegration:
         spread_df = spread_df.drop(columns=['adf_result'])
         spread_df = spread_df.drop(columns=['kpss_result'])
 
-        # spread_sr = spread_df[momentum_prefix_finder(spread_df) + '1']
-        spread_sr = spread_df['0']
+        spread_sr = spread_df[momentum_prefix_finder(spread_df) + '1']
         pairs['spread'] = (spread_sr - spread_sr.mean()) / spread_sr.std()
         pairs = pd.DataFrame(pairs.dropna(subset=['spread']))
         pairs = pairs.loc[pairs.index[pairs['spread'].abs() > 2], :]
@@ -107,7 +106,7 @@ class cointegration:
         LS_table = pd.DataFrame(columns=['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index'])
         # name = momentum_prefix_finder(self.data.T) + '1'
 
-        name='0'
+        name = '0'
 
         for cluster_num, firms in enumerate(self.invest_list):
             # Sort firms based on momentum_1
@@ -160,10 +159,8 @@ if __name__ == '__main__':
             if file in os.listdir(output_dir):
                 continue
             data = read_and_preprocess_data(input_dir, file)
-            df_combined = generate_PCA_Data(data)
-
             Coin = cointegration(output_dir, file)
-            Coin.data = df_combined.T
+            Coin.read_mom_data(data)
 
             Do_Clustering = C.Clustering(df_combined)
             Do_Clustering.perform_HDBSCAN(0.6)
@@ -179,5 +176,5 @@ if __name__ == '__main__':
                 total_invest_list.append(Coin.invest_list)
 
             total_invest_list = [p for sublist in total_invest_list for p in sublist]
-            Coin.invest_list=total_invest_list
+            Coin.invest_list = total_invest_list
             Coin.save_cointegrated_LS()
