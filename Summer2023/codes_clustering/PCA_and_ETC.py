@@ -4,9 +4,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn import manifold
-from sklearn.mixture import *
 from sklearn.decomposition import PCA
-from sklearn.model_selection import GridSearchCV
 
 # turn off warning
 warnings.filterwarnings("ignore")
@@ -14,7 +12,6 @@ warnings.filterwarnings("ignore")
 
 def momentum_prefix_finder(df: pd.DataFrame):
     """
-
     :param df:
     :return:
     """
@@ -38,7 +35,6 @@ def merge_LS_Table(data, LS_merged_df, file):
         LS_merged_df = data
     else:
         LS_merged_df = pd.merge(LS_merged_df, data, on='Firm Name', how='outer')
-
 
     return LS_merged_df
 

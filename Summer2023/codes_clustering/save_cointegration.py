@@ -126,6 +126,7 @@ class cointegration:
             LS_table.loc[len(LS_table)] = [firm, self.data.T.loc[firm, name], 0, -1]
 
         LS_table.sort_values(by='Cluster Index', inplace=True)
+        LS_table = LS_table[~LS_table.iloc[:, 0].duplicated(keep='first')]
 
         # Save the output to a CSV file in the output directory
         LS_table.to_csv(os.path.join(self.output_dir, self.file), index=False)
