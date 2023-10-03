@@ -84,7 +84,8 @@ class cointegration:
         spread_df = spread_df.drop(columns=['adf_result'])
         spread_df = spread_df.drop(columns=['kpss_result'])
 
-        spread_sr = spread_df[momentum_prefix_finder(spread_df) + '1']
+        # spread_sr = spread_df[momentum_prefix_finder(spread_df) + '1']
+        spread_sr = spread_df['0']
         pairs['spread'] = (spread_sr - spread_sr.mean()) / spread_sr.std()
         pairs = pd.DataFrame(pairs.dropna(subset=['spread']))
         pairs = pairs.loc[pairs.index[pairs['spread'].abs() > 2], :]
