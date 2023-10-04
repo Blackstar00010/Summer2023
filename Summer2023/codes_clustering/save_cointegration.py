@@ -138,7 +138,7 @@ class cointegration:
 # Save Cointegration method LS_Tables
 if __name__ == '__main__':
     # input_dir = '../files/characteristics'
-    # output_dir = '../files/Cointegration'
+    # output_dir = '../files/Cointegration2'
     # files = sorted(filename for filename in os.listdir(input_dir))
     #
     # for file in files:
@@ -149,7 +149,6 @@ if __name__ == '__main__':
     #     Coin = cointegration(output_dir, file)
     #     Coin.read_mom_data(data)
     #     Coin.find_cointegrated_pairs([], False)
-    #     print(Coin.invest_list)
     #     Coin.save_cointegrated_LS()
 
     mix = True
