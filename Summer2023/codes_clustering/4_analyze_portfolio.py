@@ -22,7 +22,7 @@ if FTSE:
 
 result = pd.read_csv('../files/result/total_result_modified.csv')
 
-new_order=[6,3,0,8,5,1,9,7,4,2,10,11]
+new_order=[7,4,0,2,6,1,9,8,5,3,10,11]
 result=result.reindex(new_order).reset_index(drop=True)
 
 print('profit_factor')

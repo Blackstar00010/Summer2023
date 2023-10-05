@@ -1,9 +1,12 @@
 import math
-from PCA_and_ETC import *
-from sklearn.cluster import *
-from sklearn.neighbors import NearestNeighbors
-from scipy.spatial import distance
 import random
+
+from scipy.spatial import distance
+from sklearn.cluster import *
+from sklearn.mixture import GaussianMixture
+from sklearn.neighbors import NearestNeighbors
+
+from PCA_and_ETC import *
 
 
 class Clustering:
@@ -16,7 +19,7 @@ class Clustering:
         self.DBSCAN = []
         self.Agglomerative = []
 
-        self.minibatch_K_mean = []
+        self.bisecting_K_mean = []
         self.HDBSCAN = []
         self.BIRCH = []
 
@@ -28,7 +31,7 @@ class Clustering:
         self.DBSCAN_labels = []
         self.Agglomerative_labels = []
 
-        self.minibatch_K_mean_labels = []
+        self.bisecting_K_mean_labels = []
         self.HDBSCAN_labels = []
         self.BIRCH_labels = []
 
@@ -164,7 +167,7 @@ class Clustering:
 
         self.Agglomerative = clust
 
-    def perform_minibatchkmeans(self, k_value: int, alpha: float = 0.5):
+    def perform_bisectingkmeans(self, k_value: int, alpha: float = 0.5):
         """
         :param k_value: Number of Cluster
         :param alpha: Outlier threshold
@@ -178,13 +181,12 @@ class Clustering:
         if n_sample <= k_value:
             k_value = n_sample
 
-
         # Clustering
-        kmeans = BisectingKMeans(init='k-means++', n_clusters=k_value, n_init=10, max_iter=500,
+        kmeans = MiniBatchKMeans(init='k-means++', n_clusters=k_value, n_init=10, max_iter=500,
                                  random_state=random.randint(1, 100)).fit(self.PCA_Data)
         cluster_labels = kmeans.labels_
         self.test = kmeans
-        self.minibatch_K_mean_labels = cluster_labels
+        self.bisecting_K_mean_labels = cluster_labels
 
         # Outlier Detection
         distance_to_own_centroid = [distance.euclidean(self.PCA_Data[i], kmeans.cluster_centers_[cluster_labels[i]])
@@ -212,7 +214,7 @@ class Clustering:
                 final_cluster[i].append(self.index[j])
 
         final_cluster = [cluster for cluster in final_cluster if cluster]
-        self.minibatch_K_mean = final_cluster
+        self.bisecting_K_mean = final_cluster
 
     def perform_HDBSCAN(self, threshold):
         """
@@ -428,7 +430,7 @@ class ResultCheck:
                                            ascending=[True, True]).reset_index()['Momentum_1'])
         clusters = clusters.reset_index()
         clusters['spread'] = spread_vec
-        clusters['in_portfolio'] = (clusters['spread'].abs() > clusters['spread'].std()) * 1
+        clusters['in_portfolio'] = (clusters['spread'].abs() > clusters['spread'].std()) * 2
         clusters['Long Short'] = clusters['in_portfolio'] * (-clusters['spread'] / clusters['spread'].abs())
         clusters['Long Short'] = clusters['Long Short'].fillna(0)
         clusters = clusters.drop(columns=['spread', 'in_portfolio'])

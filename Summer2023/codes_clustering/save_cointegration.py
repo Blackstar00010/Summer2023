@@ -162,8 +162,9 @@ if __name__ == '__main__':
             if file in os.listdir(output_dir):
                 continue
 
-            # if int(file[:4])<2021:
-            #     continue
+            if int(file[:4]) < 2021:
+                continue
+
             data = read_and_preprocess_data(input_dir, file)
             df_combined = generate_PCA_Data(data)
 
