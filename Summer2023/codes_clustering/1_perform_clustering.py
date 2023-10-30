@@ -4,22 +4,22 @@ from PCA_and_ETC import *
 MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
 MOM_merged_df.set_index('Firm Name', inplace=True)
 MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
-
+output_dir = '../files/result'
 # hyper parameter K(3, 5, 10, 25, 50, 75, 100, 200, 300) should be tested manually.(paper follow) Done!
-K_mean_Save = True
+K_mean_Save = False
 if K_mean_Save:
     file_names = []
     result_df = pd.DataFrame()
     stat_lists = []
 
     input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/K_Means_outlier'
+
     files = sorted(filename for filename in os.listdir(input_dir))
     cl = 0
     outliers_count = 0
     figure = 0
 
-    for i in [3, 5, 10, 25, 50, 75, 100, 200, 300]:
+    for i in [3,5,10,25, 50, 75, 100, 200, 300]:
         file_names.append(f'{i}')
         LS_merged_df = pd.DataFrame()
 
@@ -59,7 +59,7 @@ if K_mean_Save:
         print(f'total outliers: {outliers_count}')
         print(f'number of stock traded: {figure}')
 
-    save_and_plot_result('K_mean', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
+    save_and_plot_result(output_dir,'K_mean', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('K_mean', stat_lists, file_names)
 
 # hyper parameter eps percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow) Done!
@@ -70,7 +70,6 @@ if dbscan_Save:
     stat_lists = []
 
     input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/DBSCAN'
     files = sorted(filename for filename in os.listdir(input_dir))
     cl = 0
     outliers_count = 0
@@ -123,7 +122,7 @@ if dbscan_Save:
         print(f'total outliers: {outliers_count}')
         print(f'number of stock traded: {figure}')
 
-    save_and_plot_result('DBSCAN', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
+    save_and_plot_result(output_dir,'DBSCAN', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('DBSCAN', stat_lists, file_names)
 
 # hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow) Done!
@@ -180,7 +179,7 @@ if agglomerative_Save:
         print(f'total outliers: {outliers_count}')
         print(f'number of stock traded: {figure}')
 
-    save_and_plot_result('Agglomerative', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
+    save_and_plot_result(output_dir,'Agglomerative', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('Agglomerative', stat_lists, file_names)
 
 # hyper parameter K(3, 5, 10, 25, 50, 75, 100, 200, 300) should be tested manually.(paper follow) Done!
@@ -191,7 +190,6 @@ if bisecting_Save:
     stat_lists = []
 
     input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/Bisecting_K_mean'
     files = sorted(filename for filename in os.listdir(input_dir))
     cl = 0
     outliers_count = 0
@@ -237,7 +235,7 @@ if bisecting_Save:
         print(f'total outliers: {outliers_count}')
         print(f'number of stock traded: {figure}')
 
-    save_and_plot_result('Bisecting', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
+    save_and_plot_result(output_dir,'Bisecting', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('Bisecting', stat_lists, file_names)
 
 # hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(agglomerative) Done!
@@ -248,7 +246,6 @@ if hdbscan_Save:
     stat_lists = []
 
     input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/HDBSCAN'
     files = sorted(filename for filename in os.listdir(input_dir))
     cl = 0
     outliers_count = 0
@@ -301,7 +298,7 @@ if hdbscan_Save:
         print(f'total outliers: {outliers_count}')
         print(f'number of stock traded: {figure}')
 
-    save_and_plot_result('HDBSCAN', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
+    save_and_plot_result(output_dir,'HDBSCAN', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('HDBSCAN', stat_lists, file_names)
 
 # hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(K_mean/agglomerative) more..
@@ -312,7 +309,6 @@ if birch_Save:
     stat_lists = []
 
     input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/BIRCH'
     files = sorted(filename for filename in os.listdir(input_dir))
     cl = 0
     outliers_count = 0
@@ -358,7 +354,7 @@ if birch_Save:
         print(f'total outliers: {outliers_count}')
         print(f'number of stock traded: {figure}')
 
-    save_and_plot_result('BIRCH', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
+    save_and_plot_result(output_dir,'BIRCH', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('BIRCH', stat_lists, file_names)
 
 # hyper parameter eps percentile np.arange(0.01, 0.1, 0.01) should be tested manually.(DBSCAN) Done!
@@ -369,7 +365,6 @@ if optics_Save:
     stat_lists = []
 
     input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/OPTICS'
     files = sorted(filename for filename in os.listdir(input_dir))
     cl = 0
     outliers_count = 0
@@ -415,7 +410,7 @@ if optics_Save:
         print(f'total outliers: {outliers_count}')
         print(f'number of stock traded: {figure}')
 
-    save_and_plot_result('OPTICS', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
+    save_and_plot_result(output_dir,'OPTICS', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('OPTICS', stat_lists, file_names)
 
 # hyper parameter bandwidth percentile np.range(0.1, 1, 0.1) should be tested manually.(arbitrarily) Done!
@@ -426,7 +421,6 @@ if meanshift_Save:
     stat_lists = []
 
     input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/meanshift'
     files = sorted(filename for filename in os.listdir(input_dir))
     cl = 0
     outliers_count = 0
@@ -472,7 +466,7 @@ if meanshift_Save:
         print(f'total outliers: {outliers_count}')
         print(f'number of stock traded: {figure}')
 
-    save_and_plot_result('meanshift', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
+    save_and_plot_result(output_dir,'meanshift', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('meanshift', stat_lists, file_names)
 
 # hyper parameter n components [3,5,10,20,30,40,50,60,70] should be tested manually.(arbitrarily) more..
@@ -483,7 +477,6 @@ if GMM_Save:
     stat_lists = []
 
     input_dir = '../files/characteristics'
-    output_dir = '../files/clustering_result/GMM'
     files = sorted(filename for filename in os.listdir(input_dir))
     cl = 0
     outliers_count = 0
@@ -529,5 +522,5 @@ if GMM_Save:
         print(f'total outliers: {outliers_count}')
         print(f'number of stock traded: {figure}')
 
-    save_and_plot_result('GMM', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
+    save_and_plot_result(output_dir,'GMM', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
     save_cluster_info('GMM', stat_lists, file_names)

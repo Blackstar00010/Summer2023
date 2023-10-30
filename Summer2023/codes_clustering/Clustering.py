@@ -1,13 +1,14 @@
 import math
 import random
-
-from scipy.spatial import distance
-from sklearn.cluster import *
-from sklearn.mixture import GaussianMixture
-from sklearn.neighbors import NearestNeighbors
+import matplotlib.cm as cm
 
 from PCA_and_ETC import *
-
+from sklearn.cluster import *
+from scipy.spatial import distance
+from sklearn.mixture import GaussianMixture
+from sklearn.neighbors import NearestNeighbors
+from sklearn.datasets import make_blobs
+from sklearn.metrics import silhouette_samples, silhouette_score
 
 class Clustering:
     def __init__(self, data: pd.DataFrame):
@@ -232,7 +233,7 @@ class Clustering:
         eps = np.percentile(avg_distances, threshold * 100)
 
         # Clustering
-        Hdbscan = HDBSCAN(min_cluster_size=ms, cluster_selection_epsilon=eps).fit(self.PCA_Data)
+        Hdbscan = HDBSCAN(min_cluster_size=ms, cluster_selection_epsilon=eps,allow_single_cluster=False).fit(self.PCA_Data)
         cluster_labels = Hdbscan.labels_
         self.test = Hdbscan
         self.HDBSCAN_labels = cluster_labels
@@ -371,7 +372,7 @@ class Clustering:
 
         # Outliers
         probabilities = gmm.score_samples(self.PCA_Data)
-        threshold = np.percentile(probabilities, 60)
+        threshold = np.percentile(probabilities, 70)
 
         outliers = []
         for i, probability in enumerate(probabilities):
@@ -392,6 +393,41 @@ class Clustering:
                 cluster[t] = self.index[num]
 
         self.Gaussian = clusters
+
+    def visualize_silhouette(self, n_cluster, label):
+        fig, axs = plt.subplots(figsize=(4 * 1, 4), nrows=1, ncols=1)
+
+        # Calculate the silhouette score
+        sil_avg = silhouette_score(self.PCA_Data, label)
+        sil_values = silhouette_samples(self.PCA_Data, label)
+
+        y_lower = 10
+        axs.set_title('Number of Clusters: ' + str(n_cluster) + '\n' \
+                                                                'Silhouette Score: ' + str(round(sil_avg, 3)))
+        axs.set_xlabel("The silhouette coefficient values")
+        axs.set_ylabel("Cluster label")
+        axs.set_xlim([-0.1, 1])
+        axs.set_ylim([0, len(self.PCA_Data) + (n_cluster + 1) * 10])
+        axs.set_yticks([])  # Clear the y-axis labels / ticks
+        axs.set_xticks([0, 0.2, 0.4, 0.6, 0.8, 1])
+
+        # Loop through clusters to create silhouette plots
+        for i in range(n_cluster):
+            ith_cluster_sil_values = sil_values[label == i]
+            ith_cluster_sil_values.sort()
+
+            size_cluster_i = ith_cluster_sil_values.shape[0]
+            y_upper = y_lower + size_cluster_i
+
+            color = cm.nipy_spectral(float(i) / n_cluster)  # Adjusted the cluster color
+            axs.fill_betweenx(np.arange(y_lower, y_upper), 0, ith_cluster_sil_values, \
+                              facecolor=color, edgecolor=color, alpha=0.7)
+            axs.text(-0.05, y_lower + 0.5 * size_cluster_i, str(i))
+            y_lower = y_upper + 10
+
+        axs.axvline(x=sil_avg, color="red", linestyle="--")
+
+        plt.show()
 
 
 class ResultCheck:
@@ -430,13 +466,15 @@ class ResultCheck:
                                            ascending=[True, True]).reset_index()['Momentum_1'])
         clusters = clusters.reset_index()
         clusters['spread'] = spread_vec
-        clusters['in_portfolio'] = (clusters['spread'].abs() > clusters['spread'].std()) * 2
+        clusters['in_portfolio'] = (clusters['spread'].abs() > clusters['spread'].std()*3)
         clusters['Long Short'] = clusters['in_portfolio'] * (-clusters['spread'] / clusters['spread'].abs())
         clusters['Long Short'] = clusters['Long Short'].fillna(0)
         clusters = clusters.drop(columns=['spread', 'in_portfolio'])
         clusters.loc[clusters['Cluster Index'] == 0, 'Long Short'] = 0
+        clusters['Long'] = clusters['Long Short'].apply(lambda x: 1 if x == 1 else 0)
+        clusters['Short'] = clusters['Long Short'].apply(lambda x: -1 if x == -1 else 0)
         clusters.sort_values('Cluster Index', inplace=True)
-        clusters = clusters[['Firm Name', 'Momentum_1', 'Long Short', 'Cluster Index']]
+        clusters = clusters[['Firm Name', 'Momentum_1', 'Long Short', 'Long','Short','Cluster Index']]
 
         if save:
             clusters.to_csv(os.path.join(output_dir, file), index=False)

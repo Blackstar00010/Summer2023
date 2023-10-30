@@ -76,7 +76,7 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     non_zero_count = LS_merged_df.astype(bool).sum()
 
     non_zero_count2=pd.DataFrame(non_zero_count).T
-    non_zero_count2.to_csv(f'../files/traded_{subdir}.csv')
+    # non_zero_count2.to_csv(f'../files/traded_{subdir}.csv')
 
 
     # sum about all rows(395 by 1 matrix/index=Date)
@@ -93,7 +93,7 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     return result_df
 
 
-def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, FTSE=False, apply_log=True, new_Plot=False):
+def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, file_names, FTSE=False, apply_log=True, new_Plot=False):
     # Add a new column to the result DataFrame with the file names
     result_df['Clustering Method'] = file_names
 
@@ -129,13 +129,6 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
     result_df.iloc[:, 0:] = np.log(result_df.iloc[:, 0:]) if apply_log else result_df.iloc[:, 0:]
     result_df.to_csv(os.path.join('../files/result/', f'{clustering_name}_result_original.csv'), index=True)
 
-    # drop irrational data (larger than criterion)
-    # criterion = np.log(1.5) if apply_log else 1.5
-    # result_df = result_df.applymap(lambda x: float('NaN') if abs(x) > criterion else x)
-    # result_df = result_df.applymap(
-    #     lambda x: float('NaN') if x < 1 - 1 / criterion else x) if not apply_log else result_df
-    # result_df = result_df.fillna(method='ffill', axis=1)
-
     result_modified = pd.DataFrame(
         index=['count', 'annual return mean', 'annual return std', 'monthly return min', 'monthly return max'],
         columns=result_df.index)
@@ -165,8 +158,8 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
 
     result_modified = pd.concat([result_modified, MDD], axis=0)
 
-    result_modified.to_csv(os.path.join('../files/result/', clustering_name + '_statistcs_modified.csv'), index=True)
-    result_df.to_csv(os.path.join('../files/result/', clustering_name + '_result_modified.csv'), index=True)
+    result_modified.to_csv(os.path.join(output_dir, clustering_name + '_statistcs_modified.csv'), index=True)
+    result_df.to_csv(os.path.join(output_dir, clustering_name + '_result_modified.csv'), index=True)
 
 
     if new_Plot:
@@ -253,6 +246,29 @@ def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, F
         #     plt.xticks(rotation=45)
         #     plt.tight_layout()
         #     plt.show()
+
+
+def merge_Long_and_Short_Table(data, df2, df3, file):
+    # Keep only the 'Firm Name' and 'Long Short' columns
+    data2 = data[['Firm Name', 'Long']]
+    data3 = data[['Firm Name', 'Short']]
+
+    # Change the column name into file name (ex: 1990-01)
+    file_column_name = os.path.splitext(file)[0]
+    data2 = data2.rename(columns={'Long': file_column_name})
+    data3 = data3.rename(columns={'Short': file_column_name})
+
+    if df2.empty:
+        df2 = data2
+    else:
+        df2 = pd.merge(df2, data2, on='Firm Name', how='outer')
+
+    if df3.empty:
+        df3 = data3
+    else:
+        df3 = pd.merge(df3, data3, on='Firm Name', how='outer')
+
+    return df2, df3
 
 
 def save_cluster_info(clustering_name, stat_list: list, file_names):
