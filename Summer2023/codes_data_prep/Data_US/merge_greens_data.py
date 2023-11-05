@@ -37,15 +37,10 @@ def collapse_dup(some_df: pd.DataFrame, subset: list = None, df_name: str = None
 
 
 if __name__ == '__main__':
-    convert_to_csv = True
+    convert_to_csv = False
     if convert_to_csv:
         files_dir = '/Users/jamesd/Desktop/wrds_data/us/'
-        data1 = pd.read_csv(files_dir + 'data.csv', low_memory=False)
-        data2 = pd.read_csv(files_dir + 'data2.csv', low_memory=False)
-        data3 = pd.read_csv(files_dir + 'data3.csv', low_memory=False)
-        data4 = pd.read_csv(files_dir + 'data4.csv', low_memory=False)
-        data5 = pd.read_csv(files_dir + 'data5.csv', low_memory=False)
-        data6 = pd.read_csv(files_dir + 'data6.csv', low_memory=False)
+        all_df = pd.read_csv(files_dir + 'temp2.csv', low_memory=False)
 
         # join all data
         target_cols = ['permno', 'gvkey', 'datadate', 'absacc', 'acc', 'aeavol', 'age', 'agr', 'baspread', 'beta',
@@ -55,26 +50,25 @@ if __name__ == '__main__':
                        'invest', 'IPO', 'lev', 'lgr', 'maxret', 'ms', 'mve', 'mve_ia', 'nincr', 'operprof',
                        'pchcapx_ia', 'pchcurrat', 'pchdepr', 'pchgm_pchsale', 'pchquick', 'pchsale_pchrect', 'pctacc',
                        'pricedelay', 'ps', 'quick', 'rd', 'retvol', 'roaq', 'roeq', 'roic', 'rsup', 'salecash', 'salerec', 'secured', 'securedind', 'sgr',
-                       'sin', 'SP', 'std_dolvol', 'std_turn', 'sue', 'tang', 'tb', 'turn', 'zerotrade']
-        data_list = []
-        for data in [data1, data2, data3, data4, data5, data6]:
-            specific_col = [col for col in data.columns if col in target_cols]
-            if specific_col != ['gvkey', 'datadate']:
-                data_list.append(data[specific_col])
-        all_df = pd.concat(data_list, axis=0)
+                       'sin', 'sp', 'std_dolvol', 'std_turn', 'sue', 'tang', 'tb', 'turn', 'zerotrade']
+        all_df = all_df.drop(columns=[item for item in all_df.columns if item not in target_cols])
 
         # permno to join with close
         permno_df = all_df[['permno', 'gvkey']].drop_duplicates(subset=['permno', 'gvkey'], keep='first')
         permno_df = permno_df[permno_df['permno'].notna()]
-        # print(permno_df[permno_df.duplicated(subset=['permno'], keep=False)])
         permno_df = permno_df.drop_duplicates(subset=['permno'], keep='last')
         all_df = all_df[all_df['permno'].isin(permno_df['permno'])]
+        all_df = all_df.merge(permno_df, on='gvkey')
+        all_df['permno_x'] = all_df['permno_x'].fillna(all_df['permno_y'])
+        all_df = all_df.drop('permno_y', axis=1).rename(columns={'permno_x': 'permno'})
 
         # match format & collapse duplicates
+        all_df = all_df.dropna(subset=['datadate'])
         all_df = us.change_date_format(all_df, df_name='all_df', date_col_name='datadate')
         all_df['datadate'] = all_df['datadate'].str[:7]
         all_df = collapse_dup(all_df, subset=['gvkey', 'datadate'], df_name='all_df')
 
+        # close price + momentum
         close_df = pd.read_csv(files_dir + 'close.csv', low_memory=False)
         close_df = close_df.rename(columns={'PERMNO': 'permno', 'PRC': 'prc', 'DATE': 'datadate'})
         close_df = us.change_date_format(close_df, df_name='close_df', date_col_name='datadate')
@@ -97,18 +91,24 @@ if __name__ == '__main__':
             this_month_df = this_month_df.drop_duplicates(subset=['permno'], keep='last')
             this_month_df = this_month_df.rename(columns={'permno': 'firms'})
             this_month_df = this_month_df.set_index('firms')
-            this_month_df.to_csv(export_dir + f'/{adate}.csv', index=True, index_label='firms')
+            this_month_df.to_csv(export_dir + f'/_{adate}.csv', index=True, index_label='firms')
 
     clean_data = True
     if clean_data:
         characteristics_dir = str(
             Path(__file__).parents[2]) + '/files/characteristics_us/' if platform.system() == 'Darwin' else str(
             Path(__file__).parents[2]) + '\\files\\characteristics_us\\'
-        first_days = us.listdir(characteristics_dir)
+        first_days = [item for item in us.listdir(characteristics_dir) if item[0] == '_']
         for afirst_day in first_days:
             # importing momentum data
             chars_df = pd.read_csv(characteristics_dir + afirst_day, low_memory=False)
             chars_df = chars_df.set_index('firms')
+            moms_df = chars_df
+            for acol in moms_df.columns:
+                if 'mom' in acol:
+                    chars_df = chars_df.drop(acol, axis=1)
+                else:
+                    moms_df = moms_df.drop(acol, axis=1)
 
             best_case_finder = []
             chars_df_og = chars_df
@@ -137,6 +137,8 @@ if __name__ == '__main__':
                 if chars_df[acol].notna().sum() < (len(chars_df) * best_case_finder.iloc[0, 0] / 10):
                     chars_df = chars_df.drop(acol, axis=1)
             chars_df = chars_df.dropna(thresh=int(chars_df.shape[1] * best_case_finder.iloc[0, 1]), axis=0)
-            chars_df = chars_df.dropna(how='any', axis=1)
-            chars_df.to_csv(characteristics_dir + afirst_day, index=True, index_label='firms')
+
+            chars_df = pd.concat([chars_df, moms_df], axis=1)
+            chars_df = chars_df.dropna(how='any', axis=0)
+            chars_df.to_csv(characteristics_dir + afirst_day[1:], index=True, index_label='firms')
             # print(f'{afirst_day} exported!')

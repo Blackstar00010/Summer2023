@@ -371,6 +371,8 @@ def dt_to_str(col: pd.Series) -> pd.Series:
     :param col: the column vector to convert to str in the format YYYY-MM-DD
     :return: pd.Series of the converted vector
     """
+    if type(col.iloc[0]) in [float, np.float64]:
+        col = col.astype(int)
     if type(col.iloc[0]) in [int, np.int64]:
         col = col.astype(str)
 
