@@ -84,7 +84,7 @@ if momentum:
 
 MOM_Merge = True
 if MOM_Merge:
-    directory = '../files/characteristics'
+    directory = '../files/characteristics_us'
     long_short = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
 
     merged_df = pd.DataFrame()

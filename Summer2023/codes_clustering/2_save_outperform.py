@@ -3,7 +3,7 @@ from PCA_and_ETC import *
 
 Reversal_Save = False
 if Reversal_Save:
-    input_dir = '../files/characteristics'
+    input_dir = '../files/characteristics_us'
     output_dir = '../files/clustering_result/Reversal'
     files = sorted(filename for filename in os.listdir(input_dir))
 
@@ -17,7 +17,7 @@ if Reversal_Save:
         # Save LS_Table CSV File
         Do_Result_Save.reversal_table(data, output_dir, file)
 
-K_mean_Save = True
+K_mean_Save = False
 if K_mean_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/K_mean'
@@ -72,7 +72,7 @@ if K_mean_Save:
 
 dbscan_Save = True
 if dbscan_Save:
-    input_dir = '../files/characteristics'
+    input_dir = '../files/characteristics_us'
     output_dir = '../files/clustering_result/DBSCAN'
     files = sorted(filename for filename in os.listdir(input_dir))
     outliers_count = 0
@@ -90,7 +90,7 @@ if dbscan_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_DBSCAN(0.9)
+        Do_Clustering.perform_DBSCAN(0.1)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
 
         # Save LS_Table CSV File
@@ -123,7 +123,7 @@ if dbscan_Save:
 
     top_df.to_csv(os.path.join('../files/result2/', 'DBSCAN.csv'), index=False)
 
-Agglormerative_Save = True
+Agglormerative_Save = False
 if Agglormerative_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/Agglomerative'
@@ -176,7 +176,7 @@ if Agglormerative_Save:
 
     top_df.to_csv(os.path.join('../files/result2/', 'Agglo.csv'), index=False)
 
-Bisecting_Save = True
+Bisecting_Save = False
 if Bisecting_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/Bisecting_K_mean'
@@ -229,7 +229,7 @@ if Bisecting_Save:
 
     top_df.to_csv(os.path.join('../files/result2/', 'Bisecting.csv'), index=False)
 
-hdbscan_Save = True
+hdbscan_Save = False
 if hdbscan_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/HDBSCAN'
@@ -283,7 +283,7 @@ if hdbscan_Save:
 
     top_df.to_csv(os.path.join('../files/result2/', 'HDBSCAN.csv'), index=False)
 
-birch_Save = True
+birch_Save = False
 if birch_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/BIRCH'
@@ -336,7 +336,7 @@ if birch_Save:
 
     top_df.to_csv(os.path.join('../files/result2/', 'BIRCH.csv'), index=False)
 
-optics_Save = True
+optics_Save = False
 if optics_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/OPTICS'
@@ -389,7 +389,7 @@ if optics_Save:
 
     top_df.to_csv(os.path.join('../files/result2/', 'OPTICS.csv'), index=False)
 
-meanshift_Save = True
+meanshift_Save = False
 if meanshift_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/Meanshift'
@@ -442,7 +442,7 @@ if meanshift_Save:
 
     top_df.to_csv(os.path.join('../files/result2/', 'meanshift.csv'), index=False)
 
-GMM_Save = True
+GMM_Save = False
 if GMM_Save:
     input_dir = '../files/characteristics'
     output_dir = '../files/clustering_result/GMM'

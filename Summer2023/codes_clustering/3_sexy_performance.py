@@ -27,42 +27,42 @@ for subdir in subdirectories:
 
 file_names2 = [name for name in file_names if name not in ['Cointegration', 'Reversal']]
 
-# for subdir in subdirectories:
-#     print(subdir)
-#     directory = os.path.join(base_directory, subdir)
-#
-#     LS_merged_df = pd.DataFrame()
-#
-#     files = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
-#     for file in files:
-#         data = pd.read_csv(os.path.join(directory, file))
-#         LS_merged_df = merge_LS_Table(data, LS_merged_df, file)
-#         LS_merged_df = LS_merged_df[~LS_merged_df.iloc[:,0].duplicated(keep='first')]
-#
-#     result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, subdir, save=False)
-#
-# save_and_plot_result(output_dir,'total', result_df, file_names, FTSE=True, apply_log=True, new_Plot=True)
-
 for subdir in subdirectories:
     print(subdir)
     directory = os.path.join(base_directory, subdir)
 
-    if subdir == 'Cointegration':
-        continue
-
-    elif subdir == 'Reversal':
-        continue
-
-    LS_merged_df2 = pd.DataFrame()
-    LS_merged_df3 = pd.DataFrame()
+    LS_merged_df = pd.DataFrame()
 
     files = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
     for file in files:
         data = pd.read_csv(os.path.join(directory, file))
-        LS_merged_df2, LS_merged_df3 = merge_Long_and_Short_Table(data, LS_merged_df2, LS_merged_df3, file)
+        LS_merged_df = merge_LS_Table(data, LS_merged_df, file)
+        LS_merged_df = LS_merged_df[~LS_merged_df.iloc[:,0].duplicated(keep='first')]
 
-    result_df2 = product_LS_Table(LS_merged_df2, MOM_merged_df, result_df2, subdir, save=False)
-    result_df3 = product_LS_Table(LS_merged_df3, MOM_merged_df, result_df3, subdir, save=True)
+    result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, subdir, save=False)
 
-save_and_plot_result(output_dir2,'total', result_df2, file_names2, FTSE=False, apply_log=True, new_Plot=True)
-save_and_plot_result(output_dir3,'total', result_df3, file_names2, FTSE=False, apply_log=True, new_Plot=True)
+save_and_plot_result(output_dir,'total', result_df, file_names, FTSE=False, apply_log=True, new_Plot=True)
+#
+# for subdir in subdirectories:
+#     print(subdir)
+#     directory = os.path.join(base_directory, subdir)
+#
+#     if subdir == 'Cointegration':
+#         continue
+#
+#     elif subdir == 'Reversal':
+#         continue
+#
+#     LS_merged_df2 = pd.DataFrame()
+#     LS_merged_df3 = pd.DataFrame()
+#
+#     files = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
+#     for file in files:
+#         data = pd.read_csv(os.path.join(directory, file))
+#         LS_merged_df2, LS_merged_df3 = merge_Long_and_Short_Table(data, LS_merged_df2, LS_merged_df3, file)
+#
+#     result_df2 = product_LS_Table(LS_merged_df2, MOM_merged_df, result_df2, subdir, save=False)
+#     result_df3 = product_LS_Table(LS_merged_df3, MOM_merged_df, result_df3, subdir, save=True)
+#
+# save_and_plot_result(output_dir2,'total', result_df2, file_names2, FTSE=False, apply_log=True, new_Plot=True)
+# save_and_plot_result(output_dir3,'total', result_df3, file_names2, FTSE=False, apply_log=True, new_Plot=True)

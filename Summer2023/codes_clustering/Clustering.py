@@ -466,7 +466,7 @@ class ResultCheck:
                                            ascending=[True, True]).reset_index()['Momentum_1'])
         clusters = clusters.reset_index()
         clusters['spread'] = spread_vec
-        clusters['in_portfolio'] = (clusters['spread'].abs() > clusters['spread'].std()*3)
+        clusters['in_portfolio'] = (clusters['spread'].abs() > clusters['spread'].std())
         clusters['Long Short'] = clusters['in_portfolio'] * (-clusters['spread'] / clusters['spread'].abs())
         clusters['Long Short'] = clusters['Long Short'].fillna(0)
         clusters = clusters.drop(columns=['spread', 'in_portfolio'])
