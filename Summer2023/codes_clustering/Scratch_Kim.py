@@ -1,5 +1,3 @@
-import pandas as pd
-
 from save_cointegration import *
 
 # turn off warning
@@ -113,127 +111,80 @@ if traded:
     plt.legend().set_visible(False)
     plt.show()
 
+finx = True
+if finx:
+    input_dir = '../finx/clustering_result'
+    output_dir = '../finx/long_short_result'
+    files = sorted(filename for filename in os.listdir(input_dir))
+    cl = 0
+    outliers_count = 0
+    figure = 0
+    top_df = pd.DataFrame(columns=['month', 'invested', 'first', 'second', 'number of clusters'])
+
+    for file in files:
+        print(file)
+
+        # convert mom_data into PCA_data
+        data = read_and_preprocess_data(input_dir, file)
+
+        # Call initial method
+        Do_Result_Save = C.ResultCheck(data)
+
+        # Do clustering and get 2D list of cluster index
 
 
+        clusters = []
+        for i in range(1 + max(set(data['Cluster Index']))):
+            indices = list(data[data['Cluster Index'] == i].index)
+            clusters.append(indices)
 
-def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, result_df: pd.DataFrame, subdir, save=False):
-    # Sort LS_Value according to Firm Name
-    LS_merged_df = LS_merged_df.sort_values('Firm Name')
+        # Save LS_Table CSV File
+        Do_Result_Save.ls_table(clusters, output_dir, file, save=True, raw=True)
 
-    # Set Firm Name column into index
-    LS_merged_df.set_index('Firm Name', inplace=True)
+        outliers_count += (data['Cluster Index'] == 0).sum()/len(data)
+        invested_num=len(data)-(data['Cluster Index'] == 0).sum()
+        cl += len(clusters) - 1
+        figure += Do_Result_Save.count_stock_of_traded()
 
-    # 마지막 row 버리면 한칸씩 밀어버리는 것과 동치
-    LS_merged_df = LS_merged_df.drop(LS_merged_df.columns[-1], axis=1)
-    LS_merged_df = LS_merged_df.fillna(0)
-    LS_merged_df.columns = MOM_merged_df.columns
+        if True:
+            # 각 sublist의 원소 개수를 저장할 리스트 생성
+            sublist_lengths = [len(sublist) for sublist in clusters]
 
-    if save:
-        LS_merged_df.to_csv(f'../files/LS_merge_{subdir}.csv',index=False)
+            sublist_lengths = sublist_lengths[1:]
 
-    prod = MOM_merged_df * LS_merged_df
-    prod = pd.DataFrame(prod)
+            # sublist_lengths를 기반으로 top3 원소 개수를 찾음
+            top3_lengths = sorted(set(sublist_lengths), reverse=True)[:2]
 
-    # prod index set to df1.index
-    prod.set_index(MOM_merged_df.index, inplace=True)
-    # cumulative return은 1990-02부터 2022-12이기 때문에 prod.columns=df1.columns
-    prod.columns = MOM_merged_df.columns
+            if len(top3_lengths) == 1:
+                top3_lengths.append(0)
 
-    if save:
-        prod.to_csv(f'../files/prod_{subdir}.csv')
+            if len(top3_lengths) == 0:
+                top3_lengths.append(0)
+                top3_lengths.append(0)
 
-    if True:
-        for col in prod.columns:
-                if col == 'Firm Name':
-                    continue
-                prod.loc[prod[col] > 0.5, col] = 0.5
-                prod.loc[prod[col] < -0.33333, col] = -0.33333
+            new_row = pd.DataFrame({'month': [file[:-4]],
+                                    'invested': invested_num,
+                                    'first': [top3_lengths[0]],
+                                    'second': [top3_lengths[1]],
+                                    'number of clusters': [len(sublist_lengths)]})
 
-    # Count the non-zero LS that is the number of total firm invested(395 by 1 matrix/index=Date)
-    non_zero_count = LS_merged_df.astype(bool).sum()
-
-    non_zero_count2=pd.DataFrame(non_zero_count).T
-    # non_zero_count2.to_csv(f'../files/traded_{subdir}.csv')
+            # 이 새로운 행을 기존 DataFrame에 추가합니다.
+            top_df = pd.concat([top_df, new_row], ignore_index=True)
 
 
-    # sum about all rows(395 by 1 matrix/index=Date)
-    column_sums = prod.sum()
+    cl = int(cl / len(files))
+    outliers_count = outliers_count / len(files)
+    figure = figure / len(files)
+    stat_list = [cl, 1 - outliers_count, outliers_count, figure]
+    stat_df = pd.DataFrame(stat_list).T
+    stat_df.columns=['Number of clusters', 'Number of stock in clusters',
+                                    'Number of outliers', 'Number of stock traded']
 
-    # calculate mean and make into DataFrame
-    column_means = column_sums.values / non_zero_count.values
-    column_means = pd.DataFrame(column_means)
-    column_means.index = column_sums.index
+    print(f'avg of clusters: {cl}')
+    print(f'total outliers: {outliers_count}')
+    print(f'number of stock traded: {figure}')
 
-    # Concat the means DataFrame to the result DataFrame(395 by 1 matrix->1 by 395 matrix)
-    result_df = pd.concat([result_df, column_means.T], ignore_index=True)
+    top_df.to_csv(os.path.join('../finx/etc/', 'top3.csv'), index=False)
 
-    return result_df
+    stat_df.to_csv(os.path.join('../finx/etc/', 'cluster_info.csv'), index=False)
 
-
-def save_and_plot_result(clustering_name, result_df: pd.DataFrame, file_names, FTSE=False, apply_log=True, new_Plot=False):
-    # Add a new column to the result DataFrame with the file names
-    result_df['Clustering Method'] = file_names
-
-    # Separate the 'Clustering Method' column from the date columns
-    clustering_method = result_df['Clustering Method']
-    date_columns_df = result_df.drop('Clustering Method', axis=1)
-
-    # Convert the date columns to datetime format and sort them
-    date_columns_df.columns = pd.to_datetime(date_columns_df.columns, errors='coerce')
-    date_columns_df = date_columns_df.sort_index(axis=1)
-
-    # Concat the 'Clustering Method' column back with the sorted date columns
-    result_df = pd.concat([clustering_method, date_columns_df], axis=1)
-    result_df.set_index('Clustering Method', inplace=True)
-
-    if FTSE:
-        file_names.append('FTSE 100')
-        file = '../files/ftse_return.csv'
-        df = pd.read_csv(file)
-        df = df.iloc[1:]
-        df = df.iloc[0:, 2:]
-        df.columns = result_df.columns[0:-7]  # columns name should be same with result_df
-        result_df = pd.concat([result_df.iloc[:, 0:-7], df], axis=0)  # add monthly_return right below result_df
-
-    result_df.index = file_names
-    result_df = result_df.astype(float)  # set data type as float(df.value was str actually.)
-    result_df = result_df.fillna(0)
-
-    # Add 1 to all data values
-    result_df.iloc[:, 0:] = result_df.iloc[:, 0:] + 1
-
-    # transform into log scale
-    result_df.iloc[:, 0:] = np.log(result_df.iloc[:, 0:]) if apply_log else result_df.iloc[:, 0:]
-    result_df.to_csv(os.path.join('../files/result/', f'{clustering_name}_result_original.csv'), index=True)
-
-    result_modified = pd.DataFrame(
-        index=['count', 'annual return mean', 'annual return std', 'monthly return min', 'monthly return max'],
-        columns=result_df.index)
-    for i in range(len(result_modified.columns)):
-        result_modified.iloc[0, i] = len(result_df.columns)
-        result_modified.iloc[1, i] = np.exp(np.mean(result_df.iloc[i, :]) * 12) - 1
-        result_modified.iloc[2, i] = np.exp(np.std(result_df.iloc[i, :]) * np.sqrt(12)) - 1
-        result_modified.iloc[3, i] = np.min(result_df.iloc[i, :])
-        result_modified.iloc[4, i] = np.max(result_df.iloc[i, :])
-    # result_modified.iloc[1, :] = result_modified.iloc[1, :] * len(result_df.iloc[1, :]) / 12
-
-    sharpe_ratio = pd.DataFrame(index=['Sharpe ratio'], columns=result_modified.columns)
-    for i in range(len(result_modified.columns)):
-        sharpe_ratio.iloc[0, i] = result_modified.iloc[1, i] / result_modified.iloc[2, i]
-
-    result_modified = pd.concat([result_modified, sharpe_ratio], axis=0)
-
-    MDD = pd.DataFrame(index=['Maximum drawdown'], columns=result_modified.columns)
-    for i in range(len(result_df.index)):
-        row = result_df.iloc[i, :]
-        row2 = np.exp(row.astype(float)) - 1
-        cumulative_returns = np.cumprod(1 + row2) - 1
-        peak = np.maximum.accumulate(cumulative_returns)
-        drawdown = (cumulative_returns - peak) / (peak + 1)
-        max_drawdown = drawdown.min()
-        MDD.iloc[0, i] = max_drawdown
-
-    result_modified = pd.concat([result_modified, MDD], axis=0)
-
-    result_modified.to_csv(os.path.join('../files/result/', clustering_name + '_statistcs_modified.csv'), index=True)
-    result_df.to_csv(os.path.join('../files/result/', clustering_name + '_result_modified.csv'), index=True)
