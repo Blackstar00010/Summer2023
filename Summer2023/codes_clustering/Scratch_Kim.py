@@ -1,3 +1,5 @@
+import pandas as pd
+
 from save_cointegration import *
 
 # turn off warning
@@ -72,30 +74,6 @@ if min_max:
 
     result.to_csv('../files/min_mom1.csv')
 
-t_test = False
-if t_test:
-    from scipy import stats
-
-    lst_mean = [0.299550651, 0.305943581, 0.289794729, 0.171507687, 0.299360048, 0.30047511, 0.314495301, 0.304478585,
-                0.284678536, 0.296668338]
-    lst_std = [0.106437896, 0.114507258, 0.114836032, 0.123466177, 0.115254803, 0.138503739, 0.135243158, 0.112620708,
-               0.101942693, 0.1192455]
-
-    for i in range(10):
-        mean1 = lst_mean[i]
-        std_dev1 = lst_std[i]
-        sample_size1 = 384
-
-        mean2 = 0.0643798208882231
-        std_dev2 = 0.0643798208882231
-        sample_size2 = 384
-
-        # t-검정 수행
-        t_statistic, p_value = stats.ttest_ind_from_stats(mean1, std_dev1, sample_size1, mean2, std_dev2, sample_size2)
-
-        # 결과 출력
-        print(f"{i}t-통계량:", t_statistic)
-        print(f"{i}p-값:", p_value)
 
 traded = False
 if traded:
@@ -111,9 +89,26 @@ if traded:
     plt.legend().set_visible(False)
     plt.show()
 
+finx_before = False
+if finx_before:
+    input_dir = '../finx/clustering_result'
+    output_dir = '../finx/clustering_result2'
+    files = sorted(filename for filename in os.listdir(input_dir))
+    for file in files:
+        print(file)
+
+        df = pd.read_csv(os.path.join(input_dir, file))
+
+        new_df = pd.DataFrame(index=None, columns=['Firm Name', 'Momentum_1', 'Cluster Index'])
+        new_df['Firm Name'] = df.iloc[:, 1]
+        new_df['Momentum_1'] = df.iloc[:, 0]
+        new_df['Cluster Index'] = df.iloc[:, 2]+1
+
+        new_df.to_csv(os.path.join(output_dir, file), index=None)
+
 finx = True
 if finx:
-    input_dir = '../finx/clustering_result'
+    input_dir = '../finx/clustering_result2'
     output_dir = '../finx/long_short_result'
     files = sorted(filename for filename in os.listdir(input_dir))
     cl = 0
@@ -132,7 +127,6 @@ if finx:
 
         # Do clustering and get 2D list of cluster index
 
-
         clusters = []
         for i in range(1 + max(set(data['Cluster Index']))):
             indices = list(data[data['Cluster Index'] == i].index)
@@ -141,8 +135,8 @@ if finx:
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(clusters, output_dir, file, save=True, raw=True)
 
-        outliers_count += (data['Cluster Index'] == 0).sum()/len(data)
-        invested_num=len(data)-(data['Cluster Index'] == 0).sum()
+        outliers_count += (data['Cluster Index'] == 0).sum() / len(data)
+        invested_num = len(data) - (data['Cluster Index'] == 0).sum()
         cl += len(clusters) - 1
         figure += Do_Result_Save.count_stock_of_traded()
 
@@ -171,14 +165,13 @@ if finx:
             # 이 새로운 행을 기존 DataFrame에 추가합니다.
             top_df = pd.concat([top_df, new_row], ignore_index=True)
 
-
     cl = int(cl / len(files))
     outliers_count = outliers_count / len(files)
     figure = figure / len(files)
     stat_list = [cl, 1 - outliers_count, outliers_count, figure]
     stat_df = pd.DataFrame(stat_list).T
-    stat_df.columns=['Number of clusters', 'Number of stock in clusters',
-                                    'Number of outliers', 'Number of stock traded']
+    stat_df.columns = ['Number of clusters', 'Number of stock in clusters',
+                       'Number of outliers', 'Number of stock traded']
 
     print(f'avg of clusters: {cl}')
     print(f'total outliers: {outliers_count}')
@@ -187,4 +180,3 @@ if finx:
     top_df.to_csv(os.path.join('../finx/etc/', 'top3.csv'), index=False)
 
     stat_df.to_csv(os.path.join('../finx/etc/', 'cluster_info.csv'), index=False)
-

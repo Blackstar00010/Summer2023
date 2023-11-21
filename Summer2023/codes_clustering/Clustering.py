@@ -466,7 +466,7 @@ class ResultCheck:
                                            ascending=[True, True]).reset_index()['Momentum_1'])
         clusters = clusters.reset_index()
         clusters['spread'] = spread_vec
-        clusters['in_portfolio'] = (clusters['spread'].abs() > clusters['spread'].std())
+        clusters['in_portfolio'] = (clusters['spread'].abs() > clusters['spread'].std()*2)
         clusters['Long Short'] = clusters['in_portfolio'] * (-clusters['spread'] / clusters['spread'].abs())
         clusters['Long Short'] = clusters['Long Short'].fillna(0)
         clusters = clusters.drop(columns=['spread', 'in_portfolio'])
@@ -504,6 +504,9 @@ class ResultCheck:
 
         for i, firm in enumerate(firm_sorted):
             LS_table_reversal.loc[len(LS_table_reversal)] = [firm, data.loc[firm, self.prefix + '1'], long_short[i]]
+
+        LS_table_reversal['Long'] = LS_table_reversal['Long Short'].apply(lambda x: 1 if x == 1 else 0)
+        LS_table_reversal['Short'] = LS_table_reversal['Long Short'].apply(lambda x: -1 if x == -1 else 0)
 
         if save:
             # Save the output to a CSV file in the output directory

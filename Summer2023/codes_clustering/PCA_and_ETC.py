@@ -2,7 +2,9 @@ import os
 import warnings
 import numpy as np
 import pandas as pd
+import statsmodels.api as sm
 import matplotlib.pyplot as plt
+from scipy import stats
 from sklearn import manifold
 from sklearn.decomposition import PCA
 
@@ -39,9 +41,10 @@ def merge_LS_Table(data, LS_merged_df, file):
     return LS_merged_df
 
 
-def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, result_df: pd.DataFrame, subdir, save=False):
+def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, result_df: pd.DataFrame, subdir,
+                     save=False):
     # Sort LS_Value according to Firm Name
-    LS_merged_df = LS_merged_df.sort_values('Firm Name')
+    # LS_merged_df = LS_merged_df.sort_values('Firm Name')
 
     # Set Firm Name column into index
     LS_merged_df.set_index('Firm Name', inplace=True)
@@ -52,7 +55,7 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     LS_merged_df.columns = MOM_merged_df.columns
 
     if save:
-        LS_merged_df.to_csv(f'../files/LS_merge_{subdir}.csv',index=False)
+        LS_merged_df.to_csv(f'../files/LS_merge_{subdir}.csv', index=False)
 
     prod = MOM_merged_df * LS_merged_df
     prod = pd.DataFrame(prod)
@@ -67,17 +70,16 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
 
     if True:
         for col in prod.columns:
-                if col == 'Firm Name':
-                    continue
-                prod.loc[prod[col] > 0.5, col] = 0.5
-                prod.loc[prod[col] < -0.33333, col] = -0.33333
+            if col == 'Firm Name':
+                continue
+            prod.loc[prod[col] > 0.5, col] = 0.5
+            prod.loc[prod[col] < -0.33333, col] = -0.33333
 
     # Count the non-zero LS that is the number of total firm invested(395 by 1 matrix/index=Date)
     non_zero_count = LS_merged_df.astype(bool).sum()
 
-    non_zero_count2=pd.DataFrame(non_zero_count).T
+    non_zero_count2 = pd.DataFrame(non_zero_count).T
     # non_zero_count2.to_csv(f'../files/traded_{subdir}.csv')
-
 
     # sum about all rows(395 by 1 matrix/index=Date)
     column_sums = prod.sum()
@@ -93,7 +95,8 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     return result_df
 
 
-def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, file_names, FTSE=False, apply_log=True, new_Plot=False):
+def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, file_names, FTSE=False, apply_log=True,
+                         new_Plot=False):
     # Add a new column to the result DataFrame with the file names
     result_df['Clustering Method'] = file_names
 
@@ -130,48 +133,169 @@ def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, f
     result_df.to_csv(os.path.join('../files/result/', f'{clustering_name}_result_original.csv'), index=True)
 
     result_modified = pd.DataFrame(
-        index=['count', 'annual return mean', 'annual return std', 'monthly return min', 'monthly return max'],
+        index=['count', 'annual return mean', 'annual return std'],
         columns=result_df.index)
-    for i in range(len(result_modified.columns)):
-        result_modified.iloc[0, i] = len(result_df.columns)
-        result_modified.iloc[1, i] = np.exp(np.mean(result_df.iloc[i, :]) * 12) - 1
-        result_modified.iloc[2, i] = np.exp(np.std(result_df.iloc[i, :]) * np.sqrt(12)) - 1
-        result_modified.iloc[3, i] = np.min(result_df.iloc[i, :])
-        result_modified.iloc[4, i] = np.max(result_df.iloc[i, :])
-    # result_modified.iloc[1, :] = result_modified.iloc[1, :] * len(result_df.iloc[1, :]) / 12
 
-    sharpe_ratio = pd.DataFrame(index=['Sharpe ratio'], columns=result_modified.columns)
-    for i in range(len(result_modified.columns)):
-        sharpe_ratio.iloc[0, i] = result_modified.iloc[1, i] / result_modified.iloc[2, i]
+    annual=True
+    if annual:
+        for i in range(len(result_modified.columns)):
+            result_modified.iloc[0, i] = len(result_df.columns)
+            result_modified.iloc[1, i] = np.exp(np.mean(result_df.iloc[i, :]) * 12) - 1
+            result_modified.iloc[2, i] = np.exp(np.std(result_df.iloc[i, :]) * np.sqrt(12)) - 1
 
-    result_modified = pd.concat([result_modified, sharpe_ratio], axis=0)
+        sharpe_ratio = pd.DataFrame(index=['Sharpe ratio'], columns=result_modified.columns)
+        for i in range(len(result_modified.columns)):
+            sharpe_ratio.iloc[0, i] = result_modified.iloc[1, i] / result_modified.iloc[2, i]
 
-    MDD = pd.DataFrame(index=['Maximum drawdown'], columns=result_modified.columns)
-    for i in range(len(result_df.index)):
-        row = result_df.iloc[i, :]
-        row2 = np.exp(row.astype(float)) - 1
-        cumulative_returns = np.cumprod(1 + row2) - 1
-        peak = np.maximum.accumulate(cumulative_returns)
-        drawdown = (cumulative_returns - peak) / (peak + 1)
-        max_drawdown = drawdown.min()
-        MDD.iloc[0, i] = max_drawdown
+        result_modified = pd.concat([result_modified, sharpe_ratio], axis=0)
 
-    result_modified = pd.concat([result_modified, MDD], axis=0)
+        t_test = pd.DataFrame(index=['t-statistic'], columns=result_modified.columns)
+        for i in range(len(result_modified.columns)):
+            t_statistic, p_value = stats.ttest_ind_from_stats(result_modified.iloc[1, i], result_modified.iloc[2, i],
+                                                              result_modified.iloc[0, i], result_modified.iloc[1, -1],
+                                                              result_modified.iloc[2, -1], result_modified.iloc[0, -1])
+            t_test.iloc[0, i] = t_statistic
+
+        result_modified = pd.concat([result_modified, t_test], axis=0)
+
+        Down_std = pd.DataFrame(index=['Downside deviation'], columns=result_modified.columns)
+        for i in range(len(result_modified.columns)):
+            row = result_df.iloc[i, :]
+            sf = (np.exp(row[row < 0].std() * np.sqrt(12)) - 1)
+            Down_std.iloc[0, i] = sf
+
+        result_modified = pd.concat([result_modified, Down_std], axis=0)
+
+        sortino_ratio = pd.DataFrame(index=['Sortino ratio'], columns=result_modified.columns)
+        for i in range(len(result_modified.columns)):
+            row = result_df.iloc[i, :]
+            sf = (np.exp(row.mean() * 12) - 1) / (np.exp(row[row < 0].std() * np.sqrt(12)) - 1)
+            sortino_ratio.iloc[0, i] = sf
+
+        result_modified = pd.concat([result_modified, sortino_ratio], axis=0)
+
+        Gross_profit = pd.DataFrame(index=['Gross profit'], columns=result_modified.columns)
+        for i in range(len(result_modified.columns)):
+            row = result_df.iloc[i, :]
+            pf = row[row > 0].sum()
+            Gross_profit.iloc[0, i] = pf
+
+        result_modified = pd.concat([result_modified, Gross_profit], axis=0)
+
+        Gross_loss = pd.DataFrame(index=['Gross loss'], columns=result_modified.columns)
+        for i in range(len(result_modified.columns)):
+            row = result_df.iloc[i, :]
+            pf = row[row < 0].sum()
+            Gross_loss.iloc[0, i] = pf
+
+        result_modified = pd.concat([result_modified, Gross_loss], axis=0)
+
+        profit_factor = pd.DataFrame(index=['Profit Factor'], columns=result_modified.columns)
+        for i in range(len(result_modified.columns)):
+            row = result_df.iloc[i, :]
+            pf = row[row > 0].sum() / np.abs(row[row < 0].sum())
+            profit_factor.iloc[0, i] = pf
+
+        result_modified = pd.concat([result_modified, profit_factor], axis=0)
+
+        profitable_years = pd.DataFrame(index=['Profitable years'], columns=result_modified.columns)
+        for i in range(len(result_modified.columns)):
+            row = result_df.iloc[i, :]
+            row.index = pd.to_datetime(row.index)
+            row2 = pd.DataFrame(row.index.year, index=row.index)
+            row = pd.concat([row, row2], axis=1)
+            sum_by_year = row.groupby(0)[result_modified.columns[i]].sum()
+            pf = sum_by_year[sum_by_year > 0].count()
+
+            profitable_years.iloc[0, i] = pf
+
+        result_modified = pd.concat([result_modified, profitable_years], axis=0)
+
+        unprofitable_years = pd.DataFrame(index=['Unprofitable years'], columns=result_modified.columns)
+        for i in range(len(result_modified.columns)):
+            row = result_df.iloc[i, :]
+            row.index = pd.to_datetime(row.index)
+            row2 = pd.DataFrame(row.index.year, index=row.index)
+            row = pd.concat([row, row2], axis=1)
+            sum_by_year = row.groupby(0)[result_modified.columns[i]].sum()
+            pf = sum_by_year[sum_by_year < 0].count()
+
+            unprofitable_years.iloc[0, i] = pf
+
+        result_modified = pd.concat([result_modified, unprofitable_years], axis=0)
+
+        MDD = pd.DataFrame(index=['Maximum drawdown'], columns=result_modified.columns)
+        for i in range(len(result_df.index)):
+            row = result_df.iloc[i, :]
+            row2 = np.exp(row.astype(float)) - 1
+            cumulative_returns = np.cumprod(1 + row2) - 1
+            peak = np.maximum.accumulate(cumulative_returns)
+            drawdown = (cumulative_returns - peak) / (peak + 1)
+            max_drawdown = drawdown.min()
+            MDD.iloc[0, i] = max_drawdown
+
+        result_modified = pd.concat([result_modified, MDD], axis=0)
+
+        Calmar_ratio = pd.DataFrame(index=['Calmar ratio'], columns=result_modified.columns)
+        for i in range(len(result_modified.columns)):
+            row = result_df.iloc[i, :]
+            row2 = np.exp(row.astype(float)) - 1
+            cumulative_returns = np.cumprod(1 + row2) - 1
+            peak = np.maximum.accumulate(cumulative_returns)
+            drawdown = (cumulative_returns - peak) / (peak + 1)
+            max_drawdown = drawdown.min()
+            calmar = (np.exp(row.mean() * 12) - 1) / abs(max_drawdown)
+            Calmar_ratio.iloc[0, i] = calmar
+
+        result_modified = pd.concat([result_modified, Calmar_ratio], axis=0)
+
+    monthly=True
+    if monthly:
+        month = pd.DataFrame(index=['Mean', 'Standard deviation', 'Standard error', 't-statistic', 'Min', '25%', '50%', '75%', 'Max', 'Skew', 'Kurtosis'], columns=result_modified.columns)
+        for i in range(len(result_modified.columns)):
+
+            month.iloc[0, i] = np.mean(result_df.iloc[i, :])
+            month.iloc[1, i] = np.std(result_df.iloc[i, :])
+            month.iloc[2, i] = np.std(result_df.iloc[i, :], ddof=1) / np.sqrt(len(result_df.iloc[i, :]))
+            # month.iloc[3, i] = '?'
+            month.iloc[4, i] = np.min(result_df.iloc[i, :])
+            month.iloc[5, i] = np.percentile(result_df.iloc[i, :], 25)
+            month.iloc[6, i] = np.percentile(result_df.iloc[i, :], 50)
+            month.iloc[7, i] = np.percentile(result_df.iloc[i, :], 75)
+            month.iloc[8, i] = np.max(result_df.iloc[i, :])
+            month.iloc[9, i] = result_df.iloc[i, :].skew()
+            month.iloc[10, i] = result_df.iloc[i, :].kurtosis()
+
+            lags = 1
+            X = sm.add_constant(result_df.iloc[i, :].shift(1).dropna())
+            y = result_df.iloc[i, :][1:]
+
+            # 회귀 모델 적합
+            model = sm.OLS(y, X)
+            result = model.fit()
+
+            # Newey-West 표준 오차 계산
+            newey_west_errors = result.get_robustcov_results(cov_type='HAC', maxlags=lags)
+
+            # Newey-West t-통계량 출력
+            t_statistic, p_value = result.tvalues / np.sqrt(newey_west_errors.cov_params()[0, 0])
+            month.iloc[3, i]=t_statistic
+
+        result_modified = pd.concat([result_modified, month], axis=0)
 
     result_modified.to_csv(os.path.join(output_dir, clustering_name + '_statistcs_modified.csv'), index=True)
     result_df.to_csv(os.path.join(output_dir, clustering_name + '_result_modified.csv'), index=True)
 
-
     if new_Plot:
-        result_df.iloc[:, :] = result_df.iloc[:, :].cumsum(axis=1) if apply_log else result_df.iloc[:, :].cumprod(axis=1)
-
+        result_df.iloc[:, :] = result_df.iloc[:, :].cumsum(axis=1) if apply_log else result_df.iloc[:, :].cumprod(
+            axis=1)
 
         color_dict = {
             'K_mean': 'red',  # Standard red
             'DBSCAN': 'firebrick',  # Darker shade of red
             'Agglomerative': 'darkred',  # Darkest shade of red
 
-            'Bisecting_K_mean': 'blue',   # Standard blue
+            'Bisecting_K_mean': 'blue',  # Standard blue
             'HDBSCAN': 'steelblue',  # Darker shade of blue
             'BIRCH': 'navy',  # Darkest shade blue
 
@@ -181,22 +305,12 @@ def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, f
 
             'Cointegration': 'darkgrey',  # Darker shade of grey
             'Reversal': 'lightgrey',  # Lighter shade of grey
-            'FTSE 100': 'grey'  # Standard grey
-        }
+            'FTSE 100': 'grey',  # Standard grey
 
-        # color_dict = {
-        #     'Cointegration': 'brown',
-        #     'K_mean': 'red',
-        #     'DBSCAN': 'magenta',
-        #     'Agglomerative': 'crimson',
-        #     'HDBSCAN': 'rebeccapurple',
-        #     'OPTICS': 'darkcyan',
-        #     'BIRCH': 'navy',
-        #     'Meanshift': 'blue',
-        #     'GMM': 'royalblue',
-        #     'Reversal': 'dimgrey',
-        #     'FTSE 100': 'black'
-        # }
+            'FINX(1sigma)': 'blue',
+            'FINX(2sigma)': 'steelblue'
+
+        }
 
         plt.figure(figsize=(10, 6))
         handles = []  # List to store the line handles for the legend
@@ -215,7 +329,6 @@ def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, f
         plt.legend(handles=handles)  # Use the handles list to order the legend
         plt.tight_layout()
         plt.show()
-
 
     if not new_Plot:
         # Calculate the cumulative product
@@ -293,6 +406,7 @@ def generate_PCA_Data(data: pd.DataFrame):
     data_normalized = (data - data.mean()) / data.std()
     mat = data_normalized.astype(float)
     # mom1을 제외한 mat/PCA(2-49)
+    # mat = mat.drop(columns=[prefix + '2'])
     # mat = np.delete(mat, 0, axis=1)
 
     # mom49를 제외한 mat/PCA(1-48)
@@ -387,6 +501,7 @@ def t_SNE(title, data, cluster_labels):
         plt.legend(handles, labels)
         plt.show()
         print()
+
 
 # PCA_Result Check
 if __name__ == "__main__":

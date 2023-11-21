@@ -17,7 +17,7 @@ if Reversal_Save:
         # Save LS_Table CSV File
         Do_Result_Save.reversal_table(data, output_dir, file)
 
-K_mean_Save = True
+K_mean_Save = False
 if K_mean_Save:
     input_dir = '../files/characteristics_us'
     output_dir = '../files/clustering_result/K_mean'
@@ -90,7 +90,7 @@ if dbscan_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_DBSCAN(0.1)
+        Do_Clustering.perform_DBSCAN(0.2)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
 
         # Save LS_Table CSV File
@@ -125,7 +125,7 @@ if dbscan_Save:
 
 Agglormerative_Save = False
 if Agglormerative_Save:
-    input_dir = '../files/characteristics'
+    input_dir = '../files/characteristics_us'
     output_dir = '../files/clustering_result/Agglomerative'
     files = sorted(filename for filename in os.listdir(input_dir))
     outliers_count = 0
@@ -143,11 +143,12 @@ if Agglormerative_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_HA(0.9)
+        Do_Clustering.perform_HA(0.4)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
         # Save LS_Table CSV File
         Do_Result_Save.ls_table(Do_Clustering.Agglomerative, output_dir, file, save=True, raw=False)
+
 
         if True:
             # 각 sublist의 원소 개수를 저장할 리스트 생성
@@ -166,7 +167,7 @@ if Agglormerative_Save:
                 top3_lengths.append(0)
 
             new_row = pd.DataFrame({'month': [file[:-4]],
-                                    1: sum(top3_lengths),
+                                    1: sum(sublist_lengths),
                                     2: [top3_lengths[0]],
                                     3: [top3_lengths[1]],
                                     'number of clusters': [len(sublist_lengths)]})
