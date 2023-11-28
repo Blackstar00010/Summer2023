@@ -39,7 +39,7 @@ file_names2 = [name for name in file_names if name not in ['Cointegration']]
 #         LS_merged_df = merge_LS_Table(data, LS_merged_df, file)
 #         LS_merged_df = LS_merged_df[~LS_merged_df.iloc[:,0].duplicated(keep='first')]
 #
-#     result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, subdir, save=True)
+#     result_df = product_LS_Table(LS_merged_df, MOM_merged_df, result_df, subdir, save=False)
 #
 # save_and_plot_result(output_dir,'total', result_df, file_names, FTSE=False, apply_log=True, new_Plot=True)
 

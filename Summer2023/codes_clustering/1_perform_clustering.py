@@ -12,7 +12,7 @@ if K_mean_Save:
     result_df = pd.DataFrame()
     stat_lists = []
 
-    input_dir = '../files/characteristics'
+    input_dir = '../files/characteristics_us'
 
     files = sorted(filename for filename in os.listdir(input_dir))
     cl = 0
@@ -59,11 +59,11 @@ if K_mean_Save:
         print(f'total outliers: {outliers_count}')
         print(f'number of stock traded: {figure}')
 
-    save_and_plot_result(output_dir,'K_mean', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
+    save_and_plot_result(output_dir,'K_mean', result_df, file_names, FTSE=False, apply_log=True, new_Plot=False)
     save_cluster_info('K_mean', stat_lists, file_names)
 
 # hyper parameter eps percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow) Done!
-dbscan_Save = True
+dbscan_Save = False
 if dbscan_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -126,14 +126,13 @@ if dbscan_Save:
     save_cluster_info('DBSCAN', stat_lists, file_names)
 
 # hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow) Done!
-agglomerative_Save = False
+agglomerative_Save = True
 if agglomerative_Save:
     file_names = []
     result_df = pd.DataFrame()
     stat_lists = []
 
     input_dir = '../files/characteristics_us'
-    output_dir = '../files/clustering_result/Hierarchical_Agglomerative'
     files = sorted(filename for filename in os.listdir(input_dir))
     cl = 0
     outliers_count = 0
@@ -179,7 +178,7 @@ if agglomerative_Save:
         print(f'total outliers: {outliers_count}')
         print(f'number of stock traded: {figure}')
 
-    save_and_plot_result(output_dir,'Agglomerative', result_df, file_names, FTSE=True, apply_log=True, new_Plot=False)
+    save_and_plot_result(output_dir,'Agglomerative', result_df, file_names, FTSE=False, apply_log=True, new_Plot=False)
     save_cluster_info('Agglomerative', stat_lists, file_names)
 
 # hyper parameter K(3, 5, 10, 25, 50, 75, 100, 200, 300) should be tested manually.(paper follow) Done!

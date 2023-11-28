@@ -1,5 +1,6 @@
 from PCA_and_ETC import *
 
+
 first_day_of_month = False
 if first_day_of_month:
     # Creates a new table only containing the rows of dates that are first business day of the month
@@ -106,6 +107,7 @@ if MOM_Merge:
             merged_df = pd.merge(merged_df, data, on='Firm Name', how='outer')
 
     merged_df = merged_df.sort_values('Firm Name')
+    merged_df.set_index('Firm Name', inplace=True)
 
 # fixing abnormal mom1
 #     for col in merged_df.columns:
@@ -113,5 +115,11 @@ if MOM_Merge:
 #             continue
 #         merged_df.loc[merged_df[col] > 1, col] = 1
 #         merged_df.loc[merged_df[col] < -0.5, col] = -0.5
+    # Winsorization 적용
+    # alpha = 0.02  # 상위 10%와 하위 10%의 값을 winsorize
+    #
+    # # 수치형 열에 대해서만 Winsorization을 수행하도록 선택
+    # numeric_columns = merged_df.select_dtypes(include=['float64', 'int64']).columns
+    # merged_df[numeric_columns] = merged_df[numeric_columns].apply(lambda x: winsorize(x, limits=(alpha, alpha)).data)
 
-    merged_df.to_csv('../files/mom1_data_combined_adj_close.csv', index=False)
+    merged_df.to_csv('../files/mom1_data_combined_adj_close.csv', index=True)

@@ -5,12 +5,35 @@ from save_cointegration import *
 # turn off warning
 warnings.filterwarnings("ignore")
 
-abnormal = False
+abnormal = True
 if abnormal:
     MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
     MOM_merged_df.set_index('Firm Name', inplace=True)
     MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
 
+    count3 = 0
+    count4 = 0
+    count5 = 0
+    count6 = 0
+
+    count3 += MOM_merged_df[MOM_merged_df >= 0.5].count().sum()
+    count4 += MOM_merged_df[MOM_merged_df <= -0.5].count().sum()
+    count5 += MOM_merged_df[MOM_merged_df == 0].count().sum()
+    count6 += MOM_merged_df.isna().sum().sum()
+    count_greater_than_0_5 = (MOM_merged_df >= 0.5).any(axis=1).sum()
+    count_less_than_0_5 = (MOM_merged_df <= -0.5).any(axis=1).sum()
+    count_both_0_5 = ((MOM_merged_df <= -0.5) | (MOM_merged_df >= 0.5)).any(axis=1).sum()
+
+
+    print("-0.5보다 작고 0.5보다 큰 숫자가 있는 행의 개수:", count_both_0_5)
+    print("0.5보다 큰 숫자가 있는 행의 개수:", count_greater_than_0_5)
+    print("-0.5보다 작은 숫자가 있는 행의 개수:", count_less_than_0_5)
+    print('0.5보다 큰 숫자가 있는 칸 갯수:', count3)
+    print('-0.5보다 작은 숫자가 있는 칸 갯수:', count4)
+    print('mom1=0인 칸 갯수:',count5)
+    t=9749*391-count6
+    print('NaN이 아닌 칸 갯수:', t)
+    print(MOM_merged_df.shape)
     base_directory = '../files/clustering_result/'
 
     # Get all subdirectories in the base directory
@@ -34,6 +57,8 @@ if abnormal:
         LS_merged_df.drop(columns='Firm Name', inplace=True)
 
         outlier_df = pd.DataFrame()
+        count1 = 0
+        count2 = 0
 
         for i in range(len(LS_merged_df.iloc[0, :]) - 1):
             col = pd.DataFrame(LS_merged_df.iloc[:, i])
@@ -42,8 +67,11 @@ if abnormal:
 
             value_df = MOM_merged_df.loc[firm_df]
             value_df = value_df.iloc[:, i]
-            filtered_df = value_df[(value_df >= 1) | (value_df <= -0.5)]
+            filtered_df = value_df[(value_df >= 0.5) | (value_df <= -0.5)]
             filtered_df = pd.DataFrame({filtered_df.name: filtered_df})
+
+            count1 += value_df[value_df >= 0.5].count().sum()
+            count2 += value_df[value_df <= -0.5].count().sum()
 
             outlier_df = pd.concat([outlier_df, filtered_df])
 
@@ -56,8 +84,10 @@ if abnormal:
             count_numeric_df.loc[col] = [count]
 
         count_numeric_df.T.to_csv(f'../files/abnormal_count_{subdir}.csv')
+        print(count1)
+        print(count2)
 
-min_max = False
+min_max = True
 if min_max:
     df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
 
@@ -73,7 +103,6 @@ if min_max:
     result = pd.DataFrame(df.min())
 
     result.to_csv('../files/min_mom1.csv')
-
 
 traded = False
 if traded:
@@ -91,7 +120,8 @@ if traded:
 
 finx_before = False
 if finx_before:
-    input_dir = '../finx/clustering_result'
+    input_dir = '../finx/30_us_merged'
+    # input_dir = '../finx/10_us_merged'
     output_dir = '../finx/clustering_result2'
     files = sorted(filename for filename in os.listdir(input_dir))
     for file in files:
@@ -100,16 +130,20 @@ if finx_before:
         df = pd.read_csv(os.path.join(input_dir, file))
 
         new_df = pd.DataFrame(index=None, columns=['Firm Name', 'Momentum_1', 'Cluster Index'])
-        new_df['Firm Name'] = df.iloc[:, 1]
-        new_df['Momentum_1'] = df.iloc[:, 0]
-        new_df['Cluster Index'] = df.iloc[:, 2]+1
+        new_df['Firm Name'] = df.iloc[:, 0]
+        new_df['Momentum_1'] = df.iloc[:, 1]
+        new_df['Cluster Index'] = df.iloc[:, 2] + 1
 
         new_df.to_csv(os.path.join(output_dir, file), index=None)
 
-finx = True
+finx = False
 if finx:
     input_dir = '../finx/clustering_result2'
-    output_dir = '../finx/long_short_result'
+    # output_dir = '../files/clustering_result/CL_10_1sigma'
+    # output_dir = '../files/clustering_result/CL_10_2sigma'
+    # output_dir = '../files/clustering_result/CL_30_1sigma'
+    output_dir = '../files/clustering_result/CL_30_2sigma'
+
     files = sorted(filename for filename in os.listdir(input_dir))
     cl = 0
     outliers_count = 0

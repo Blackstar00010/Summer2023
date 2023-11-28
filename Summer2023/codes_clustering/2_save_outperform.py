@@ -1,7 +1,7 @@
 import Clustering as C
 from PCA_and_ETC import *
 
-Reversal_Save = False
+Reversal_Save = True
 if Reversal_Save:
     input_dir = '../files/characteristics_us'
     output_dir = '../files/clustering_result/Reversal'
@@ -37,7 +37,7 @@ if K_mean_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_kmeans(500)
+        Do_Clustering.perform_kmeans(75)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.K_Mean)
 
         # Save LS_Table CSV File
@@ -90,7 +90,7 @@ if dbscan_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_DBSCAN(0.2)
+        Do_Clustering.perform_DBSCAN(0.8)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
 
         # Save LS_Table CSV File
@@ -143,7 +143,7 @@ if Agglormerative_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_HA(0.4)
+        Do_Clustering.perform_HA(0.9)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
         # Save LS_Table CSV File

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from sklearn import manifold
 from sklearn.decomposition import PCA
-
+from scipy.stats.mstats import winsorize
 # turn off warning
 warnings.filterwarnings("ignore")
 
@@ -52,6 +52,7 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     # 마지막 row 버리면 한칸씩 밀어버리는 것과 동치
     LS_merged_df = LS_merged_df.drop(LS_merged_df.columns[-1], axis=1)
     LS_merged_df = LS_merged_df.fillna(0)
+    LS_merged_df.sort_values('Firm Name', inplace=True)
     LS_merged_df.columns = MOM_merged_df.columns
 
     if save:
@@ -73,7 +74,7 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
             if col == 'Firm Name':
                 continue
             prod.loc[prod[col] > 0.5, col] = 0.5
-            prod.loc[prod[col] < -0.33333, col] = -0.33333
+            prod.loc[prod[col] < -0.99, col] = -0.99
 
     # Count the non-zero LS that is the number of total firm invested(395 by 1 matrix/index=Date)
     non_zero_count = LS_merged_df.astype(bool).sum()
@@ -136,7 +137,7 @@ def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, f
         index=['count', 'annual return mean', 'annual return std'],
         columns=result_df.index)
 
-    annual=True
+    annual = True
     if annual:
         for i in range(len(result_modified.columns)):
             result_modified.iloc[0, i] = len(result_df.columns)
@@ -249,15 +250,15 @@ def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, f
 
         result_modified = pd.concat([result_modified, Calmar_ratio], axis=0)
 
-    monthly=True
+    monthly = True
     if monthly:
-        month = pd.DataFrame(index=['Mean', 'Standard deviation', 'Standard error', 't-statistic', 'Min', '25%', '50%', '75%', 'Max', 'Skew', 'Kurtosis'], columns=result_modified.columns)
+        month = pd.DataFrame(
+            index=['Mean', 'Standard deviation', 'Standard error', 't-statistic', 'Min', '25%', '50%', '75%', 'Max',
+                   'Skew', 'Kurtosis'], columns=result_modified.columns)
         for i in range(len(result_modified.columns)):
-
             month.iloc[0, i] = np.mean(result_df.iloc[i, :])
             month.iloc[1, i] = np.std(result_df.iloc[i, :])
             month.iloc[2, i] = np.std(result_df.iloc[i, :], ddof=1) / np.sqrt(len(result_df.iloc[i, :]))
-            # month.iloc[3, i] = '?'
             month.iloc[4, i] = np.min(result_df.iloc[i, :])
             month.iloc[5, i] = np.percentile(result_df.iloc[i, :], 25)
             month.iloc[6, i] = np.percentile(result_df.iloc[i, :], 50)
@@ -266,20 +267,12 @@ def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, f
             month.iloc[9, i] = result_df.iloc[i, :].skew()
             month.iloc[10, i] = result_df.iloc[i, :].kurtosis()
 
-            lags = 1
-            X = sm.add_constant(result_df.iloc[i, :].shift(1).dropna())
-            y = result_df.iloc[i, :][1:]
-
-            # 회귀 모델 적합
-            model = sm.OLS(y, X)
-            result = model.fit()
-
-            # Newey-West 표준 오차 계산
-            newey_west_errors = result.get_robustcov_results(cov_type='HAC', maxlags=lags)
-
-            # Newey-West t-통계량 출력
-            t_statistic, p_value = result.tvalues / np.sqrt(newey_west_errors.cov_params()[0, 0])
-            month.iloc[3, i]=t_statistic
+            # X = sm.add_constant(result_df.iloc[i, :].shift(1).dropna())
+            # y = result_df.iloc[i, :][1:]
+            # model = sm.OLS(y, X)
+            # newey_west = model.fit(cov_type='HAC', cov_kwds={'maxlags': 1})
+            # t_statistic, p_value = newey_west.tvalues
+            # month.iloc[3, i] = t_statistic
 
         result_modified = pd.concat([result_modified, month], axis=0)
 
@@ -307,8 +300,10 @@ def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, f
             'Reversal': 'lightgrey',  # Lighter shade of grey
             'FTSE 100': 'grey',  # Standard grey
 
-            'FINX(1sigma)': 'blue',
-            'FINX(2sigma)': 'steelblue'
+            'CL_10_1sigma': 'blue',  # Standard blue
+            'CL_10_2sigma': 'steelblue',  # Darker shade of blue
+            'CL_30_1sigma': 'navy',  # Darkest shade blue
+            'CL_30_2sigma': 'deepskyblue'  # Bright blue
 
         }
 
@@ -349,17 +344,6 @@ def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, f
         plt.tight_layout()
         plt.show()
 
-        # # Plot a graph for each row
-        # for i in range(len(result_df)):
-        #     plt.figure(figsize=(10, 6))
-        #     plt.plot(result_df.columns[1:-7], result_df.iloc[i, 1:-7].fillna(method='ffill'))
-        #     plt.title(result_df.index[i])
-        #     plt.xlabel('Date')
-        #     plt.ylabel('Average Value')
-        #     plt.xticks(rotation=45)
-        #     plt.tight_layout()
-        #     plt.show()
-
 
 def merge_Long_and_Short_Table(data, df2, df3, file):
     # Keep only the 'Firm Name' and 'Long Short' columns
@@ -385,7 +369,7 @@ def merge_Long_and_Short_Table(data, df2, df3, file):
 
 
 def save_cluster_info(clustering_name, stat_list: list, file_names):
-    file_names.remove('FTSE 100')
+    # file_names.remove('FTSE 100')
     stat_df = pd.DataFrame(stat_list,
                            index=file_names,
                            columns=['Number of clusters', 'Number of stock in clusters',
@@ -406,12 +390,12 @@ def generate_PCA_Data(data: pd.DataFrame):
     data_normalized = (data - data.mean()) / data.std()
     mat = data_normalized.astype(float)
     # mom1을 제외한 mat/PCA(2-49)
-    # mat = mat.drop(columns=[prefix + '2'])
-    # mat = np.delete(mat, 0, axis=1)
+    mat = mat.drop(columns=[prefix + '2'])
+    mat = np.delete(mat, 0, axis=1)
 
     # mom49를 제외한 mat/PCA(1-48)
-    mat = mat.drop(columns=[prefix + '49'])
-    mat = mat.dropna(how='all', axis=1)
+    # mat = mat.drop(columns=[prefix + '49'])
+    # mat = mat.dropna(how='all', axis=1)
 
     # 1. Searching optimal n_components
     n_components = min(len(data), 20)
@@ -457,11 +441,13 @@ def read_and_preprocess_data(input_dir, file) -> pd.DataFrame:
     """
 
     df = pd.read_csv(os.path.join(input_dir, file), index_col=0)
-
+    prefix = momentum_prefix_finder(df)
     # Replace infinities with NaN
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
     # Drop rows with NaN values
     df.dropna(inplace=True)
+    alpha = 0.05  # 상위 10%와 하위 10%의 값을 winsorize
+    df.astype(float).loc[:, prefix + '1'] = winsorize(df.astype(float).loc[:, prefix + '1'], limits=(alpha, alpha)).data
     return df
 
 
