@@ -69,7 +69,7 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     if save:
         prod.to_csv(f'../files/prod_{subdir}.csv')
 
-    if True:
+    if False:
         for col in prod.columns:
             if col == 'Firm Name':
                 continue

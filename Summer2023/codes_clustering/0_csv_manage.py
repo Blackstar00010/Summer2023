@@ -109,17 +109,37 @@ if MOM_Merge:
     merged_df = merged_df.sort_values('Firm Name')
     merged_df.set_index('Firm Name', inplace=True)
 
+    print("Original Data:")
+    print("Min:", np.min(data))
+    print("Max:", np.max(data))
+
+
+
+
 # fixing abnormal mom1
 #     for col in merged_df.columns:
 #         if col == 'Firm Name':
 #             continue
 #         merged_df.loc[merged_df[col] > 1, col] = 1
 #         merged_df.loc[merged_df[col] < -0.5, col] = -0.5
-    # Winsorization 적용
-    # alpha = 0.02  # 상위 10%와 하위 10%의 값을 winsorize
+
+    # # Winsorizing의 상위 및 하위 백분율 설정
+    # lower_percentile = 1
+    # upper_percentile = 70
     #
     # # 수치형 열에 대해서만 Winsorization을 수행하도록 선택
     # numeric_columns = merged_df.select_dtypes(include=['float64', 'int64']).columns
-    # merged_df[numeric_columns] = merged_df[numeric_columns].apply(lambda x: winsorize(x, limits=(alpha, alpha)).data)
+    # merged_df[numeric_columns] = merged_df[numeric_columns].apply(lambda x: winsorize(x, limits=(lower_percentile / 100.0, upper_percentile / 100.0)).data)
+
+    # plt.hist(merged_df.values.flatten(), range=(-1, 400), bins=1000, color='skyblue', edgecolor='black')  # bins는 막대의 갯수
+    # plt.title('Histogram of Values')
+    # plt.xlabel('Value')
+    # plt.ylabel('Frequency')
+    # plt.show()
+
+
+    print("\nWinsorized Data:")
+    print("Min:", np.min(merged_df))
+    print("Max:", np.max(merged_df))
 
     merged_df.to_csv('../files/mom1_data_combined_adj_close.csv', index=True)

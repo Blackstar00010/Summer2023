@@ -20,7 +20,7 @@ if abnormal:
     count4 += MOM_merged_df[MOM_merged_df <= -0.5].count().sum()
     count5 += MOM_merged_df[MOM_merged_df == 0].count().sum()
     count6 += MOM_merged_df.isna().sum().sum()
-    count_greater_than_0_5 = (MOM_merged_df >= 0.5).any(axis=1).sum()
+    count_greater_than_0_5 = (MOM_merged_df >= 1000).any(axis=1).sum()
     count_less_than_0_5 = (MOM_merged_df <= -0.5).any(axis=1).sum()
     count_both_0_5 = ((MOM_merged_df <= -0.5) | (MOM_merged_df >= 0.5)).any(axis=1).sum()
 
