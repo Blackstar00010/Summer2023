@@ -441,13 +441,10 @@ def read_and_preprocess_data(input_dir, file) -> pd.DataFrame:
     """
 
     df = pd.read_csv(os.path.join(input_dir, file), index_col=0)
-    prefix = momentum_prefix_finder(df)
     # Replace infinities with NaN
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
     # Drop rows with NaN values
     df.dropna(inplace=True)
-    alpha = 0.05  # 상위 10%와 하위 10%의 값을 winsorize
-    df.astype(float).loc[:, prefix + '1'] = winsorize(df.astype(float).loc[:, prefix + '1'], limits=(alpha, alpha)).data
     return df
 
 

@@ -70,7 +70,7 @@ if K_mean_Save:
 
     top_df.to_csv(os.path.join('../files/result2/', 'K_Mean.csv'), index=False)
 
-dbscan_Save = False
+dbscan_Save = True
 if dbscan_Save:
     input_dir = '../files/characteristics_us'
     output_dir = '../files/clustering_result/DBSCAN'
@@ -90,7 +90,7 @@ if dbscan_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_DBSCAN(0.8)
+        Do_Clustering.perform_DBSCAN(0.4)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
 
         # Save LS_Table CSV File
