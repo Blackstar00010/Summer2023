@@ -1,11 +1,38 @@
 from PCA_and_ETC import *
-
+from scipy.stats.mstats import winsorize
 # turn off warning
 warnings.filterwarnings("ignore")
 
-MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
+MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj_close2.csv')
 MOM_merged_df.set_index('Firm Name', inplace=True)
 MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
+count3 = 0
+count4 = 0
+count5 = 0
+count6 = 0
+
+count3 += MOM_merged_df[MOM_merged_df >= 0].count().sum()
+count4 += MOM_merged_df[MOM_merged_df < 0].count().sum()
+count5 += MOM_merged_df[MOM_merged_df == 0].count().sum()
+count6 += MOM_merged_df.isna().sum().sum()
+
+count_greater_than_0_5 = (MOM_merged_df >= 0.5).any(axis=1).sum()
+count_less_than_0_5 = (MOM_merged_df <= -0.5).any(axis=1).sum()
+count_both_0_5 = ((MOM_merged_df <= -0.5) | (MOM_merged_df >= 0.5)).any(axis=1).sum()
+
+print("\n-0.5보다 작고 0.5보다 큰 숫자가 있는 행의 개수:", count_both_0_5)
+print("0.5보다 큰 숫자가 있는 행의 개수:", count_greater_than_0_5)
+print("-0.5보다 작은 숫자가 있는 행의 개수:", count_less_than_0_5)
+print('0보다 큰 숫자가 있는 칸 갯수:', count3)
+print('0보다 작은 숫자가 있는 칸 갯수:', count4)
+print('mom1=0인 칸 갯수:', count5)
+t = 9749 * 391 - count6
+print('NaN이 아닌 칸 갯수:', t)
+print(MOM_merged_df.shape)
+print("\nWinsorized Data:")
+print("Min:", np.min(MOM_merged_df))
+print("Max:", np.max(MOM_merged_df))
+print("Mean:", np.mean(MOM_merged_df))
 
 base_directory = '../files/clustering_result/'
 output_dir='../files/result'
@@ -62,7 +89,7 @@ for subdir in subdirectories:
         LS_merged_df2, LS_merged_df3 = merge_Long_and_Short_Table(data, LS_merged_df2, LS_merged_df3, file)
 
     result_df2 = product_LS_Table(LS_merged_df2, MOM_merged_df, result_df2, subdir, save=False)
-    result_df3 = product_LS_Table(LS_merged_df3, MOM_merged_df, result_df3, subdir, save=True)
+    result_df3 = product_LS_Table(LS_merged_df3, MOM_merged_df, result_df3, subdir, save=False)
 
 save_and_plot_result(output_dir2,'total', result_df2, file_names2, FTSE=False, apply_log=True, new_Plot=True)
 save_and_plot_result(output_dir3,'total', result_df3, file_names2, FTSE=False, apply_log=True, new_Plot=True)

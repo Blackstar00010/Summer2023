@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from sklearn import manifold
 from sklearn.decomposition import PCA
-from scipy.stats.mstats import winsorize
+
 # turn off warning
 warnings.filterwarnings("ignore")
 
@@ -300,7 +300,7 @@ def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, f
             'Reversal': 'lightgrey',  # Lighter shade of grey
             'FTSE 100': 'grey',  # Standard grey
 
-            'CL_10_1sigma': 'blue',  # Standard blue
+            'CL_20_64': 'blue',  # Standard blue
             'CL_10_2sigma': 'steelblue',  # Darker shade of blue
             'CL_30_1sigma': 'navy',  # Darkest shade blue
             'CL_30_2sigma': 'deepskyblue'  # Bright blue
@@ -390,8 +390,8 @@ def generate_PCA_Data(data: pd.DataFrame):
     data_normalized = (data - data.mean()) / data.std()
     mat = data_normalized.astype(float)
     # mom1을 제외한 mat/PCA(2-49)
-    mat = mat.drop(columns=[prefix + '2'])
-    mat = np.delete(mat, 0, axis=1)
+    mat = mat.drop(columns=[prefix + '1'])
+    mat = mat.dropna(how='all', axis=1)
 
     # mom49를 제외한 mat/PCA(1-48)
     # mat = mat.drop(columns=[prefix + '49'])

@@ -1,93 +1,135 @@
-import pandas as pd
-
 from save_cointegration import *
+from scipy.stats.mstats import winsorize
 
 # turn off warning
 warnings.filterwarnings("ignore")
 
-abnormal = True
+abnormal = False
 if abnormal:
     MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
     MOM_merged_df.set_index('Firm Name', inplace=True)
-    MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
 
     count3 = 0
     count4 = 0
     count5 = 0
     count6 = 0
 
-    count3 += MOM_merged_df[MOM_merged_df >= 0.5].count().sum()
-    count4 += MOM_merged_df[MOM_merged_df <= -0.5].count().sum()
+    count3 += MOM_merged_df[MOM_merged_df >= 0].count().sum()
+    count4 += MOM_merged_df[MOM_merged_df < 0].count().sum()
     count5 += MOM_merged_df[MOM_merged_df == 0].count().sum()
     count6 += MOM_merged_df.isna().sum().sum()
-    count_greater_than_0_5 = (MOM_merged_df >= 1000).any(axis=1).sum()
+
+    count_greater_than_0_5 = (MOM_merged_df >= 0.5).any(axis=1).sum()
     count_less_than_0_5 = (MOM_merged_df <= -0.5).any(axis=1).sum()
     count_both_0_5 = ((MOM_merged_df <= -0.5) | (MOM_merged_df >= 0.5)).any(axis=1).sum()
 
-
-    print("-0.5보다 작고 0.5보다 큰 숫자가 있는 행의 개수:", count_both_0_5)
+    print("\n-0.5보다 작고 0.5보다 큰 숫자가 있는 행의 개수:", count_both_0_5)
     print("0.5보다 큰 숫자가 있는 행의 개수:", count_greater_than_0_5)
     print("-0.5보다 작은 숫자가 있는 행의 개수:", count_less_than_0_5)
-    print('0.5보다 큰 숫자가 있는 칸 갯수:', count3)
-    print('-0.5보다 작은 숫자가 있는 칸 갯수:', count4)
-    print('mom1=0인 칸 갯수:',count5)
-    t=9749*391-count6
+    print('0보다 큰 숫자가 있는 칸 갯수:', count3)
+    print('0보다 작은 숫자가 있는 칸 갯수:', count4)
+    print('mom1=0인 칸 갯수:', count5)
+    t = 9749 * 391 - count6
     print('NaN이 아닌 칸 갯수:', t)
     print(MOM_merged_df.shape)
-    base_directory = '../files/clustering_result/'
+    print("\nOriginal Data:")
+    print("Min:", np.min(MOM_merged_df))
+    print("Max:", np.max(MOM_merged_df))
+    print("Mean:", np.mean(MOM_merged_df))
 
-    # Get all subdirectories in the base directory
-    subdirectories = [d for d in os.listdir(base_directory) if os.path.isdir(os.path.join(base_directory, d))]
+    # Winsorizing의 상위 및 하위 백분율 설정
+    lower_percentile = 3
+    upper_percentile = 2
 
-    file_names = []
-    result_df = pd.DataFrame()
+    # 수치형 열에 대해서만 Winsorization을 수행하도록 선택
+    numeric_columns = MOM_merged_df.select_dtypes(include=['float64', 'int64']).columns
+    MOM_merged_df[numeric_columns] = MOM_merged_df[numeric_columns].apply(
+        lambda x: winsorize(x, limits=(lower_percentile / 100.0, upper_percentile / 100.0)).data, axis=0)
 
-    for subdir in subdirectories:
-        print(subdir)
-        directory = os.path.join(base_directory, subdir)
+    count3 = 0
+    count4 = 0
+    count5 = 0
+    count6 = 0
 
-        LS_merged_df = pd.DataFrame()
+    count3 += MOM_merged_df[MOM_merged_df >= 0].count().sum()
+    count4 += MOM_merged_df[MOM_merged_df < 0].count().sum()
+    count5 += MOM_merged_df[MOM_merged_df == 0].count().sum()
+    count6 += MOM_merged_df.isna().sum().sum()
 
-        files = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
-        for file in files:
-            data = pd.read_csv(os.path.join(directory, file))
-            LS_merged_df = merge_LS_Table(data, LS_merged_df, file)
+    count_greater_than_0_5 = (MOM_merged_df >= 0.5).any(axis=1).sum()
+    count_less_than_0_5 = (MOM_merged_df <= -0.5).any(axis=1).sum()
+    count_both_0_5 = ((MOM_merged_df <= -0.5) | (MOM_merged_df >= 0.5)).any(axis=1).sum()
 
-        LS_merged_df.index = LS_merged_df.iloc[:, 0]
-        LS_merged_df.drop(columns='Firm Name', inplace=True)
+    print("\n-0.5보다 작고 0.5보다 큰 숫자가 있는 행의 개수:", count_both_0_5)
+    print("0.5보다 큰 숫자가 있는 행의 개수:", count_greater_than_0_5)
+    print("-0.5보다 작은 숫자가 있는 행의 개수:", count_less_than_0_5)
+    print('0보다 큰 숫자가 있는 칸 갯수:', count3)
+    print('0보다 작은 숫자가 있는 칸 갯수:', count4)
+    print('mom1=0인 칸 갯수:', count5)
+    t = 9749 * 391 - count6
+    print('NaN이 아닌 칸 갯수:', t)
+    print(MOM_merged_df.shape)
+    print("\nWinsorized Data:")
+    print("Min:", np.min(MOM_merged_df))
+    print("Max:", np.max(MOM_merged_df))
+    print("Mean:", np.mean(MOM_merged_df))
 
-        outlier_df = pd.DataFrame()
-        count1 = 0
-        count2 = 0
+    MOM_merged_df.to_csv('../files/mom1_data_combined_adj_close2.csv', index=True)
 
-        for i in range(len(LS_merged_df.iloc[0, :]) - 1):
-            col = pd.DataFrame(LS_merged_df.iloc[:, i])
+    # base_directory = '../files/clustering_result/'
+    #
+    # # Get all subdirectories in the base directory
+    # subdirectories = [d for d in os.listdir(base_directory) if os.path.isdir(os.path.join(base_directory, d))]
+    #
+    # file_names = []
+    # result_df = pd.DataFrame()
+    #
+    # for subdir in subdirectories:
+    #     print(subdir)
+    #     directory = os.path.join(base_directory, subdir)
+    #
+    #     LS_merged_df = pd.DataFrame()
+    #
+    #     files = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
+    #     for file in files:
+    #         data = pd.read_csv(os.path.join(directory, file))
+    #         LS_merged_df = merge_LS_Table(data, LS_merged_df, file)
+    #
+    #     LS_merged_df.index = LS_merged_df.iloc[:, 0]
+    #     LS_merged_df.drop(columns='Firm Name', inplace=True)
+    #
+    #     outlier_df = pd.DataFrame()
+    #     count1 = 0
+    #     count2 = 0
+    #
+    #     for i in range(len(LS_merged_df.iloc[0, :]) - 1):
+    #         col = pd.DataFrame(LS_merged_df.iloc[:, i])
+    #
+    #         firm_df = col.index[(col.iloc[:, 0] != 0) & (col.iloc[:, 0].notna())]
+    #
+    #         value_df = MOM_merged_df.loc[firm_df]
+    #         value_df = value_df.iloc[:, i]
+    #         filtered_df = value_df[(value_df >= 0.5) | (value_df <= -0.5)]
+    #         filtered_df = pd.DataFrame({filtered_df.name: filtered_df})
+    #
+    #         count1 += value_df[value_df >= 0.5].count().sum()
+    #         count2 += value_df[value_df <= -0.5].count().sum()
+    #
+    #         outlier_df = pd.concat([outlier_df, filtered_df])
+    #
+    #     outlier_df.to_csv(f'../files/abnormal_{subdir}.csv')
+    #
+    #     count_numeric_df = pd.DataFrame(columns=['count'])
+    #     # 각 열을 순회하면서 숫자가 있는 칸들의 개수를 계산하여 저장
+    #     for col in outlier_df.columns:
+    #         count = outlier_df[col].apply(lambda x: 1 if pd.notna(x) and isinstance(x, (int, float)) else 0).sum()
+    #         count_numeric_df.loc[col] = [count]
+    #
+    #     count_numeric_df.T.to_csv(f'../files/abnormal_count_{subdir}.csv')
+    #     print(count1)
+    #     print(count2)
 
-            firm_df = col.index[(col.iloc[:, 0] != 0) & (col.iloc[:, 0].notna())]
-
-            value_df = MOM_merged_df.loc[firm_df]
-            value_df = value_df.iloc[:, i]
-            filtered_df = value_df[(value_df >= 0.5) | (value_df <= -0.5)]
-            filtered_df = pd.DataFrame({filtered_df.name: filtered_df})
-
-            count1 += value_df[value_df >= 0.5].count().sum()
-            count2 += value_df[value_df <= -0.5].count().sum()
-
-            outlier_df = pd.concat([outlier_df, filtered_df])
-
-        outlier_df.to_csv(f'../files/abnormal_{subdir}.csv')
-
-        count_numeric_df = pd.DataFrame(columns=['count'])
-        # 각 열을 순회하면서 숫자가 있는 칸들의 개수를 계산하여 저장
-        for col in outlier_df.columns:
-            count = outlier_df[col].apply(lambda x: 1 if pd.notna(x) and isinstance(x, (int, float)) else 0).sum()
-            count_numeric_df.loc[col] = [count]
-
-        count_numeric_df.T.to_csv(f'../files/abnormal_count_{subdir}.csv')
-        print(count1)
-        print(count2)
-
-min_max = True
+min_max = False
 if min_max:
     df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
 
@@ -118,9 +160,9 @@ if traded:
     plt.legend().set_visible(False)
     plt.show()
 
-finx_before = False
+finx_before = True
 if finx_before:
-    input_dir = '../finx/30_us_merged'
+    input_dir = '../finx/20_characteristics_us_batch_64_bins_32_hidden_128'
     # input_dir = '../finx/10_us_merged'
     output_dir = '../finx/clustering_result2'
     files = sorted(filename for filename in os.listdir(input_dir))
@@ -131,18 +173,18 @@ if finx_before:
 
         new_df = pd.DataFrame(index=None, columns=['Firm Name', 'Momentum_1', 'Cluster Index'])
         new_df['Firm Name'] = df.iloc[:, 0]
-        new_df['Momentum_1'] = df.iloc[:, 1]
-        new_df['Cluster Index'] = df.iloc[:, 2] + 1
+        new_df['Momentum_1'] = df.iloc[:, 2]
+        new_df['Cluster Index'] = df.iloc[:, 1]
 
         new_df.to_csv(os.path.join(output_dir, file), index=None)
 
-finx = False
+finx = True
 if finx:
     input_dir = '../finx/clustering_result2'
     # output_dir = '../files/clustering_result/CL_10_1sigma'
     # output_dir = '../files/clustering_result/CL_10_2sigma'
     # output_dir = '../files/clustering_result/CL_30_1sigma'
-    output_dir = '../files/clustering_result/CL_30_2sigma'
+    output_dir = '../files/clustering_result/CL_20_64'
 
     files = sorted(filename for filename in os.listdir(input_dir))
     cl = 0

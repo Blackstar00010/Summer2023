@@ -1,7 +1,7 @@
 import Clustering as C
 from PCA_and_ETC import *
 
-Reversal_Save = True
+Reversal_Save = False
 if Reversal_Save:
     input_dir = '../files/characteristics_us'
     output_dir = '../files/clustering_result/Reversal'
