@@ -19,7 +19,7 @@ if K_mean_Save:
     outliers_count = 0
     figure = 0
 
-    for i in [3,5,10,25, 50, 75, 100, 200, 300]:
+    for i in [10,20,30,50,100]:
         file_names.append(f'{i}')
         LS_merged_df = pd.DataFrame()
 
