@@ -160,99 +160,149 @@ if traded:
     plt.legend().set_visible(False)
     plt.show()
 
-finx_before = True
+finx_before = False
 if finx_before:
-    input_dir = '../finx/20_characteristics_us_batch_64_bins_32_hidden_128'
-    # input_dir = '../finx/10_us_merged'
-    output_dir = '../finx/clustering_result2'
-    files = sorted(filename for filename in os.listdir(input_dir))
-    for file in files:
-        print(file)
+    base_directory = '../finx/'
+    subdirectories = [d for d in os.listdir(base_directory) if os.path.isdir(os.path.join(base_directory, d))]
+    file_names = []
 
-        df = pd.read_csv(os.path.join(input_dir, file))
+    for subdir in subdirectories:
+        file_names.append(subdir)
 
-        new_df = pd.DataFrame(index=None, columns=['Firm Name', 'Momentum_1', 'Cluster Index'])
-        new_df['Firm Name'] = df.iloc[:, 0]
-        new_df['Momentum_1'] = df.iloc[:, 2]
-        new_df['Cluster Index'] = df.iloc[:, 1]
+    subdirectories.remove('modified')
+    file_names.remove('modified')
 
-        new_df.to_csv(os.path.join(output_dir, file), index=None)
+    i = 0
+    for subdir in subdirectories:
+        print(subdir)
 
-finx = True
+        i += 1
+        print(i)
+        output_dir = f'../finx/modified/clustering_result_{i}'
+        directory = os.path.join(base_directory, subdir)
+        files = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
+        for file in files:
+            print(file)
+
+            df = pd.read_csv(os.path.join(directory, file))
+
+            new_df = pd.DataFrame(index=None, columns=['Firm Name', 'Momentum_1', 'Cluster Index'])
+            new_df['Firm Name'] = df.iloc[:, 0]
+            new_df['Momentum_1'] = df.iloc[:, 2]
+            new_df['Cluster Index'] = df.iloc[:, 1]
+            new_df.to_csv(os.path.join(output_dir, file), index=None)
+
+finx = False
 if finx:
-    input_dir = '../finx/clustering_result2'
-    # output_dir = '../files/clustering_result/CL_10_1sigma'
-    # output_dir = '../files/clustering_result/CL_10_2sigma'
-    # output_dir = '../files/clustering_result/CL_30_1sigma'
-    output_dir = '../files/clustering_result/CL_20_64'
+    base_directory = '../finx/modified'
+    subdirectories = [d for d in os.listdir(base_directory) if os.path.isdir(os.path.join(base_directory, d))]
+    file_names = []
 
-    files = sorted(filename for filename in os.listdir(input_dir))
-    cl = 0
-    outliers_count = 0
-    figure = 0
-    top_df = pd.DataFrame(columns=['month', 'invested', 'first', 'second', 'number of clusters'])
+    for subdir in subdirectories:
+        file_names.append(subdir)
 
-    for file in files:
-        print(file)
+    subdirectories.remove('etc')
+    file_names.remove('etc')
 
-        # convert mom_data into PCA_data
-        data = read_and_preprocess_data(input_dir, file)
+    i = 0
+    for subdir in subdirectories:
+        print(subdir)
 
-        # Call initial method
-        Do_Result_Save = C.ResultCheck(data)
+        if subdir == 'clustering_result_1':
+            output_dir = f'../files/clustering_result/CL_100_128'
+        elif subdir == 'clustering_result_2':
+            output_dir = f'../files/clustering_result/CL_10_128'
+        elif subdir == 'clustering_result_3':
+            output_dir = f'../files/clustering_result/CL_10_64'
+        elif subdir == 'clustering_result_4':
+            output_dir = f'../files/clustering_result/CL_20_128'
+        elif subdir == 'clustering_result_5':
+            output_dir = f'../files/clustering_result/CL_20_64'
+        elif subdir == 'clustering_result_6':
+            output_dir = f'../files/clustering_result/CL_30_128'
+        elif subdir == 'clustering_result_7':
+            output_dir = f'../files/clustering_result/CL_30_64'
+        elif subdir == 'clustering_result_8':
+            output_dir = f'../files/clustering_result/CL_50_128'
+        elif subdir == 'clustering_result_9':
+            output_dir = f'../files/clustering_result/CL_50_64'
+        elif subdir == 'clustering_result_10':
+            output_dir = f'../files/clustering_result/CL_100_64'
+        i += 1
+        print(i)
+        directory = os.path.join(base_directory, subdir)
 
-        # Do clustering and get 2D list of cluster index
+        # output_dir = f'../files/clustering_result/CL_{i}'
 
-        clusters = []
-        for i in range(1 + max(set(data['Cluster Index']))):
-            indices = list(data[data['Cluster Index'] == i].index)
-            clusters.append(indices)
+        files = sorted(filename for filename in os.listdir(directory) if filename.endswith('.csv'))
+        cl = 0
+        outliers_count = 0
+        figure = 0
+        top_df = pd.DataFrame(columns=['month', 'invested', 'first', 'second', 'number of clusters'])
 
-        # Save LS_Table CSV File
-        Do_Result_Save.ls_table(clusters, output_dir, file, save=True, raw=True)
+        for file in files:
+            print(file)
 
-        outliers_count += (data['Cluster Index'] == 0).sum() / len(data)
-        invested_num = len(data) - (data['Cluster Index'] == 0).sum()
-        cl += len(clusters) - 1
-        figure += Do_Result_Save.count_stock_of_traded()
+            # convert mom_data into PCA_data
+            data = read_and_preprocess_data(directory, file)
 
-        if True:
-            # 각 sublist의 원소 개수를 저장할 리스트 생성
-            sublist_lengths = [len(sublist) for sublist in clusters]
+            # Call initial method
+            Do_Result_Save = C.ResultCheck(data)
 
-            sublist_lengths = sublist_lengths[1:]
+            # Do clustering and get 2D list of cluster index
 
-            # sublist_lengths를 기반으로 top3 원소 개수를 찾음
-            top3_lengths = sorted(set(sublist_lengths), reverse=True)[:2]
+            clusters = []
+            for j in range(1 + max(set(data['Cluster Index']))):
+                indices = list(data[data['Cluster Index'] == j].index)
+                clusters.append(indices)
 
-            if len(top3_lengths) == 1:
-                top3_lengths.append(0)
+            # Save LS_Table CSV File
+            Do_Result_Save.ls_table(clusters, output_dir, file, save=True, raw=True)
 
-            if len(top3_lengths) == 0:
-                top3_lengths.append(0)
-                top3_lengths.append(0)
+            outliers_count += (data['Cluster Index'] == 0).sum() / len(data)
+            invested_num = len(data) - (data['Cluster Index'] == 0).sum()
+            cl += len(clusters) - 1
+            figure += Do_Result_Save.count_stock_of_traded()
 
-            new_row = pd.DataFrame({'month': [file[:-4]],
-                                    'invested': invested_num,
-                                    'first': [top3_lengths[0]],
-                                    'second': [top3_lengths[1]],
-                                    'number of clusters': [len(sublist_lengths)]})
+            if True:
+                # 각 sublist의 원소 개수를 저장할 리스트 생성
+                sublist_lengths = [len(sublist) for sublist in clusters]
 
-            # 이 새로운 행을 기존 DataFrame에 추가합니다.
-            top_df = pd.concat([top_df, new_row], ignore_index=True)
+                sublist_lengths = sublist_lengths[1:]
 
-    cl = int(cl / len(files))
-    outliers_count = outliers_count / len(files)
-    figure = figure / len(files)
-    stat_list = [cl, 1 - outliers_count, outliers_count, figure]
-    stat_df = pd.DataFrame(stat_list).T
-    stat_df.columns = ['Number of clusters', 'Number of stock in clusters',
-                       'Number of outliers', 'Number of stock traded']
+                # sublist_lengths를 기반으로 top3 원소 개수를 찾음
+                top3_lengths = sorted(set(sublist_lengths), reverse=True)[:2]
 
-    print(f'avg of clusters: {cl}')
-    print(f'total outliers: {outliers_count}')
-    print(f'number of stock traded: {figure}')
+                if len(top3_lengths) == 1:
+                    top3_lengths.append(0)
 
-    top_df.to_csv(os.path.join('../finx/etc/', 'top3.csv'), index=False)
+                if len(top3_lengths) == 0:
+                    top3_lengths.append(0)
+                    top3_lengths.append(0)
 
-    stat_df.to_csv(os.path.join('../finx/etc/', 'cluster_info.csv'), index=False)
+                new_row = pd.DataFrame({'month': [file[:-4]],
+                                        'invested': invested_num,
+                                        'first': [top3_lengths[0]],
+                                        'second': [top3_lengths[1]],
+                                        'number of clusters': [len(sublist_lengths)]})
+
+                # 이 새로운 행을 기존 DataFrame에 추가합니다.
+                top_df = pd.concat([top_df, new_row], ignore_index=True)
+
+        cl = int(cl / len(files))
+        outliers_count = outliers_count / len(files)
+        figure = figure / len(files)
+        stat_list = [cl, 1 - outliers_count, outliers_count, figure]
+        stat_df = pd.DataFrame(stat_list).T
+        stat_df.columns = ['Number of clusters', 'Number of stock in clusters',
+                           'Number of outliers', 'Number of stock traded']
+
+        print(f'avg of clusters: {cl}')
+        print(f'total outliers: {outliers_count}')
+        print(f'number of stock traded: {figure}')
+
+        top_df.to_csv(os.path.join('../finx/modified/etc/', f'top3_{i}.csv'), index=False)
+
+        stat_df.to_csv(os.path.join('../finx/modified/etc/', f'cluster_info_{i}.csv'), index=False)
+
+

@@ -1,14 +1,12 @@
-import math
-import random
-import matplotlib.cm as cm
-
 from PCA_and_ETC import *
 from sklearn.cluster import *
 from scipy.spatial import distance
 from sklearn.mixture import GaussianMixture
 from sklearn.neighbors import NearestNeighbors
-from sklearn.datasets import make_blobs
 from sklearn.metrics import silhouette_samples, silhouette_score
+import math
+import random
+import matplotlib.cm as cm
 
 class Clustering:
     def __init__(self, data: pd.DataFrame):
@@ -79,7 +77,8 @@ class Clustering:
                 continue
             clusters_indices[label].append(i)
 
-        clusters_indices.insert(0, list(outliers))
+        # clusters_indices.insert(0, list(outliers))
+        clusters_indices.insert(0, [])
 
         # number index를 firm name으로 바꾸어 2차원 리스트로 저장.
         final_cluster = [[] for _ in clusters_indices]
@@ -136,7 +135,7 @@ class Clustering:
         # 이웃한 두 개 점 사이 거리의 평균 계산
         nbrs = NearestNeighbors(n_neighbors=3, p=1).fit(self.PCA_Data)
         distances, indices = nbrs.kneighbors(self.PCA_Data)
-        avg_distances = np.mean(distances[:, 1:], axis=1)
+        avg_distances = np.max(distances[:, 1:], axis=1)
         outlier_distance = np.percentile(avg_distances, threshold * 100)
 
         # Clustering
@@ -466,7 +465,7 @@ class ResultCheck:
                                            ascending=[True, True]).reset_index()['Momentum_1'])
         clusters = clusters.reset_index()
         clusters['spread'] = spread_vec
-        clusters['in_portfolio'] = (clusters['spread'].abs() > clusters['spread'].std()*2)
+        clusters['in_portfolio'] = (clusters['spread'].abs() > clusters['spread'].std()*3)
         clusters['Long Short'] = clusters['in_portfolio'] * (-clusters['spread'] / clusters['spread'].abs())
         clusters['Long Short'] = clusters['Long Short'].fillna(0)
         clusters = clusters.drop(columns=['spread', 'in_portfolio'])

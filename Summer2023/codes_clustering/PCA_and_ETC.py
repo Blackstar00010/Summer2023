@@ -69,13 +69,6 @@ def product_LS_Table(LS_merged_df: pd.DataFrame, MOM_merged_df: pd.DataFrame, re
     if save:
         prod.to_csv(f'../files/prod_{subdir}.csv')
 
-    if False:
-        for col in prod.columns:
-            if col == 'Firm Name':
-                continue
-            prod.loc[prod[col] > 0.5, col] = 0.5
-            prod.loc[prod[col] < -0.99, col] = -0.99
-
     # Count the non-zero LS that is the number of total firm invested(395 by 1 matrix/index=Date)
     non_zero_count = LS_merged_df.astype(bool).sum()
 
@@ -267,12 +260,12 @@ def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, f
             month.iloc[9, i] = result_df.iloc[i, :].skew()
             month.iloc[10, i] = result_df.iloc[i, :].kurtosis()
 
-            # X = sm.add_constant(result_df.iloc[i, :].shift(1).dropna())
-            # y = result_df.iloc[i, :][1:]
-            # model = sm.OLS(y, X)
-            # newey_west = model.fit(cov_type='HAC', cov_kwds={'maxlags': 1})
-            # t_statistic, p_value = newey_west.tvalues
-            # month.iloc[3, i] = t_statistic
+            X = sm.add_constant(result_df.iloc[i, :].shift(1).dropna())
+            y = result_df.iloc[i, :][1:]
+            model = sm.OLS(y, X)
+            newey_west = model.fit(cov_type='HAC', cov_kwds={'maxlags': 1})
+            t_statistic, p_value = newey_west.tvalues
+            month.iloc[3, i] = t_statistic
 
         result_modified = pd.concat([result_modified, month], axis=0)
 
@@ -285,7 +278,7 @@ def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, f
 
         color_dict = {
             'K_mean': 'red',  # Standard red
-            'DBSCAN': 'firebrick',  # Darker shade of red
+            'DBSCAN': 'lightcoral',  # Darker shade of red
             'Agglomerative': 'darkred',  # Darkest shade of red
 
             'Bisecting_K_mean': 'blue',  # Standard blue
@@ -300,10 +293,16 @@ def save_and_plot_result(output_dir, clustering_name, result_df: pd.DataFrame, f
             'Reversal': 'lightgrey',  # Lighter shade of grey
             'FTSE 100': 'grey',  # Standard grey
 
-            'CL_20_64': 'blue',  # Standard blue
-            'CL_10_2sigma': 'steelblue',  # Darker shade of blue
-            'CL_30_1sigma': 'navy',  # Darkest shade blue
-            'CL_30_2sigma': 'deepskyblue'  # Bright blue
+            'CL_10_64': 'blue',  # Standard blue
+            'CL_10_128': 'navy',  # Darker shade of blue
+            'CL_20_64': 'lightsteelblue',  # Darkest shade blue
+            'CL_20_128': 'royalblue',  # Bright blue
+            'CL_30_64': 'slateblue',  # Darkest shade blue
+            'CL_30_128': 'darkslateblue',  # Bright blue
+            'CL_50_64': 'indigo',  # Darkest shade blue
+            'CL_50_128': 'blueviolet',  # Bright blue
+            'CL_100_64': 'cyan',  # Darkest shade blue
+            'CL_100_128': 'darkcyan',  # Bright blue
 
         }
 

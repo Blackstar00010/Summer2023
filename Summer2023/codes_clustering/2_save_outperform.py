@@ -17,7 +17,7 @@ if Reversal_Save:
         # Save LS_Table CSV File
         Do_Result_Save.reversal_table(data, output_dir, file)
 
-K_mean_Save = False
+K_mean_Save = True
 if K_mean_Save:
     input_dir = '../files/characteristics_us'
     output_dir = '../files/clustering_result/K_mean'
@@ -37,7 +37,7 @@ if K_mean_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_kmeans(75)
+        Do_Clustering.perform_kmeans(100)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.K_Mean)
 
         # Save LS_Table CSV File
@@ -70,7 +70,7 @@ if K_mean_Save:
 
     top_df.to_csv(os.path.join('../files/result2/', 'K_Mean.csv'), index=False)
 
-dbscan_Save = True
+dbscan_Save = False
 if dbscan_Save:
     input_dir = '../files/characteristics_us'
     output_dir = '../files/clustering_result/DBSCAN'
@@ -90,7 +90,7 @@ if dbscan_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_DBSCAN(0.4)
+        Do_Clustering.perform_DBSCAN(0.9)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.DBSCAN)
 
         # Save LS_Table CSV File
@@ -143,7 +143,7 @@ if Agglormerative_Save:
         Do_Result_Save = C.ResultCheck(df_combined)
 
         # Do clustering and get 2D list of cluster index
-        Do_Clustering.perform_HA(0.9)
+        Do_Clustering.perform_HA(0.8)
         outliers_count += Do_Result_Save.count_outlier(Do_Clustering.Agglomerative)
 
         # Save LS_Table CSV File

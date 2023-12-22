@@ -1,12 +1,12 @@
 import Clustering as C
 from PCA_and_ETC import *
 
-MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj_close.csv')
+MOM_merged_df = pd.read_csv('../files/mom1_data_combined_adj_close2.csv')
 MOM_merged_df.set_index('Firm Name', inplace=True)
 MOM_merged_df.drop(MOM_merged_df.columns[0], axis=1, inplace=True)
 output_dir = '../files/result'
 # hyper parameter K(3, 5, 10, 25, 50, 75, 100, 200, 300) should be tested manually.(paper follow) Done!
-K_mean_Save = True
+K_mean_Save = False
 if K_mean_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -63,7 +63,7 @@ if K_mean_Save:
     save_cluster_info('K_mean', stat_lists, file_names)
 
 # hyper parameter eps percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow) Done!
-dbscan_Save = False
+dbscan_Save = True
 if dbscan_Save:
     file_names = []
     result_df = pd.DataFrame()
@@ -126,7 +126,7 @@ if dbscan_Save:
     save_cluster_info('DBSCAN', stat_lists, file_names)
 
 # hyper parameter distance percentile np.range(0.1, 1, 0.1) should be tested manually.(paper follow) Done!
-agglomerative_Save = True
+agglomerative_Save = False
 if agglomerative_Save:
     file_names = []
     result_df = pd.DataFrame()
