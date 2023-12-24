@@ -2,6 +2,7 @@ import pandas as pd
 import Misc.useful_stuff as us
 from Misc.elementwise_calc import lag, delta, past_stddev, past_mean
 import _options as opt
+import sys
 
 
 wrds = opt.wrds
@@ -12,7 +13,11 @@ secd_dir = opt.secd_dir
 intermed_dir = opt.intermed_dir
 by_var_dir = opt.by_var_dd_dir
 
-if __name__ == '__main__':
+
+def run_quarterly(beep_on_finish=True):
+    if __name__ != '__main__':
+        print('Computing quarterly updated firm characteristics...')
+
     if True:
         try:
             pstkq = pd.read_csv(fundq_dir + 'pstkq.csv').set_index('datadate').fillna(0)
@@ -79,6 +84,7 @@ if __name__ == '__main__':
     sgrvol = sgrvol * (countq > 16)
     roavol = roavol * (countq > 16)
 
+    print('Saving...')
     us.fix_save_df(chtx, by_var_dir, 'chtx.csv', index_label='datadate')
     us.fix_save_df(cash, by_var_dir, 'cash.csv', index_label='datadate')
     us.fix_save_df(nincr, by_var_dir, 'nincr.csv', index_label='datadate')
@@ -92,4 +98,10 @@ if __name__ == '__main__':
     us.fix_save_df(sgrvol, by_var_dir, 'sgrvol.csv', index_label='datadate')
     us.fix_save_df(roavol, by_var_dir, 'roavol.csv', index_label='datadate')
 
-    us.beep()
+    if beep_on_finish:
+        us.beep()
+
+
+
+if __name__ == '__main__':
+    run_quarterly()
